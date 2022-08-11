@@ -1,0 +1,16 @@
+﻿@page "/"
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+
+<PageTitle>@Loc["AboutSteganography"]</PageTitle>
+
+<h1>TODO</h1>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.SetPageTheme(Color.Info, "AboutSteganography");
+    }
+}

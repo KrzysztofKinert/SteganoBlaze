@@ -1,0 +1,314 @@
+﻿@page "/ImageDecode"
+@using System.Diagnostics
+@using Microsoft.JSInterop
+@using System.Text;
+@using MudBlazor;
+@using ByteSizeLib;
+@using SteganoBlaze.Shared.Classes;
+@using SteganoBlaze.Shared.Classes.Types;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+
+<PageTitle>@Loc["ImageDecoding"]</PageTitle>
+
+<canvas hidden id="canvas"/>
+<a hidden id="saveLink" download="" href="" target="_blank"/>
+@if(carrier is not null)
+{
+	<img hidden id="carrierImage" @onload="GetCarrierDimensions" src="data:@carrier.contentType;base64,@carrier.base64Data"/>
+}
+
+<MudGrid Spacing="1">          
+	<MudItem sm="12" md="6" xs="12">
+        <MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
+            <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
+                <MudListItem Class="py-0 my-0">
+                    <InputFile class="custom-file-input" OnChange="OpenImage" hidden accept="image/png, image/webp" id="inputImage"/>
+                    <MudButton HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Filled.Image"
+                                FullWidth="true"
+								Disabled=@openButtonsDisabled
+								Class="mt-2"
+                                for="inputImage">
+                        <MudText Typo="Typo.button" Class="align-center">@Loc["ChooseCarrier"]</MudText>
+                    </MudButton>
+                </MudListItem>
+                <MudListItem Class="py-0 my-0">
+                    <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @if(carrier is not null) @carrier.fileName</MudText>
+                </MudListItem>
+                <MudListItem Class="py-0 my-0" >
+					<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+						<MudListItem Style="width:50%" Class="py-0 my-0">	
+							<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @if(carrier is not null) @carrier.SizeToString()</MudText>
+						</MudListItem>
+						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 mx-1"/>
+						<MudListItem DisableGutters="true" Class="py-0 my-0">
+							<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+								<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Dimensions"]:</MudText>
+								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@carrierDimensions</MudText>
+							</MudContainer>
+						</MudListItem>
+					</MudList>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem sm="12" md="6" xs="12"> 
+		<MudPaper Elevation="3" Style="height:100%">
+            <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
+                <MudListItem Class="py-0 my-0">
+					<MudButton HtmlTag="label"
+                                Variant="Variant.Outlined"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Filled.AttachFile"
+                                FullWidth="true"
+								DisableRipple="true"
+								Class="mt-2 cursor-default">
+                            <MudText Typo="Typo.button" Align="Align.Center">@Loc["DecodedFile"]</MudText>
+                    </MudButton>
+                </MudListItem>
+                <MudListItem Class="py-0 my-0">
+                    <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @if(message is not null) @message.fileName</MudText>
+                </MudListItem>
+                <MudListItem Class="py-0 my-0">
+					<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+						<MudListItem Style="width:50%" Class="py-0 my-0">	
+							<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @if(message is not null) @message.SizeToString()</MudText>
+						</MudListItem>
+						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-1"/>
+						<MudListItem DisableGutters="true" Class="py-0 my-0">
+							<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+								<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Type"]:</MudText>
+								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@if(message is not null) @message.contentType</MudText>
+							</MudContainer>
+						</MudListItem>
+					</MudList>
+                </MudListItem>
+            </MudList>
+		</MudPaper>
+	</MudItem>
+
+	<MudItem xs="12">
+        <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
+			<MudGrid style="height:100%" Class="align-content-center">
+				<MudItem sm="6" xs="12">
+					<MudText Typo="Typo.body1" Align="Align.Center">Input the password if the message was additionaly encrypted</MudText>
+				</MudItem>
+				<MudItem sm="6" xs="12">
+					<MudTextField @bind-Value="password" T="string" Label="Input the password" HelperText="Leave empty if the message was not encrypted"
+									InputType="InputType.Password"/>
+				</MudItem>
+			</MudGrid>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem xs="12">
+        <MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
+			<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
+				<MudListItem Class="pb-2 pt-3">
+					<MudProgressLinear Color="Color.Primary" Rounded="true" Size="Size.Large" Style="transform: scaleY(2)" Value="@processingValue">
+						<MudText Typo="Typo.subtitle2" Color="Color.Tertiary" Style="transform: scaleY(0.5);" Class="align-center">@processingTask</MudText>
+					</MudProgressLinear>
+				</MudListItem>
+				<MudListItem Class="pt-0">
+					<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
+						<MudButton HtmlTag="label"
+									Variant="Variant.Filled"
+									Color="Color.Primary"
+									StartIcon="@Icons.Filled.FilePresent"
+									OnClick="Decode"
+									Disabled=@decodeButtonDisabled
+									Style="width:100%">
+							<MudText Typo="Typo.button" Class="align-center">@Loc["Decode"]</MudText>
+						</MudButton>
+						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
+						<MudButton HtmlTag="label"
+									Variant="Variant.Filled" 
+									Color="Color.Primary"
+									StartIcon="@Icons.Filled.Download"
+									OnClick="SaveFile"
+									Disabled=@saveButtonDisabled
+									Style="width:100%">
+							<MudText Typo="Typo.button" Class="align-center">@Loc["Save"]</MudText>
+						</MudButton>
+					</MudList>
+				</MudListItem>
+			</MudList>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem xs="12" hidden="@carrierImagesHidden">
+		<MudPaper Elevation="3">
+			<MudList Clickable="false" Dense="true">
+				<MudListItem Class="py-0 my-0">
+					<MudContainer Style="width:100%" Class="d-flex justify-center flex-row">
+						<MudButton Variant="Variant.Outlined"
+									Color="Color.Primary"
+									Size="Size.Small"
+									DisableRipple = "true"
+									Class="mt-2 cursor-default">
+							<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedImage"]</MudText>
+						</MudButton>
+					</MudContainer>
+                </MudListItem>
+                <MudListItem Class="py-0 my-0">
+					<MudContainer Class="d-flex justify-center">
+						@if(carrier is not null)
+						{
+							<img id="carrierImagePreview" class="center" style="max-width:100%; height:auto;" src="data:@carrier.contentType;base64,@carrier.base64Data" Fluid="true" Alt=@Loc["OriginalImage"]/>
+						}
+					</MudContainer>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+	</MudItem>
+</MudGrid>
+
+
+@inject IJSRuntime js
+@code {
+	Base64File? carrier;
+	Base64File? message;
+
+	Stopwatch watch = new Stopwatch();
+
+	int? imageWidth;
+	int? imageHeight;
+
+	public int processingValue { get; set; } = 0;
+	public string? password { get; set; }
+
+	bool decodeButtonDisabled = true;
+	bool saveButtonDisabled = true;
+	bool openButtonsDisabled = false;
+	bool carrierImagesHidden = true;
+
+	string? carrierDimensions = ""; 
+	string? processingTask = "";
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.SetPageTheme(Color.Primary, "ImageDecoding");
+	}
+
+	public async Task ChangeState()
+	{
+		StateHasChanged();
+		await Task.Delay(1);
+	}
+	async Task ResetState()
+	{
+		processingValue = 0;
+		decodeButtonDisabled = true;
+		saveButtonDisabled = true;
+		openButtonsDisabled = false;
+		carrierImagesHidden = true;
+		carrierDimensions = ""; 
+		processingTask = "";
+		imageWidth = null;
+		imageHeight = null;
+		carrier = null;
+		message = null;
+		StateHasChanged();
+		await Task.Delay(1);
+	}
+
+	async Task OpenImage(InputFileChangeEventArgs e)
+	{
+		await ResetState();
+		if(e.File.Size > AppState.maxAllowedCarrierSize)
+		{
+			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
+			return;
+		}
+
+		var carrierBytes = new byte[e.File.Size];
+		try
+		{
+			using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
+			{
+				await stream.ReadAsync(carrierBytes);
+			}
+		}
+		catch
+		{
+			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
+			return;
+		}
+		carrier = new Base64File(carrierBytes, e.File);
+		//carrier = new base64File { base64Data = Convert.ToBase64String(carrierBytes), contentType = e.File.ContentType, fileName = e.File.Name, fileSize = e.File.Size };
+		decodeButtonDisabled = false;
+		carrierImagesHidden = false;
+		carrierDimensions = Loc["Loading"]; 
+	}
+
+	async Task GetCarrierDimensions()
+	{
+		imageWidth = await js.InvokeAsync<int>("getImageWidth");
+		imageHeight = await js.InvokeAsync<int>("getImageHeight");
+		carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
+		if((imageHeight * imageWidth) > AppState.maxAllowedCarrierPixels)
+		{
+			Snackbar.Add(Loc["MaxCarrierPixels"] + " 5 MP", Severity.Error);
+			await ResetState();
+		}
+	}
+
+	async Task SaveFile()
+	{
+		if (message is not null)
+		{
+			await js.InvokeVoidAsync("saveFile", message);
+		}
+	}
+
+	async Task Decode()
+	{
+		watch.Reset();
+		watch.Start();
+		processingTask = Loc["ReadingImageData"];
+		processingValue = 0;
+		StateHasChanged();
+		await Task.Delay(10);
+
+		var imageDataStreamReference = await js.InvokeAsync<IJSStreamReference>("getImageData");
+		var carrierImageData = new byte[imageDataStreamReference.Length];
+		using (var stream = await imageDataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 2))
+		{
+			await stream.ReadAsync(carrierImageData);
+			await stream.DisposeAsync();
+		}
+
+		var bitsToUse = ImageSteganography.CheckCarrier(carrierImageData);
+		if (bitsToUse is null)
+		{
+			processingTask = Loc["ImageNotEncoded"];
+			processingValue = 0;
+			return;
+		}
+
+		processingTask = Loc["DecodingMessage"];
+		processingValue = 33;
+		StateHasChanged();
+		await Task.Delay(10);
+
+		ByteFile recoveredFile = ImageSteganography.Decode(carrierImageData, bitsToUse);
+
+		processingTask = Loc["SavingMessageData"];
+		processingValue = 66;
+		StateHasChanged();
+		await Task.Delay(100);
+
+		this.message = new Base64File(recoveredFile);
+		saveButtonDisabled = false;
+
+		watch.Stop();
+		processingTask = Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!";
+		processingValue = 100;
+	}
+}

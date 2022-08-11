@@ -1,0 +1,26 @@
+﻿@inject IStringLocalizer<Resource> Loc
+@inject AppState AppState
+
+@*<MudNavMenu>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
+    <MudNavLink Href="fetchdata" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
+</MudNavMenu>*@
+
+<MudNavMenu Bordered="true" Rounded="true" Color="AppState.themeColor">
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@Loc["AboutSteganography"]</MudNavLink>
+    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
+    <MudNavLink Href="fetchdata" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
+    <MudNavLink Href="ImageEncode" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Image">@Loc["ImageEncoding"]</MudNavLink>
+    <MudNavLink Href="ImageDecode" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.FileFormats.FileImage">@Loc["ImageDecoding"]</MudNavLink>
+@*    <MudNavLink Href="AudioEncode" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Audiotrack">@Loc["AudioEncoding"]</MudNavLink>
+    <MudNavLink Href="AudioDecode" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.FileFormats.FileMusic">@Loc["AudioDecoding"]</MudNavLink>*@
+</MudNavMenu>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+}
