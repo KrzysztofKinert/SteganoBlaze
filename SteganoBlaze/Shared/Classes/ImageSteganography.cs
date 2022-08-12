@@ -1,28 +1,60 @@
 ﻿using SteganoBlaze.Shared.Classes.Types;
 using System.Text;
+using System.Threading;
 
 namespace SteganoBlaze.Shared.Classes
 {
-    public static class ImageSteganography
+    public abstract class ImageSteganography
     {
-        private static byte[] carrier = new byte[0];
-        private static PixelBits bitsToUse = new PixelBits { R = 0, G = 0, B = 0 };
-
-        private static int currentPixel = 0;
-        private static PixelChannel currentChannel = PixelChannel.R;
-        private static int[] channelBitsLeft = new int[3];
-
-        private enum PixelChannel
+        protected byte[] carrier = Array.Empty<byte>();
+        protected int currentPixel;
+        protected int[] channelBitsLeft = new int[3];
+        protected PixelBits bitsToUse = new PixelBits();
+        protected enum PixelChannel
         {
             R,
             G,
             B
         }
+        protected PixelChannel currentChannel;
 
-        public static byte[] Encode(byte[] _carrier, Message message, PixelBits bits)
+        protected enum PixelOrder
         {
-            carrier = _carrier;
+            Sequential,
+            Random
+        }
+        protected PixelOrder pixelOrder;
+        protected void FirstPixelSequential()
+        {
+            currentPixel = 0;
+            currentChannel = PixelChannel.R;
+            channelBitsLeft[(int)PixelChannel.R] = bitsToUse!.R;
+            channelBitsLeft[(int)PixelChannel.G] = bitsToUse!.G;
+            channelBitsLeft[(int)PixelChannel.B] = bitsToUse!.B;
+        }
+        protected void NextPixelSequential()
+        {
+            currentPixel += 4;
+            currentChannel = PixelChannel.R;
+            channelBitsLeft[(int)PixelChannel.R] = bitsToUse!.R;
+            channelBitsLeft[(int)PixelChannel.G] = bitsToUse!.G;
+            channelBitsLeft[(int)PixelChannel.B] = bitsToUse!.B;
+        }
+        protected void NextPixelRandom()
+        {
+
+        }
+    }
+    public class ImageEncoder : ImageSteganography
+    {
+        public ImageEncoder(byte[] carrierToEncode, PixelBits bits)
+        {
+            carrier = carrierToEncode;
             bitsToUse = bits;
+        }
+
+        public byte[] Encode(Message message)
+        {
             FirstPixelSequential();
 
             for (int i = 0; i < message.header.Length; i++)
@@ -39,11 +71,46 @@ namespace SteganoBlaze.Shared.Classes
             }
             return carrier;
         }
-
-        public static ByteFile Decode(byte[] _carrier, PixelBits bits, byte[]? password = null)
+        private void EncodeByte(byte byteValue)
         {
-            carrier = _carrier;
-            bitsToUse = bits;
+            int encodedBits = 0;
+            while (encodedBits < 8)
+            {
+                while (channelBitsLeft[(int)currentChannel] > 0)
+                {
+                    int bit = byteValue % 2;
+                    byteValue /= 2;
+                    //currentPixelValues[(int)currentChannel] = (byte)ChangeNthBit(currentPixelValues[(int)currentChannel], bit, channelBitsLeft[(int)currentChannel] - 1);
+                    carrier[currentPixel + (int)currentChannel] = (byte)ChangeNthBit(carrier[currentPixel + (int)currentChannel], bit, channelBitsLeft[(int)currentChannel] - 1);
+
+                    channelBitsLeft[(int)currentChannel]--;
+                    encodedBits++;
+                    if (encodedBits == 8) return;
+                }
+
+                if (currentChannel == PixelChannel.B)
+                {
+                    NextPixelSequential();
+                }
+                else currentChannel++;
+            }
+        }
+        private int ChangeNthBit(int value, int bit, int n)
+        {
+            return (value & ~(1 << n) | (bit << n));
+        }
+
+    }
+    public class ImageDecoder : ImageSteganography
+    {
+        public ImageDecoder(byte[] carrierToDecode)
+        {
+            carrier = carrierToDecode;
+            bitsToUse = CheckCarrier(carrier);
+        }
+
+        public ByteFile Decode(byte[]? password = null)
+        {
             FirstPixelSequential();
 
             List<byte> decodedBytes = new List<byte>();
@@ -79,10 +146,8 @@ namespace SteganoBlaze.Shared.Classes
             return new ByteFile { byteData = decodedBytes.ToArray(), contentType = contentType, fileName = fileName, fileSize = fileSize };
         }
 
-        public static PixelBits? CheckCarrier(byte[] _carrier)
+        private PixelBits CheckCarrier(byte[] carrier)
         {
-            carrier = _carrier;
-
             List<PixelBits> bitsToCheck = new List<PixelBits>();
             for (int i = 1; i < 9; i++)
             {
@@ -120,60 +185,11 @@ namespace SteganoBlaze.Shared.Classes
                     return bits;
                 }
             }
-            return null;
-        }
-        private static void FirstPixelSequential()
-        {
-            currentPixel = 0;
-            currentChannel = PixelChannel.R;
-            channelBitsLeft[(int)PixelChannel.R] = bitsToUse.R;
-            channelBitsLeft[(int)PixelChannel.G] = bitsToUse.G;
-            channelBitsLeft[(int)PixelChannel.B] = bitsToUse.B;
-        }
-        private static void NextPixelSequential()
-        {
-            currentPixel += 4;
-            currentChannel = PixelChannel.R;
-            channelBitsLeft[(int)PixelChannel.R] = bitsToUse.R;
-            channelBitsLeft[(int)PixelChannel.G] = bitsToUse.G;
-            channelBitsLeft[(int)PixelChannel.B] = bitsToUse.B;
-        }
-        private static void NextPixelRandom()
-        {
 
+            throw new Exception("Carrier not encoded");
+            //return null;
         }
-
-        private static void EncodeByte(byte byteValue)
-        {
-            int encodedBits = 0;
-            while (encodedBits < 8)
-            {
-                while (channelBitsLeft[(int)currentChannel] > 0)
-                {
-                    int bit = byteValue % 2;
-                    byteValue /= 2;
-                    //currentPixelValues[(int)currentChannel] = (byte)ChangeNthBit(currentPixelValues[(int)currentChannel], bit, channelBitsLeft[(int)currentChannel] - 1);
-                    carrier[currentPixel + (int)currentChannel] = (byte)ChangeNthBit(carrier[currentPixel + (int)currentChannel], bit, channelBitsLeft[(int)currentChannel] - 1);
-
-                    channelBitsLeft[(int)currentChannel]--;
-                    encodedBits++;
-                    if (encodedBits == 8) return;
-                }
-
-                if (currentChannel == PixelChannel.B)
-                {
-                    NextPixelSequential();
-                }
-                else currentChannel++;
-            }
-        }
-
-        private static int ChangeNthBit(int value, int bit, int n)
-        {
-            return (value & ~(1 << n) | (bit << n));
-        }
-
-        private static byte DecodeByte()
+        private byte DecodeByte()
         {
             int decodedByte = 0;
             int decodedBits = 0;
@@ -197,8 +213,7 @@ namespace SteganoBlaze.Shared.Classes
             }
             return Convert.ToByte(ReverseBits(decodedByte));
         }
-
-        private static int ReverseBits(int value)
+        private int ReverseBits(int value)
         {
             int result = 0;
 
@@ -212,3 +227,4 @@ namespace SteganoBlaze.Shared.Classes
         }
     }
 }
+

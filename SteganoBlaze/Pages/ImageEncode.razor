@@ -397,10 +397,6 @@
 			return;
 		}
 
-		Ayy lmao = new Ayy();
-		lmao.Lol();
-
-
 		var buf = new byte[e.File.Size];
 		try
 		{
@@ -571,7 +567,10 @@
 
 			//Encoding message
 			PixelBits pixelBitsToEncode = new PixelBits { R = this.bitsR, G = this.bitsG, B = this.bitsB };
-			var encodedCarrierBytes = ImageSteganography.Encode(originalCarrierBytes, message, pixelBitsToEncode);
+			ImageEncoder encoder = new ImageEncoder(originalCarrierBytes, pixelBitsToEncode);
+			var encodedCarrierBytes = encoder.Encode(message);
+			//var encodedCarrierBytes = ImageSteganography2.Encode(originalCarrierBytes, message, pixelBitsToEncode);
+
 
 			processingTask = Loc["SavingImageData"];
 			processingValue = 75;

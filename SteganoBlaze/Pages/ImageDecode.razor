@@ -215,7 +215,7 @@
 		carrier = null;
 		message = null;
 		StateHasChanged();
-		await Task.Delay(1);
+		await Task.Delay(10);
 	}
 
 	async Task OpenImage(InputFileChangeEventArgs e)
@@ -284,31 +284,35 @@
 			await stream.DisposeAsync();
 		}
 
-		var bitsToUse = ImageSteganography.CheckCarrier(carrierImageData);
-		if (bitsToUse is null)
+		try
+		{
+			ImageDecoder decoder = new ImageDecoder(carrierImageData);
+
+			processingTask = Loc["DecodingMessage"];
+			processingValue = 33;
+			StateHasChanged();
+			await Task.Delay(10);
+
+			ByteFile recoveredFile = decoder.Decode();
+			//ByteFile recoveredFile = ImageSteganography2.Decode(carrierImageData, bitsToUse);
+
+			processingTask = Loc["SavingMessageData"];
+			processingValue = 66;
+			StateHasChanged();
+			await Task.Delay(100);
+
+			this.message = new Base64File(recoveredFile);
+			saveButtonDisabled = false;
+
+			watch.Stop();
+			processingTask = Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!";
+			processingValue = 100;
+		}
+		catch
 		{
 			processingTask = Loc["ImageNotEncoded"];
 			processingValue = 0;
 			return;
 		}
-
-		processingTask = Loc["DecodingMessage"];
-		processingValue = 33;
-		StateHasChanged();
-		await Task.Delay(10);
-
-		ByteFile recoveredFile = ImageSteganography.Decode(carrierImageData, bitsToUse);
-
-		processingTask = Loc["SavingMessageData"];
-		processingValue = 66;
-		StateHasChanged();
-		await Task.Delay(100);
-
-		this.message = new Base64File(recoveredFile);
-		saveButtonDisabled = false;
-
-		watch.Stop();
-		processingTask = Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!";
-		processingValue = 100;
 	}
 }
