@@ -1,0 +1,25 @@
+﻿@using System.Diagnostics
+@using Microsoft.JSInterop
+@using System.Text;
+@using MudBlazor;
+@using ByteSizeLib;
+@using SteganoBlaze.Shared.Classes;
+@using SteganoBlaze.Shared.Classes.Types;
+@using System.IO.Compression;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+
+@inject IJSRuntime js
+@code {
+
+    protected async Task<byte[]> Decompress(byte[] data)
+	{
+		using MemoryStream input = new MemoryStream(data);
+		using MemoryStream output = new MemoryStream();
+		using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
+			await dstream.CopyToAsync(output);
+
+		return output.ToArray();
+	}
+}

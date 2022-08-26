@@ -4,6 +4,7 @@
 @using System.Text;
 @using MudBlazor;
 @using ByteSizeLib;
+@using System.IO.Compression;
 @using SteganoBlaze.Shared.Classes;
 @using SteganoBlaze.Shared.Classes.Types;
 @inject AppState AppState
@@ -93,14 +94,14 @@
 	</MudItem>
 
 	<MudItem xs="12">
-        <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
-			<MudGrid style="height:100%" Class="align-content-center">
-				<MudItem sm="6" xs="12">
-					<MudText Typo="Typo.body1" Align="Align.Center">Input the password if the message was additionaly encrypted</MudText>
+        <MudPaper Elevation="3" Style="height:100%" Class="d-flex mud-width-full">
+			<MudGrid Class="align-center justify-space-evenly" Spacing="0">
+				<MudItem sm="4" xs="12" Class="pa-1">
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">Input the password if the message was additionaly encrypted</MudText>
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">Leave empty if encryption was not used</MudText>
 				</MudItem>
-				<MudItem sm="6" xs="12">
-					<MudTextField @bind-Value="password" T="string" Label="Input the password" HelperText="Leave empty if the message was not encrypted"
-									InputType="InputType.Password"/>
+				<MudItem sm="4" xs="12" Class="pa-1">
+					<MudTextField @bind-Value="password" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="Input the password" InputType="InputType.Password"/>
 				</MudItem>
 			</MudGrid>
         </MudPaper>
@@ -201,26 +202,32 @@
 		StateHasChanged();
 		await Task.Delay(1);
 	}
-	async Task ResetState()
+	async Task ResetCarrier()
 	{
+		carrier = null;
+		message = null;
+
+		imageWidth = null;
+		imageHeight = null;
+
 		processingValue = 0;
+		password = null;
+
 		decodeButtonDisabled = true;
 		saveButtonDisabled = true;
 		openButtonsDisabled = false;
 		carrierImagesHidden = true;
+
 		carrierDimensions = ""; 
 		processingTask = "";
-		imageWidth = null;
-		imageHeight = null;
-		carrier = null;
-		message = null;
+
 		StateHasChanged();
 		await Task.Delay(10);
 	}
 
 	async Task OpenImage(InputFileChangeEventArgs e)
 	{
-		await ResetState();
+		await ResetCarrier();
 		if(e.File.Size > AppState.maxAllowedCarrierSize)
 		{
 			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
@@ -228,20 +235,19 @@
 		}
 
 		var carrierBytes = new byte[e.File.Size];
+
 		try
 		{
 			using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
-			{
 				await stream.ReadAsync(carrierBytes);
-			}
 		}
 		catch
 		{
 			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
 			return;
 		}
+
 		carrier = new Base64File(carrierBytes, e.File);
-		//carrier = new base64File { base64Data = Convert.ToBase64String(carrierBytes), contentType = e.File.ContentType, fileName = e.File.Name, fileSize = e.File.Size };
 		decodeButtonDisabled = false;
 		carrierImagesHidden = false;
 		carrierDimensions = Loc["Loading"]; 
@@ -252,67 +258,121 @@
 		imageWidth = await js.InvokeAsync<int>("getImageWidth");
 		imageHeight = await js.InvokeAsync<int>("getImageHeight");
 		carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
+
 		if((imageHeight * imageWidth) > AppState.maxAllowedCarrierPixels)
 		{
 			Snackbar.Add(Loc["MaxCarrierPixels"] + " 5 MP", Severity.Error);
-			await ResetState();
+			await ResetCarrier();
 		}
 	}
 
 	async Task SaveFile()
 	{
 		if (message is not null)
-		{
 			await js.InvokeVoidAsync("saveFile", message);
-		}
+	}
+
+	async Task UpdateProgress(string progressText, int progressValue)
+	{
+		processingTask = Loc[progressText];
+		processingValue = progressValue;
+		StateHasChanged();
+		await Task.Delay(10);
 	}
 
 	async Task Decode()
 	{
 		watch.Reset();
 		watch.Start();
-		processingTask = Loc["ReadingImageData"];
-		processingValue = 0;
-		StateHasChanged();
-		await Task.Delay(10);
 
-		var imageDataStreamReference = await js.InvokeAsync<IJSStreamReference>("getImageData");
-		var carrierImageData = new byte[imageDataStreamReference.Length];
-		using (var stream = await imageDataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 2))
-		{
-			await stream.ReadAsync(carrierImageData);
-			await stream.DisposeAsync();
-		}
+		await UpdateProgress(Loc["ReadingImageData"], 0);
+		Image carrier = new Image { pixelData = await ReadJSStream("getImageData"), height = imageHeight ?? 0, width = imageHeight ?? 0 };
 
 		try
 		{
-			ImageDecoder decoder = new ImageDecoder(carrierImageData);
+			ImageDecoder decoder = new ImageDecoder(carrier);
 
-			processingTask = Loc["DecodingMessage"];
-			processingValue = 33;
-			StateHasChanged();
-			await Task.Delay(10);
+			byte[] salt = Array.Empty<byte>();
+			byte[] iv = Array.Empty<byte>();
 
-			ByteFile recoveredFile = decoder.Decode();
-			//ByteFile recoveredFile = ImageSteganography2.Decode(carrierImageData, bitsToUse);
+			await UpdateProgress(Loc["DecodingMessage"], 20);
 
-			processingTask = Loc["SavingMessageData"];
-			processingValue = 66;
-			StateHasChanged();
-			await Task.Delay(100);
+			string header = UnicodeEncoding.UTF8.GetString(decoder.Decode(15));
+			var metadataSize = Int32.Parse(header.TakeLast(4).ToArray());
 
-			this.message = new Base64File(recoveredFile);
+			if (password is not null)
+			{
+				salt = decoder.Decode(16);
+				iv = decoder.Decode(16);
+			}
+
+			var metadataBytes = decoder.Decode(metadataSize);
+
+			if (password is not null)
+			{
+				byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
+				List<byte[]> aesInputs = new List<byte[]> { metadataBytes, passwordBytes, salt, iv };
+				metadataBytes = await ReadJSStream("decryptData", aesInputs);
+			}
+
+			string metadata = UnicodeEncoding.UTF8.GetString(metadataBytes);
+
+			string fileName = metadata.Substring(metadata.IndexOf("!fnS!") + 5, metadata.IndexOf("!fnE!") - metadata.IndexOf("!fnS!") - 5);
+			string contentType = metadata.Substring(metadata.IndexOf("!ctS!") + 5, metadata.IndexOf("!ctE!") - metadata.IndexOf("!ctS!") - 5);
+			int fileSize = Int32.Parse(metadata.Substring(metadata.IndexOf("!fsS!") + 5, metadata.IndexOf("!fsE!") - metadata.IndexOf("!fsS!") - 5));
+			bool compressed = bool.Parse(metadata.Substring(metadata.IndexOf("!cpS!") + 5, metadata.IndexOf("!cpE!") - metadata.IndexOf("!cpS!") - 5));
+
+			var file = decoder.Decode(fileSize);
+
+			if (password is not null)
+			{
+				await UpdateProgress(Loc["DecryptingMessage"], 60);
+				byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
+				List<byte[]> aesInputs = new List<byte[]> { file, passwordBytes, salt, iv };
+				file = await ReadJSStream("decryptData", aesInputs);
+			}
+
+			if (compressed is true)
+			{
+				await UpdateProgress(Loc["DecompressingMessage"], 70);
+				file = await Decompress(file);
+			}
+
+			await UpdateProgress(Loc["SavingMessageData"], 80);
+
+			this.message = new Base64File { base64Data = Convert.ToBase64String(file), contentType = contentType, fileName = fileName, fileSize = fileSize };
 			saveButtonDisabled = false;
 
 			watch.Stop();
-			processingTask = Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!";
-			processingValue = 100;
+			await UpdateProgress(Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
 		}
 		catch
 		{
-			processingTask = Loc["ImageNotEncoded"];
-			processingValue = 0;
+			await UpdateProgress(Loc["ImageNotEncoded"], 0);
 			return;
 		}
+	}
+	async Task<byte[]> ReadJSStream(string jsFunction, List<byte[]>? aesInputs = null)
+	{
+		IJSStreamReference? dataStreamReference;
+		if (aesInputs is null)
+			dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction);
+		else
+			dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction, aesInputs[0], aesInputs[1], aesInputs[2], aesInputs[3]);
+
+		var dataBytes = new byte[dataStreamReference.Length];
+		using (var stream = await dataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 10))
+			await stream.ReadAsync(dataBytes);
+
+		return dataBytes;
+	}
+	async Task<byte[]> Decompress(byte[] data)
+	{
+		using MemoryStream input = new MemoryStream(data);
+		using MemoryStream output = new MemoryStream();
+		using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
+			await dstream.CopyToAsync(output);
+
+		return output.ToArray();
 	}
 }

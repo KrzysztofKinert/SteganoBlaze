@@ -51,9 +51,9 @@ namespace SteganoBlaze.Shared.Classes
                 {
                     using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        csEncrypt.WriteAsync(message.message, 0, message.message.Length);
+                        csEncrypt.WriteAsync(message.file, 0, message.file.Length);
                         csEncrypt.FlushFinalBlockAsync();
-                        message.message = msEncrypt.ToArray();
+                        message.file = msEncrypt.ToArray();
                     }
                 }
             }

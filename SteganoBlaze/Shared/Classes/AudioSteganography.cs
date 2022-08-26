@@ -1,322 +1,203 @@
-﻿using System.Text;
-using SteganoBlaze.Shared.Classes.Types;
+﻿using SteganoBlaze.Shared.Classes.Types;
+using System.Text;
+using System.Threading.Channels;
+using static MudBlazor.CategoryTypes;
+using static SteganoBlaze.Shared.Classes.ImageSteganography;
+
 namespace SteganoBlaze.Shared.Classes
 {
-    public class AudioSteganography
-    {
-        public static byte[]? EncryptTextLinear(byte[] wav, string text)
+	public abstract class AudioSteganography
+	{
+        public enum SampleOrder
         {
-            WAV audio = new WAV(wav);
-            uint value = 0;
-            string pass = string.Format(audio.bitsPerSample.ToString());
-            if (text.Length <= Math.Floor((double)(audio.samples / 8)))
-            {
-                int n = 0;
-                for (int i = 0; i < text.Length; i++)
-                {
-                    value = text[i];
-                    for (int x = 0; x < 8; x++)
-                    {
-                        uint sampleValue = audio.GetSample(n);
-                        sampleValue = (sampleValue & 0xFFFFFFFE) | ((value >> x) & 1);
-                        audio.SetSample(n, sampleValue);
-                        //audio.samples[m] = sampleValue;
-                        n++;
-                    }
+            Sequential,
+            Random
+        }
 
-                }
-                value = 0;
-                for (int x = 0; x < 8; x++)
-                {
-                    uint sampleValue = audio.GetSample(n);
-                    sampleValue = (sampleValue & 0xFFFFFFFE) | ((value >> x) & 1);
-                    audio.SetSample(n, sampleValue);
-                    n++;
-                }
-                //audio.Save();
-                return audio.data;
+        protected byte[] pixelData = Array.Empty<byte>();
+        protected WAV carrier;
+        protected int sampleIndex;
+        protected int bitsLeft;
+        protected int bitsToUse;
+
+        protected SampleOrder sampleOrder;
+
+        protected int randomSeed;
+        protected Random? generator;
+        protected HashSet<int>? usedSamples;
+
+        protected void FirstSample()
+        {
+            bitsLeft = bitsToUse;
+
+            switch (sampleOrder)
+            {
+                case SampleOrder.Sequential:
+                    sampleIndex = 0;
+                    break;
+                case SampleOrder.Random:
+                    generator = new Random(randomSeed);
+                    usedSamples = new HashSet<int>();
+                    //sampleIndex = generator.Next(pixelData.Length / 4) * 4; ////AAAAAAAAAAAAA
+                    sampleIndex = generator.Next(carrier.samples);
+                    usedSamples.Add(sampleIndex);
+                    break;
             }
+        }
+        protected void NextSample()
+        {
+            bitsLeft = bitsToUse;
+
+            switch (sampleOrder)
+            {
+                case SampleOrder.Sequential:
+                    sampleIndex++;
+                    break;
+                case SampleOrder.Random:
+                    while (usedSamples!.Contains(sampleIndex))
+                        sampleIndex = generator!.Next(carrier.samples);
+                    //sampleIndex = generator!.Next(pixelData.Length / 4) * 4; //AAAAAAAAAAAAAAAA
+                    usedSamples.Add(sampleIndex);
+                    break;
+            }
+        }
+    }
+	public class AudioEncoder : AudioSteganography
+	{
+        public AudioEncoder(WAV carrier, int bits, bool randomEncodingEnabled)
+        {
+            this.carrier = carrier;
+            bitsToUse = bits;
+            randomSeed = carrier.samples;
+
+            if (randomEncodingEnabled)
+                sampleOrder = SampleOrder.Random;
             else
-            {
-                return null;
-            }
+                sampleOrder = SampleOrder.Sequential;
 
+            FirstSample();
         }
-
-        public static string DecryptTextLinear(byte[] wav)
+        public WAV Encode(Message message)
         {
-            WAV audio = new WAV(wav);
-            string text = string.Empty;
-            int n = 0;
-            uint value = 0;
-            //string pass = string.Format(audio.bitsPerSample.ToString());
-            do
-            {
-                value = 0;
-                for (int x = 0; x < 8; x++)
-                {
-                    //uint sample = n;
-                    //uint sampleValue = audio.samples[sample];
-                    uint sampleValue = audio.GetSample(n);
-                    value = value | ((sampleValue & 1) << x);
-                    n++;
-                }
-                if (value != 0)
-                    text += Convert.ToChar(value);
-            } while (value != 0);
-            return text;
-        }
+            foreach (byte headerByte in message.header)
+                EncodeByte(headerByte);
 
-        public static byte[] EncryptFileLinear(byte[] wav, byte[] file)
+            foreach (byte metadataByte in message.metadata)
+                EncodeByte(metadataByte);
+
+            foreach (byte fileByte in message.file)
+                EncodeByte(fileByte);
+
+            return carrier;
+        }
+        private void EncodeByte(byte byteValue)
         {
-            WAV audio = new WAV(wav);
-            uint value = 0;
-            // int extraBytes = 2 + filename.Length + file.Length.ToString().Length;
-            //OutputConsole.Write(string.Format("File size: {0} bytes", file.Length));
-            if (file.Length <= Math.Floor((double)(audio.samples / 8)))
+            int encodedBits = 0;
+            while (encodedBits < 8)
             {
-                int n = 0;
-                //Write file content
-                //OutputConsole.Write("Writing file data...");
-                for (int i = 0; i < file.Length; i++)
+                while (bitsLeft > 0)
                 {
-                    value = file[i];
-                    for (int x = 0; x < 8; x++)
-                    {
-                        uint sampleValue = audio.GetSample(n);
-                        sampleValue = (sampleValue & 0xFFFFFFFE) | ((value >> x) & 1);
-                        audio.SetSample(n, sampleValue);
-                        n++;
-                    }
+                    int bitSign = byteValue % 2;
+                    byteValue /= 2;
 
+                    uint sample = carrier.GetSample2(sampleIndex);
+                    sample = (uint)ChangeNthBit((int)sample, bitSign, bitsLeft - 1);
+                    carrier.SetSample2(sampleIndex, sample);
+
+                    //var mask = 1 << (bitsLeft - 1);
+                    //if (bitSign == 1)
+                    //    sample |= (byte)mask;
+                    //else
+                    //    sample &= (byte)~mask;
+
+                    bitsLeft--;
+                    encodedBits++;
+
+                    if (encodedBits == 8)
+                        return;
                 }
+                NextSample();
             }
-            else
-            {
-                //OutputConsole.Write("Error");
-                return Array.Empty<byte>();
-            }
-            //OutputConsole.Write("Finished embedding file");
-            //OutputConsole.Write(string.Format("Used {0} samples", (file.Length + extraBytes) * 8));
-            //audio.Save();
-            return audio.data;
         }
-
-        public static byte[]? Encode(byte[] wav, byte[] message, int bitsToUse)
-        {
-            WAV audio = new WAV(wav);
-            uint value = 0;
-            bool isEncodingDone = false;
-            int byteIndex = 0;
-            int byteValue = 0;
-            int bitsEncoded = 8;
-            int indexSample = bitsToUse;
-
-
-            for (int i = 0; i < audio.data.Length; i++)
-            {
-                uint sample = audio.GetSample2(i);
-
-                for (int n = 0; n < bitsToUse; n++)
-                {
-                    if (bitsEncoded == 8)
-                    {
-                        if (isEncodingDone == true)
-                        {
-                            if (indexSample != bitsToUse)
-                            {
-                                audio.SetSample2(i, sample);
-                            }
-                            return audio.data;
-                        }
-                        if (byteIndex >= message.Length)
-                        {
-                            byteValue = 0;
-                            isEncodingDone = true;
-                        }
-                        else
-                        {
-                            byteValue = message[byteIndex];
-                            byteIndex++;
-                            bitsEncoded = 0;
-                        }
-                    }
-                    if (isEncodingDone == false)
-                    {
-                        int bit = byteValue % 2;
-                        byteValue /= 2;
-                        sample = (uint)ChangeNthBit((int)sample, bit, indexSample - 1);
-
-                        indexSample--;
-                        bitsEncoded++;
-                        if (indexSample == 0)
-                        {
-                            indexSample = bitsToUse;
-                        }
-                    }
-                }
-                audio.SetSample2(i, sample);
-            }
-
-            return null;
-        }
-
         private static int ChangeNthBit(int value, int bit, int n)
         {
             return (value & ~(1 << n) | (bit << n));
         }
-        //public static byte[] DecryptFileLinear(byte[] wav)
-        //{
-        //    try
-        //    {
-        //        WavFile audio = new WavFile(wav);
-        //        string text = string.Empty;
-        //        int n = 0;
-
-        //        uint value = 0;
-        //        //byte[] file = new byte[filesize];
-        //        byte[] last7Bytes = new byte[7];
-        //        List<byte> file = new List<byte>();
-        //        for (int i = 0; i < wav.Length; i++)
-        //        {
-        //            value = 0;
-        //            for (int x = 0; x < 8; x++)
-        //            {
-        //                uint sampleValue = audio.GetSample(n);
-        //                value = value | ((sampleValue & 1) << x);
-        //                n++;
-        //            }
-        //            file.Add((byte)value);
-
-        //            Array.Copy(last7Bytes, 1, last7Bytes, 0, 6);
-        //            last7Bytes[6] = Convert.ToByte(value);
-        //            string last7Characters = UnicodeEncoding.Default.GetString(last7Bytes);
-        //            if (last7Characters == "!#end#!")
-        //            {
-        //                return file.ToArray();
-        //            }
-        //        }
-        //        return null;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return null;
-        //    }
-        //}
-
-        public static int CheckAudio(WAV audio)
+        private void ChangeBit(int pixelIndex, int bitIndex, int bitSign)
         {
-            for (int bitsToUse = 1; bitsToUse <= audio.bitsPerSample; bitsToUse++)
+            var mask = 1 << bitIndex;
+            if (bitSign == 1)
+                pixelData[pixelIndex] |= (byte)mask;
+            else
+                pixelData[pixelIndex] &= (byte)~mask;
+        }
+    }
+    public class AudioDecoder : AudioSteganography
+    {
+        public AudioDecoder(WAV carrierToDecode)
+        {
+            carrier = carrierToDecode;
+            randomSeed = carrier.samples;
+            CheckCarrier();
+            FirstSample();
+        }
+        private void CheckCarrier()
+        {
+            foreach (SampleOrder order in new List<SampleOrder> { SampleOrder.Sequential, SampleOrder.Random })
             {
-                List<byte> decodedBytes = new List<byte>();
-
-                int decodedBits = 0;
-                uint byteValue = 0;
-
-                int indexSample = bitsToUse;
-
-                for (int i = 0; decodedBytes.Count < 9; i++)
+                sampleOrder = order;
+                for (int bits = 1; bits <= carrier.bitsPerSample; bits++)
                 {
-                    uint sample = audio.GetSample2(i);
+                    bitsToUse = bits;
+                    FirstSample();
 
-                    for (int n = 0; n < bitsToUse; n++)
-                    {
-                        int bitSign = (int)(sample / ((int)Math.Pow(2, indexSample - 1)) % 2);
-                        byteValue += (uint)((int)Math.Pow(2, 7 - decodedBits) * bitSign);
-
-                        indexSample--;
-                        decodedBits++;
-                        if (indexSample == 0)
-                        {
-                            indexSample = bitsToUse;
-                        }
-
-
-                        if (decodedBits == 8)
-                        {
-                            byteValue = ReverseBits(byteValue);
-                            decodedBytes.Add(Convert.ToByte(byteValue));
-
-                            string decodedString = UnicodeEncoding.Default.GetString(decodedBytes.ToArray());
-                            if (decodedString == "!encoded!")
-                            {
-                                return bitsToUse;
-                            }
-
-                            decodedBits = 0;
-                            byteValue = 0;
-
-                        }
-                    }
+                    if (UnicodeEncoding.UTF8.GetString(Decode(11)) == "!#encoded#!")
+                        return;
                 }
             }
-            return 0;
+            throw new Exception("Carrier not encoded");
         }
-
-
-        public static byte[] Decode(byte[] carrier, int bitsToUse)
+        public byte[] Decode(int bytesToDecode)
         {
-            WAV audio = new WAV(carrier);
-            List<byte> recoveredFile = new List<byte>();
+            List<byte> decodedBytes = new List<byte>();
+            for (int i = 0; i < bytesToDecode; i++)
+                decodedBytes.Add(DecodeByte());
 
+            return decodedBytes.ToArray();
+        }
+        private byte DecodeByte()
+        {
+            uint decodedByte = 0;
             int decodedBits = 0;
-            uint byteValue = 0;
-
-            int indexSample = bitsToUse;
-
-            byte[] last7Bytes = new byte[7];
-
-            for (int i = 0; i < carrier.Length; i++)
+            while (decodedBits < 8)
             {
-                uint sample = audio.GetSample2(i);
-
-                for (int n = 0; n < bitsToUse; n++)
+                uint sample = carrier.GetSample2(sampleIndex);
+                while (bitsLeft > 0)
                 {
-                    int bitSign = (int)(sample / ((int)Math.Pow(2, indexSample - 1)) % 2);
-                    byteValue += (uint)((int)Math.Pow(2, 7 - decodedBits) * bitSign);
+                    //int bitSign = pixelData[currentPixel + (int)channelIndex] / ((int)Math.Pow(2, channelBitsLeft[(int)channelIndex] - 1)) % 2;
+                    int bitSign = (int)(sample / ((int)Math.Pow(2, bitsLeft - 1)) % 2);
+                    decodedByte += (uint)((int)Math.Pow(2, 7 - decodedBits) * bitSign);
 
-                    indexSample--;
+                    bitsLeft--;
                     decodedBits++;
-                    if (indexSample == 0)
-                    {
-                        indexSample = bitsToUse;
-                    }
-
 
                     if (decodedBits == 8)
-                    {
-                        byteValue = ReverseBits(byteValue);
-                        recoveredFile.Add(Convert.ToByte(byteValue));
-
-                        Array.Copy(last7Bytes, 1, last7Bytes, 0, 6);
-                        last7Bytes[6] = Convert.ToByte(byteValue);
-                        string last7Characters = UnicodeEncoding.Default.GetString(last7Bytes);
-                        if (last7Characters == "!#end#!")
-                        {
-                            return recoveredFile.ToArray();
-                        }
-
-                        decodedBits = 0;
-                        byteValue = 0;
-
-                    }
+                        return Convert.ToByte(ReverseBits(decodedByte));
                 }
-            }
-            return recoveredFile.ToArray();
-        }
 
-        private static uint ReverseBits(uint value)
+                NextSample();
+            }
+            return Convert.ToByte(ReverseBits(decodedByte));
+        }
+        private uint ReverseBits(uint value)
         {
             uint result = 0;
-
             for (int i = 0; i < 8; i++)
             {
                 result = result * 2 + value % 2;
                 value /= 2;
             }
-
             return result;
         }
-
     }
 }

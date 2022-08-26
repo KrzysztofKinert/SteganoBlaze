@@ -1,39 +1,34 @@
-﻿@page "/ImageEncode"
+﻿@page "/AudioEncode"
 @using System.Diagnostics
 @using Microsoft.JSInterop
 @using System.Text;
 @using MudBlazor;
 @using ByteSizeLib;
+@using System.IO.Compression;
 @using SteganoBlaze.Shared.Classes;
 @using SteganoBlaze.Shared.Classes.Types;
-@using System.IO.Compression;
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Loc
 @inject ISnackbar Snackbar
 
-<PageTitle>@Loc["ImageEncoding"]</PageTitle>
 
-<canvas hidden id="canvas"/>
+<PageTitle>@Loc["AudioEncoding"]</PageTitle>
+
 <a hidden id="saveLink" download="" href="" target="_blank"/>
-@if(originalCarrier is not null)
-{
-	<img hidden id="carrierImage" @onload="GetCarrierDimensions" src="data:@originalCarrier.contentType;base64,@originalCarrier.base64Data"/>
-}
-
 <MudGrid Spacing="1">
 	<MudItem sm="12" md="6" xs="12">
         <MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
             <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
                 <MudListItem Class="py-0 my-0">
-                    <InputFile class="custom-file-input" OnChange="OpenImage" hidden accept="image/png, image/jpeg, image/apng, image/gif, image/svg+xml, image/webp, image/bmp, image/x-icon" id="inputImage"/>
+                    <InputFile class="custom-file-input" OnChange="OpenAudio" hidden accept="audio/wav, audio/x-wav" id="inputAudio"/>
                     <MudButton HtmlTag="label"
                                 Variant="Variant.Filled"
-                                Color="Color.Primary"
-                                StartIcon="@Icons.Filled.Image"
+                                Color="Color.Tertiary"
+                                StartIcon="@Icons.Filled.Audiotrack"
                                 FullWidth="true"
 								Disabled=@processing
 								Class="mt-2"
-                                for="inputImage">
+                                for="inputAudio">
                         <MudText Typo="Typo.button" Class="align-center">@Loc["ChooseCarrier"]</MudText>
                     </MudButton>
                 </MudListItem>
@@ -48,8 +43,8 @@
 						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 mx-1"/>
 						<MudListItem DisableGutters="true" Class="py-0 my-0">
 							<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
-								<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Dimensions"]:</MudText>
-								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@carrierDimensions</MudText>
+								<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Duration"]:</MudText>
+								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@if(carrier is not null) @carrier.GetDuration()</MudText>
 							</MudContainer>
 						</MudListItem>
 					</MudList>
@@ -65,7 +60,7 @@
                     <InputFile class="custom-file-input" OnChange="OpenFile" hidden id="inputFile" />
                     <MudButton HtmlTag="label"
                                 Variant="Variant.Filled"
-                                Color="Color.Primary"
+                                Color="Color.Tertiary"
                                 StartIcon="@Icons.Filled.AttachFile"
 								Disabled=@processing
                                 FullWidth="true"
@@ -97,18 +92,19 @@
 
 	<MudItem xs="12" sm="6">
         <MudPaper Elevation="3" Style="height:100%">
-			<MudText Typo="Typo.body1" Align="Align.Center">@Loc["PixelBitsToEncode"]</MudText>
+			<MudText Typo="Typo.body1" Align="Align.Center">@Loc["SampleBitsToEncode"]</MudText>
 			<MudDivider/>
-            <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Style="height:75%" Class="d-flex flex-row align-stretch">
+            <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
                 <MudListItem>
-                    <MudNumericField Value="@redBitsToUse" ValueChanged="@((int b) => RedBitsToUseChanged(b))" Class="pl-2" Label="@Loc["RChannel"]" Variant="Variant.Text" Min="0" Max="8"/>
+                    <MudNumericField Class="px-4 mud-tertiary-text" AdornmentColor="Color.Tertiary" Value="@sampleBitsToUse" ValueChanged="@((int b) => SampleBitsToUseChanged(b))" Label="@Loc["Bits"]" Variant="Variant.Text" Min="1" Max="@(carrier?.bitsPerSample ?? 32)" />
                 </MudListItem>
-                <MudListItem>
-                    <MudNumericField Value="@greenBitsToUse" ValueChanged="@((int b) => GreenBitsToUseChanged(b))" Class="px-1" Label="@Loc["GChannel"]" Variant="Variant.Text" Min="0" Max="8"/>
-                </MudListItem>
-                <MudListItem>
-                    <MudNumericField Value="@blueBitsToUse" ValueChanged="@((int b) => BlueBitsToUseChanged(b))" Class="pr-2" Label="@Loc["BChannel"]" Variant="Variant.Text" Min="0" Max="8"/>
-                </MudListItem>
+				<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0"/>
+				<MudListItem>
+					<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Loc["BitsPerSample"]</MudText>
+						<MudText Typo="Typo.body1" Align="Align.Center">@if(carrier is not null) @carrier.bitsPerSample</MudText>
+					</MudContainer>
+				</MudListItem>
             </MudList>
         </MudPaper>
 	</MudItem>
@@ -120,8 +116,8 @@
             <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" style="height:100%" Class="d-flex flex-row align-content-center">
                 <MudListItem>
 					<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-						<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Loc["CarrierCapacity"]</MudText>
-						<MudText Typo="Typo.body1" Align="Align.Center">@carrierCapacity</MudText>
+							<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Loc["CarrierCapacity"]</MudText>
+							<MudText Typo="Typo.body1" Align="Align.Center">@carrierCapacity</MudText>
 					</MudContainer>
                 </MudListItem>
                 <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0"/>
@@ -135,7 +131,7 @@
         </MudPaper>
 	</MudItem>
 
-	<MudItem xs="12">
+		<MudItem xs="12">
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
 			<MudExpansionPanels Style="width:100%">
 				<MudExpansionPanel Dense="true">
@@ -146,14 +142,6 @@
 					</TitleContent>
 					<ChildContent>
 						<MudGrid style="height:100%" Class="align-content-center justify-space-around" Spacing="0">
-							<MudItem sm="3" xs="12" Class="py-1" hidden="@disableWebP">
-								<MudText Typo="Typo.body1" Align="Align.Center">@Loc["CarrierFormat"]</MudText>
-								<MudContainer Class="d-flex flex-row align-content-center justify-center align-center">
-									<MudText Typo="Typo.body2" Align="Align.Justify">PNG</MudText>
-									<MudSwitch @bind-Checked="@webPEnabled" Color="Color.Primary" Class="mx-2" T="bool" Disabled="@processing"/>
-									<MudText Typo="Typo.body2" Align="Align.Justify">WebP</MudText>
-								</MudContainer>
-							</MudItem>
 							<MudItem sm="3" xs="12" Class="py-1">
 								<MudText Typo="Typo.body1" Align="Align.Center">Message Compression</MudText>
 								<MudContainer Class="d-flex flex-row align-content-center justify-center align-center">
@@ -180,7 +168,7 @@
 							</MudItem>
 							<MudItem xs="12" hidden="@(!encryptionEnabled)">
 								<MudDivider/>
-								<MudText Typo="Typo.body1" Class="pt-4" Align="Align.Center">Loc["InputPassword"]</MudText>
+								<MudText Typo="Typo.body1" Class="pt-4" Align="Align.Center">Encryption Options</MudText>
 								<MudGrid Class="align-content-center justify-space-evenly pb-4" Spacing="2">
 									<MudItem sm="4" xs="12">
 										<MudTextField @bind-Value="password" T="string" Label="Choose a password" HelperText="@passwordError" Error="@(passwordError is not null)" InputType="InputType.Password" HelperTextOnFocus="false"/>
@@ -201,15 +189,15 @@
         <MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
 			<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
 				<MudListItem Class="pb-2 pt-3">
-					<MudProgressLinear Color="Color.Primary" Rounded="true" Size="Size.Large" Style="transform: scaleY(2)" Value="@processingValue">
-						<MudText Typo="Typo.subtitle2" Color="Color.Tertiary" Style="transform: scaleY(0.5);" Class="align-center">@processingTask</MudText>
+					<MudProgressLinear Color="Color.Tertiary" Rounded="true" Size="Size.Large" Style="transform: scaleY(2)" Value="@processingValue">
+						<MudText Typo="Typo.subtitle2" Color="Color.Primary" Style="transform: scaleY(0.5);" Class="align-center">@processingTask</MudText>
 					</MudProgressLinear>
 				</MudListItem>
 				<MudListItem Class="pt-0">
 					<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
 						<MudButton HtmlTag="label"
 									Variant="Variant.Filled"
-									Color="Color.Primary"
+									Color="Color.Tertiary"
 									StartIcon="@Icons.Filled.UploadFile"
 									OnClick="Validate"
 									Disabled=@encodeButtonDisabled
@@ -219,7 +207,7 @@
 						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
 						<MudButton HtmlTag="label"
 									Variant="Variant.Filled" 
-									Color="Color.Primary"
+									Color="Color.Tertiary"
 									StartIcon="@Icons.Filled.Download"
 									OnClick="SaveFile"
 									Disabled=@(encodedCarrier is null)
@@ -232,66 +220,83 @@
         </MudPaper>
 	</MudItem>
 
-	<MudItem xs="12" hidden="@(originalCarrier is null)">
-		<MudPaper Elevation="3">
-			<MudList Clickable="false" Dense="true">
-				<MudListItem Class="py-0 my-0">
-					<MudContainer Style="width:100%" Class="d-flex justify-center flex-row">
-						<MudButton Variant="@originalButtonVariant"
-									Color="Color.Primary"
-									OnClick="ShowOriginalImage"
-									Size="Size.Small">
-							<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["OriginalImage"]</MudText>
-						</MudButton>
-						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
-						<MudButton Variant="@encodedButtonVariant"
-									Color="Color.Primary"
-									OnClick="ShowEncodedImage"
-									Disabled=@(encodedCarrier is null)
-									Size="Size.Small">
-							<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedImage"]</MudText>
+	<MudItem xs="12" sm="6" hidden="@(originalCarrier is null)">
+		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
+			<MudList Clickable="false" Dense="true" Class="px-0 mx-0">
+				<MudListItem Class="pa-0 ma-0">
+					<MudContainer Style="width:100%" Class="d-flex justify-center flex-row px-f">
+						<MudButton Variant="Variant.Outlined"
+									Color="Color.Tertiary"
+									Size="Size.Small"
+									FullWidth="true"
+									DisableRipple = "true"
+									Class="mt-2 cursor-default">
+							<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["OriginalAudio"]</MudText>
 						</MudButton>
 					</MudContainer>
                 </MudListItem>
-                <MudListItem Class="py-0 my-0">
-					<MudSwipeArea OnSwipe="@OnSwipe">
-						<MudContainer Class="d-flex justify-center">
-							@if(originalCarrier is not null)
-							{
-								<img id="carrierImagePreview" hidden="@showEmbeddedCarrier" class="center" style="max-width:100%; height:auto;" src="data:@originalCarrier.contentType;base64,@originalCarrier.base64Data" Fluid="true" Alt=@Loc["OriginalImage"]/>
-							}
-							@if (encodedCarrier is not null)
-							{
-								<img id="encodedImagePreview" hidden="@(!showEmbeddedCarrier)" class="center" style="max-width:100%; height:auto;" src="data:@encodedCarrier.contentType;base64,@encodedCarrier.base64Data" Fluid="true" Alt=@Loc["EncodedImage"]/>
-							}
-						</MudContainer>
-					</MudSwipeArea>
+                <MudListItem Class="px-0 mx-0">
+					<MudContainer Class="d-flex justify-center px-2 mx-0">
+						@if(originalCarrier is not null)
+						{
+
+							<audio controls="controls" autobuffer="autobuffer">
+								<source id="carrierImagePreview" src="data:@originalCarrier.contentType;base64,@originalCarrier.base64Data"/>
+							</audio>
+						}
+					</MudContainer>
                 </MudListItem>
             </MudList>
         </MudPaper>
 	</MudItem>
+
+	<MudItem xs="12" sm="6" hidden=" @(encodedCarrier is null)">
+		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
+			<MudList Clickable="false" Dense="true" Class="px-0 mx-0">
+				<MudListItem Class="pa-0 ma-0">
+					<MudContainer Style="width:100%" Class="d-flex justify-center flex-row px-4">
+						<MudButton Variant="Variant.Outlined"
+									Color="Color.Tertiary"
+									Size="Size.Small"
+									FullWidth="true"
+									DisableRipple = "true"
+									Class="mt-2 cursor-default">
+							<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedAudio"]</MudText>
+						</MudButton>
+					</MudContainer>
+                </MudListItem>
+                <MudListItem Class="py-0 my-0">
+					<MudContainer Class="d-flex justify-center px-2 mx-0">
+						@if (encodedCarrier is not null)
+						{
+							<audio controls="controls" autobuffer="autobuffer">
+								<source id="encodedImagePreview" src="data:@encodedCarrier.contentType;base64,@encodedCarrier.base64Data"/>
+							</audio>
+						}
+					</MudContainer>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+	</MudItem>
+
 </MudGrid>
 
 @inject IJSRuntime js
-@code {
+@code 
+{
 	Base64File? originalCarrier;
 	Base64File? encodedCarrier;
 	Message? message;
 	byte[]? messageFileUncompressed;
+	WAV? carrier;
 
 	Stopwatch watch = new Stopwatch();
 
-	int? imageWidth;
-	int? imageHeight;
-
-	public int redBitsToUse { get; set; } = 1;
-	public int greenBitsToUse { get; set; } = 1;
-	public int blueBitsToUse { get; set; } = 1;
+	public int sampleBitsToUse { get; set; } = 1;
 
 	public string password { get; set; } = "";
 	public string passwordRepeat { get; set; } = "";
 
-	public bool webPEnabled { get; set; } = false;
 	public bool encryptionEnabled { get; set; } = false;
 	public bool randomEncodingEnabled { get; set; } = false;
 	public bool compressionEnabled { get; set; } = false;
@@ -300,26 +305,19 @@
 
 	bool processing = false;
 	bool encodeButtonDisabled = true;
-	bool showEmbeddedCarrier = false;
-	bool disableWebP = false;
 
 	string? carrierCapacity = "-";
 	string? carrierUsage = "-";
-	string? carrierDimensions = ""; 
 	string? processingTask = "";
 	string? passwordError = null;
 	string? passwordRepeatError = null;
 
 	MudBlazor.Color carrierUsageColor = Color.Default;
-	MudBlazor.Variant originalButtonVariant = Variant.Filled;
-	MudBlazor.Variant encodedButtonVariant = Variant.Outlined;
 
 	protected override void OnInitialized()
 	{
-		var jsInProcess = (IJSInProcessRuntime)js;
-		disableWebP = jsInProcess.Invoke<bool>("disableWebP");
 		AppState.OnChange += StateHasChanged;
-		AppState.SetPageTheme(Color.Primary, "ImageEncoding");
+		AppState.SetPageTheme(Color.Tertiary, "AudioEncoding");
 	}
 	public async Task ChangeState()
 	{
@@ -333,8 +331,7 @@
 		StateHasChanged();
 		await Task.Delay(10);
 	}
-
-	async Task ResetCarrier()
+	async Task ResetState()
 	{
 		processingValue = 0;
 
@@ -343,118 +340,24 @@
 
 		carrierCapacity = "-";
 		carrierUsage = "-";
-		carrierDimensions = ""; 
 		processingTask = "";
 
-		imageWidth = null;
-		imageHeight = null;
 		originalCarrier = null;
 		encodedCarrier = null;
+		carrier = null;
 
 		carrierUsageColor = Color.Default;
-		originalButtonVariant = Variant.Filled;
-		encodedButtonVariant = Variant.Outlined;
 
 		StateHasChanged();
 		await Task.Delay(1);
 	}
-	async Task OpenImage(InputFileChangeEventArgs e)
+	async Task SampleBitsToUseChanged(int value)
 	{
-		await ResetCarrier();
+		sampleBitsToUse = value;
 
-		if(e.File.Size > AppState.maxAllowedCarrierSize)
-		{
-			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
-			return;
-		}
-
-		var buf = new byte[e.File.Size];
-
-		try
-		{
-			using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
-				await stream.ReadAsync(buf);
-		}
-		catch
-		{
-			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
-			return;
-		}
-
-		originalCarrier = new Base64File(buf, e.File);
-		carrierDimensions = Loc["Loading"]; 
-		await CheckCapacity();
-	}
-
-	async Task OpenFile(InputFileChangeEventArgs e)
-	{
-		message = null;
-		messageFileUncompressed = null;
-		compressionEnabled = false;
-
-		if(e.File.Size > AppState.maxAllowedMessageSize)
-		{
-			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
-			return;
-		}
-
-		var buf = new byte[e.File.Size];
-
-		try
-		{
-			using (var stream = e.File.OpenReadStream(AppState.maxAllowedMessageSize))
-				await stream.ReadAsync(buf);
-		}
-		catch
-		{
-			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
-			return;
-		}
-
-		message = new Message(buf, e.File);
-		await CheckCapacity();
-	}
-
-	async Task GetCarrierDimensions()
-	{
-		imageWidth = await js.InvokeAsync<int>("getImageWidth");
-		imageHeight = await js.InvokeAsync<int>("getImageHeight");
-		carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
-
-		if((imageHeight * imageWidth) > AppState.maxAllowedCarrierPixels)
-		{
-			Snackbar.Add(Loc["MaxCarrierPixels"] + " 5 MP", Severity.Error);
-			await ResetCarrier();
-			return;
-		}
-		await CheckCapacity();
-	}
-
-	async Task RedBitsToUseChanged(int value)
-	{
-		redBitsToUse = value;
 		if(value > 3)
-		{
 			Snackbar.Add(Loc["EncodingBitsWarning"], Severity.Warning);
-		}
-		await CheckCapacity();
-	}
-	async Task GreenBitsToUseChanged(int value)
-	{
-		greenBitsToUse = value;
-		if(value > 3)
-		{
-			Snackbar.Add(Loc["EncodingBitsWarning"], Severity.Warning);
-		}
-		await CheckCapacity();
-	}
-	async Task BlueBitsToUseChanged(int value)
-	{
-		blueBitsToUse = value;
-		if(value > 3)
-		{
-			Snackbar.Add(Loc["EncodingBitsWarning"], Severity.Warning);
-		}
+
 		await CheckCapacity();
 	}
 	void EncryptionEnabledChanged(bool value)
@@ -492,6 +395,65 @@
 
 		return output.ToArray();
 	}
+	async Task OpenAudio(InputFileChangeEventArgs e)
+	{
+		await ResetState();
+
+		if(e.File.Size > AppState.maxAllowedCarrierSize)
+		{
+			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
+			return;
+		}
+
+		var buf = new byte[e.File.Size];
+
+		try
+		{
+			using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
+				await stream.ReadAsync(buf);
+		}
+		catch
+		{
+			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
+			return;
+		}
+
+		//originalCarrier = new Base64File { base64Data = Convert.ToBase64String(buf), contentType = e.File.ContentType, fileName = e.File.Name, fileSize = e.File.Size };
+		originalCarrier = new Base64File (buf, e.File);
+		carrier = new WAV(buf);
+
+		await CheckCapacity();
+	}
+
+	async Task OpenFile(InputFileChangeEventArgs e)
+	{
+		message = null;
+		messageFileUncompressed = null;
+		compressionEnabled = false;
+
+		if(e.File.Size > AppState.maxAllowedMessageSize)
+		{
+			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
+			return;
+		}
+
+		var buf = new byte[e.File.Size];
+
+		try
+		{
+			using (var stream = e.File.OpenReadStream(AppState.maxAllowedMessageSize))
+				await stream.ReadAsync(buf);
+		}
+		catch
+		{
+			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
+			return;
+		}
+
+		message = new Message(buf, e.File);
+		await CheckCapacity();
+	}
+
 	async Task CheckCapacity()
 	{
 		if(originalCarrier is not null) carrierCapacity = @Loc["Checking"];
@@ -503,14 +465,17 @@
 		StateHasChanged();
 		await Task.Delay(1);
 
-		if(imageWidth is not null && imageHeight is not null)
+		if(carrier is not null)
 		{
-			var capacity = (double)(imageWidth * imageHeight * (redBitsToUse + greenBitsToUse + blueBitsToUse) / 8);
+			//long bytesAvailable = carrier.samples * sampleBitsToUse / 8;
+			var capacity = (double)carrier.samples * sampleBitsToUse / 8;
 			carrierCapacity = ByteSize.FromBytes(capacity).ToString();
 
 			if(message is not null)
 			{
 				carrierUsage = ((message.messageSize + 100) / capacity * 100).ToString("0.0") + " %";
+				//var messageRatio = (double)(message.messageSize + 100) / bytesAvailable;
+				//carrierUsage = (messageRatio * 100).ToString("0.0") + " %";
 				if (message.messageSize / capacity < 1)
 				{
 					carrierUsageColor = Color.Success;
@@ -522,31 +487,6 @@
 					encodeButtonDisabled = true;
 				}
 			}
-		}
-	}
-	public void ShowOriginalImage()
-	{
-		showEmbeddedCarrier = false;
-		originalButtonVariant = Variant.Filled;
-		encodedButtonVariant = Variant.Outlined;
-		StateHasChanged();
-	}
-	public void ShowEncodedImage()
-	{
-		showEmbeddedCarrier = true;
-		originalButtonVariant = Variant.Outlined;
-		encodedButtonVariant = Variant.Filled;
-		StateHasChanged();
-	}
-	public void OnSwipe(SwipeDirection direction)
-	{
-		if(direction == SwipeDirection.LeftToRight && encodedCarrier is not null)
-		{
-			ShowEncodedImage();
-		}
-		else if(direction == SwipeDirection.RightToLeft && originalCarrier is not null)
-		{
-			ShowOriginalImage();
 		}
 	}
 	async Task Validate()
@@ -582,17 +522,13 @@
 		watch.Reset();
 		watch.Start();
 		processing = true;
-
-		//Reading image data
-		await UpdateProgress(Loc["ReadingImageData"], 0);
-		Image carrier = new Image { pixelData = await ReadJSStream("getImageData"), height = imageHeight ?? 0, width = imageHeight ?? 0 };
-
+		encodedCarrier = null;
 		//Optional encryption
 		if (encryptionEnabled)
 		{
 			try
 			{
-				await UpdateProgress(Loc["Encrypting message"], 20);
+				await UpdateProgress(Loc["Encrypting message"], 0);
 				await EncryptMessage();
 			}
 			catch
@@ -605,20 +541,11 @@
 		try
 		{
 			//Encoding message
-			await UpdateProgress(Loc["EncodingMessage"], 30);
-			PixelBits pixelBitsToEncode = new PixelBits { R = this.redBitsToUse, G = this.greenBitsToUse, B = this.blueBitsToUse };
-			ImageEncoder encoder = new ImageEncoder(carrier, pixelBitsToEncode, randomEncodingEnabled);
-			var encodedCarrierBytes = encoder.Encode(message!);
+			await UpdateProgress(Loc["EncodingMessage"], 25);
+			AudioEncoder encoder = new AudioEncoder(carrier, sampleBitsToUse, randomEncodingEnabled);
+			var encodedCarrierBytes = encoder.Encode(message).data;
 
-			//Saving encoded image data
-			await UpdateProgress(Loc["SavingImageData"], 80);
-			var jsInProcess = (IJSInProcessRuntime)js;
-			string encodedCarrierURL = jsInProcess.Invoke<string>("getImageURL", encodedCarrierBytes, GetCarrierFormat());
-
-			var contentType = encodedCarrierURL.Split(";", 2)[0].Substring(5);
-			var base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7);
-
-			encodedCarrier = new Base64File { base64Data = base64Data, contentType = contentType, fileName = AddSuffix(originalCarrier!.fileName) };
+			encodedCarrier = new Base64File { base64Data = Convert.ToBase64String(encodedCarrierBytes), contentType = originalCarrier.contentType, fileName = AddSuffix(originalCarrier.fileName) };
 		}
 		catch
 		{
@@ -628,17 +555,15 @@
 
 		watch.Stop();
 		await UpdateProgress(Loc["EncodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
-		ShowEncodedImage();
 		processing = false;
 	}
-
 	async Task EncryptMessage()
 	{
 		byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
 		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
 		byte[] iv = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
 
-		List<byte[]> aesInputs = new List<byte[]> {message!.file, passwordBytes, salt, iv};
+		List<byte[]> aesInputs = new List<byte[]> { message!.file, passwordBytes, salt, iv };
 		message!.file = await ReadJSStream("encryptData", aesInputs);
 		message.UpdateMetaData();
 
@@ -660,13 +585,13 @@
 
 		return dataBytes;
 	}
-
 	private string AddSuffix(string fileName)
 	{
 		string name = Path.GetFileNameWithoutExtension(fileName);
-		if (webPEnabled) return String.Concat(name, Loc["_encoded"], ".webp");
-		else return String.Concat(name, Loc["_encoded"], ".png");
+		string ext = Path.GetExtension(fileName);
+		return String.Concat(name, Loc["_encoded"], ext);
 	}
+
 	async Task SaveFile()
 	{
 		try
@@ -677,10 +602,5 @@
 		{
 			Snackbar.Add(Loc["ErrorSavingImage"], Severity.Error);
 		}
-	}
-	string GetCarrierFormat()
-	{
-		if (webPEnabled) return "image/webp";
-		else return "image/png";
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using ByteSizeLib;
 using Microsoft.AspNetCore.Components.Forms;
+using System.IO;
 using System.Text;
 
 namespace SteganoBlaze.Shared.Classes.Types
@@ -8,40 +9,57 @@ namespace SteganoBlaze.Shared.Classes.Types
     {
         public byte[] header { get; set; }
         public byte[] metadata { get; set; }
-        public byte[] message { get; set; }
+        public byte[] file { get; set; }
         public string contentType { get; set; }
         public string fileName { get; set; }
-        public long fileSize { get; set; }
-
-        public Message(byte[] file, IBrowserFile fileInfo)
+        public long messageSize { get; set; }
+        public bool compressed { get; set; }
+        public Message(byte[] messageFile, IBrowserFile messageFileInfo)
         {
-            message = file;
+            file = messageFile;
 
-            var cT = fileInfo.ContentType;
+            var cT = messageFileInfo.ContentType;
             if (cT == "") cT = "application/octet-stream";
             contentType = cT;
 
-            fileName = fileInfo.Name;
-            fileSize = fileInfo.Size;
+            fileName = messageFileInfo.Name;
+            compressed = false;
 
-            string metaData = "!fnS!" + fileInfo.Name + "!fnE!" + "!ctS!" + contentType + "!ctE!" + "!fsS!" + fileInfo.Size + "!fsE!";
-            while ((UnicodeEncoding.UTF8.GetByteCount(metaData) % 16) != 0)
-            {
-                metaData += "0";
-            }
-            metadata = UnicodeEncoding.UTF8.GetBytes(metaData);
+            string metadataString = "!fnS!" + fileName + "!fnE!" + "!ctS!" + contentType + "!ctE!" + "!fsS!" + file.Length + "!fsE!" + "!cpS!" + compressed + "!cpE!";
+            metadata = UnicodeEncoding.UTF8.GetBytes(metadataString);
 
-            string header = "!#encoded#!" + metadata.Length;
-            while ((UnicodeEncoding.UTF8.GetByteCount(header) % 16) != 0)
+            string headerString = "!#encoded#!" + metadata.Length;
+            while ((UnicodeEncoding.UTF8.GetByteCount(headerString) % 15) != 0)
             {
-                header = header.Insert(11, "0");
+                headerString = headerString.Insert(11, "0");
             }
-            this.header = UnicodeEncoding.UTF8.GetBytes(header);
+            header = UnicodeEncoding.UTF8.GetBytes(headerString);
+
+            messageSize = header.Length + metadata.Length + file.Length;
         }
 
+        public void UpdateMetaData()
+        {
+            string metadataString = "!fnS!" + fileName + "!fnE!" + "!ctS!" + contentType + "!ctE!" + "!fsS!" + file.Length + "!fsE!" + "!cpS!" + compressed + "!cpE!";
+            metadata = UnicodeEncoding.UTF8.GetBytes(metadataString);
+            messageSize = header.Length + metadata.Length + file.Length;
+        }
+        public void UpdateHeader(byte[] salt, byte[] iv)
+        {
+            string headerString = "!#encoded#!" + metadata.Length;
+            while ((UnicodeEncoding.UTF8.GetByteCount(headerString) % 15) != 0)
+            {
+                headerString = headerString.Insert(11, "0");
+            }
+
+            header = UnicodeEncoding.UTF8.GetBytes(headerString);
+            header = header.Concat(salt).ToArray();
+            header = header.Concat(iv).ToArray();
+            messageSize = header.Length + metadata.Length + file.Length;
+        }
         public string SizeToString()
         {
-            return ByteSize.FromBytes(fileSize).ToString();
+            return ByteSize.FromBytes(messageSize).ToString();
         }
     }
 }

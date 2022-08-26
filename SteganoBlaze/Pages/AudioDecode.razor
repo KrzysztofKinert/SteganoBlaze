@@ -1,0 +1,384 @@
+﻿@page "/AudioDecode"
+@using System.Diagnostics
+@using Microsoft.JSInterop
+@using System.Text;
+@using MudBlazor;
+@using ByteSizeLib;
+@using SteganoBlaze.Shared.Classes;
+@using SteganoBlaze.Shared.Classes.Types;
+@using System.IO.Compression;
+@inherits BasePage;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+
+<PageTitle>Audio Decoding</PageTitle>
+
+<a hidden id="saveLink" download="" href="" target="_blank"/>
+<MudGrid Spacing="1">          
+	<MudItem sm="12" md="6" xs="12">
+		<MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
+			<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
+				<MudListItem Class="py-0 my-0">
+					<InputFile class="custom-file-input" OnChange="OpenAudio" hidden accept="audio/wav, audio/x-wav" id="inputImage"/>
+					<MudButton HtmlTag="label"
+                                Variant="Variant.Filled"
+                                Color="Color.Tertiary"
+                                StartIcon="@Icons.Filled.Audiotrack"
+                                FullWidth="true"
+								Disabled=@processing
+								Class="mt-2"
+                                for="inputImage">
+						<MudText Typo="Typo.button" Class="align-center">@Loc["ChooseCarrier"]</MudText>
+					</MudButton>
+				</MudListItem>
+				<MudListItem Class="py-0 my-0">
+					<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @if (carrier is not null)
+							@carrier.fileName
+					</MudText>
+					</MudListItem>
+					<MudListItem Class="py-0 my-0" >
+						<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+							<MudListItem Style="width:50%" Class="py-0 my-0">	
+								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @if (carrier is not null) @carrier.SizeToString()</MudText>
+							</MudListItem>
+							<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 mx-1"/>
+							<MudListItem DisableGutters="true" Class="py-0 my-0">
+								<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+									<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Length"]:</MudText>
+									<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@if (wavFile is not null) @wavFile.GetDuration()</MudText>
+								</MudContainer>
+							</MudListItem>
+						</MudList>
+					</MudListItem>
+				</MudList>
+			</MudPaper>
+		</MudItem>
+
+		<MudItem sm="12" md="6" xs="12"> 
+			<MudPaper Elevation="3" Style="height:100%">
+				<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
+					<MudListItem Class="py-0 my-0">
+						<MudButton HtmlTag="label"
+                                Variant="Variant.Outlined"
+                                Color="Color.Tertiary"
+                                StartIcon="@Icons.Filled.AttachFile"
+                                FullWidth="true"
+								DisableRipple="true"
+								Class="mt-2 cursor-default">
+								<MudText Typo="Typo.button" Align="Align.Center">@Loc["DecodedFile"]</MudText>
+						</MudButton>
+					</MudListItem>
+					<MudListItem Class="py-0 my-0">
+						<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @if (message is not null) @message.fileName</MudText>
+					</MudListItem>
+					<MudListItem Class="py-0 my-0">
+						<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+							<MudListItem Style="width:50%" Class="py-0 my-0">	
+								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]:@if (message is not null) @message.SizeToString()</MudText>
+							</MudListItem>
+							<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-1"/>
+							<MudListItem DisableGutters="true" Class="py-0 my-0">
+								<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+									<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Type"]:</MudText>
+									<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@if (message is not null) @message.contentType</MudText>
+								</MudContainer>
+							</MudListItem>
+						</MudList>
+					</MudListItem>
+				</MudList>
+			</MudPaper>
+		</MudItem>
+
+		<MudItem xs="12">
+			<MudPaper Elevation="3" Style="height:100%" Class="d-flex mud-width-full">
+				<MudGrid Class="align-center justify-space-evenly" Spacing="0">
+					<MudItem sm="4" xs="12" Class="pa-1">
+						<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">Input the password if the message was additionaly encrypted</MudText>
+						<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">Leave empty if encryption was not used</MudText>
+					</MudItem>
+					<MudItem sm="4" xs="12" Class="pa-1">
+						<MudTextField @bind-Value="password" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="Input the password" InputType="InputType.Password"/>
+					</MudItem>
+				</MudGrid>
+			</MudPaper>
+		</MudItem>
+
+		<MudItem xs="12">
+			<MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
+				<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
+					<MudListItem Class="pb-2 pt-3">
+						<MudProgressLinear Color="Color.Tertiary" Rounded="true" Size="Size.Large" Style="transform: scaleY(2)" Value="@processingValue">
+							<MudText Typo="Typo.subtitle2" Color="Color.Primary" Style="transform: scaleY(0.5);" Class="align-center">@processingTask</MudText>
+						</MudProgressLinear>
+					</MudListItem>
+					<MudListItem Class="pt-0">
+						<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
+							<MudButton HtmlTag="label"
+									Variant="Variant.Filled"
+									Color="Color.Tertiary"
+									StartIcon="@Icons.Filled.FilePresent"
+									OnClick="Decode"
+									Disabled=@decodeButtonDisabled
+									Style="width:100%">
+								<MudText Typo="Typo.button" Class="align-center">@Loc["Decode"]</MudText>
+							</MudButton>
+							<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
+							<MudButton HtmlTag="label"
+									Variant="Variant.Filled" 
+									Color="Color.Tertiary"
+									StartIcon="@Icons.Filled.Download"
+									OnClick="SaveFile"
+									Disabled=@saveButtonDisabled
+									Style="width:100%">
+								<MudText Typo="Typo.button" Class="align-center">@Loc["Save"]</MudText>
+							</MudButton>
+						</MudList>
+					</MudListItem>
+				</MudList>
+			</MudPaper>
+		</MudItem>
+
+		<MudItem xs="12" hidden="@audioHidden">
+			<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
+				<MudList Clickable="false" Dense="true" Class="px-0 mx-0">
+					<MudListItem Class="pa-0 ma-0">
+						<MudContainer Style="width:100%" Class="d-flex justify-center flex-row px-4">
+							<MudButton Variant="Variant.Outlined"
+									Color="Color.Tertiary"
+									Size="Size.Small"
+									FullWidth="true"
+									DisableRipple = "true"
+									Class="mt-2 cursor-default">
+								<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedAudio"]</MudText>
+							</MudButton>
+						</MudContainer>
+					</MudListItem>
+					<MudListItem Class="py-0 my-0">
+						<MudContainer Class="d-flex justify-center px-2">
+						@if (carrier is not null)
+						{
+								<audio controls="controls" autobuffer="autobuffer">
+									<source id="encodedImagePreview" src="data:@carrier.contentType;base64,@carrier.base64Data"/>
+								</audio>
+						}
+					</MudContainer>
+				</MudListItem>
+			</MudList>
+		</MudPaper>
+	</MudItem>
+</MudGrid>
+
+@inject IJSRuntime js
+@code
+{
+	Base64File? carrier;
+	Base64File? message;
+	WAV? wavFile;
+
+	Stopwatch watch = new Stopwatch();
+
+	public int processingValue { get; set; } = 0;
+	public string? password { get; set; }
+
+	bool decodeButtonDisabled = true;
+	bool saveButtonDisabled = true;
+	bool processing = false;
+	bool audioHidden = true;
+
+	string? processingTask = "";
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.SetPageTheme(Color.Tertiary, "AudioDecoding");
+	}
+	async Task ResetState()
+	{
+		processingValue = 0;
+		processing = false;
+		decodeButtonDisabled = true;
+		saveButtonDisabled = true;
+		audioHidden = true;
+		processingTask = "";
+		carrier = null;
+		message = null;
+		wavFile = null;
+		StateHasChanged();
+		await Task.Delay(1);
+	}
+	async Task OpenAudio(InputFileChangeEventArgs e)
+	{
+		await ResetState();
+		if (e.File.Size > AppState.maxAllowedCarrierSize)
+		{
+			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
+			return;
+		}
+
+		var buf = new byte[e.File.Size];
+
+		try
+		{
+			using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
+				await stream.ReadAsync(buf);
+		}
+		catch
+		{
+			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
+			return;
+		}
+
+
+		carrier = new Base64File(buf, e.File);
+		//carrier = new base64File { base64Data = Convert.ToBase64String(buf), contentType = e.File.ContentType, fileName = e.File.Name, fileSize = e.File.Size };
+		wavFile = new WAV(buf);
+		audioHidden = false;
+		decodeButtonDisabled = false;
+	}
+
+	async Task SaveFile()
+	{
+		if (message is not null)
+		{
+			await js.InvokeVoidAsync("saveFile", message);
+		}
+	}
+
+	async Task Decode()
+	{
+		watch.Reset();
+		watch.Start();
+		processing = true;
+		await UpdateProgress(Loc["DecodingMessage"], 0);
+
+		try
+		{
+			AudioDecoder decoder = new AudioDecoder(wavFile);
+
+			byte[] salt = Array.Empty<byte>();
+			byte[] iv = Array.Empty<byte>();
+
+			await UpdateProgress(Loc["DecodingMessage"], 20);
+
+			string header = UnicodeEncoding.UTF8.GetString(decoder.Decode(15));
+			var metadataSize = Int32.Parse(header.TakeLast(4).ToArray());
+		
+			if (password is not null)
+			{
+				salt = decoder.Decode(16);
+				iv = decoder.Decode(16);
+			}
+
+			var metadataBytes = decoder.Decode(metadataSize);
+
+			if (password is not null)
+			{
+				byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
+				List<byte[]> aesInputs = new List<byte[]> { metadataBytes, passwordBytes, salt, iv };
+				metadataBytes = await ReadJSStream("decryptData", aesInputs);
+			}
+
+			string metadata = UnicodeEncoding.UTF8.GetString(metadataBytes);
+
+			string fileName = metadata.Substring(metadata.IndexOf("!fnS!") + 5, metadata.IndexOf("!fnE!") - metadata.IndexOf("!fnS!") - 5);
+			string contentType = metadata.Substring(metadata.IndexOf("!ctS!") + 5, metadata.IndexOf("!ctE!") - metadata.IndexOf("!ctS!") - 5);
+			int fileSize = Int32.Parse(metadata.Substring(metadata.IndexOf("!fsS!") + 5, metadata.IndexOf("!fsE!") - metadata.IndexOf("!fsS!") - 5));
+			bool compressed = bool.Parse(metadata.Substring(metadata.IndexOf("!cpS!") + 5, metadata.IndexOf("!cpE!") - metadata.IndexOf("!cpS!") - 5));
+
+			var file = decoder.Decode(fileSize);
+
+			if (password is not null)
+			{
+				await UpdateProgress(Loc["DecryptingMessage"], 60);
+				byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
+				List<byte[]> aesInputs = new List<byte[]> { file, passwordBytes, salt, iv };
+				file = await ReadJSStream("decryptData", aesInputs);
+			}
+
+			if (compressed is true)
+			{
+				await UpdateProgress(Loc["DecompressingMessage"], 70);
+				file = await Decompress(file);
+			}
+
+			await UpdateProgress(Loc["SavingMessageData"], 80);
+
+			this.message = new Base64File { base64Data = Convert.ToBase64String(file), contentType = contentType, fileName = fileName, fileSize = fileSize };
+			saveButtonDisabled = false;
+			processing = false;
+
+			watch.Stop();
+			await UpdateProgress(Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
+		}
+		catch
+		{
+			await UpdateProgress(Loc["ImageNotEncoded"], 0);
+			return;
+		}
+		//var messageBytes = AudioSteganography.DecryptFileLinear(wavFile.data).ToList();
+
+
+		//var bitsToUse = AudioSteganography.CheckAudio(wavFile);
+		//if (bitsToUse == 0)
+		//{
+		//	processingTask = Loc["AudioNotEncoded"];
+		//	processingValue = 0;
+		//	processing = false;
+		//	return;
+		//}
+
+		//var messageBytes = AudioSteganography.Decode(wavFile.data, bitsToUse).ToList();
+
+		//string metaData = String.Empty;
+		//int i = 0;
+		//while (metaData.Substring(Math.Max(0, metaData.Length - 7)) != "!fsEnd!")
+		//{
+		//	metaData = new string(UnicodeEncoding.Default.GetChars(messageBytes.Take(i).ToArray()));
+		//	//metaData += Convert.ToChar(messageBytes[i]);
+		//	//metaData += (char)messageBytes[i];
+		//	i++;
+		//}
+
+		//messageBytes.RemoveRange(0, UnicodeEncoding.Default.GetByteCount(metaData));
+		//messageBytes.RemoveRange(messageBytes.Count - 7, 7);
+
+		//int fileNameStartIndex = metaData.IndexOf("!fnStart!");
+		//int fileNameEndIndex = metaData.IndexOf("!fnEnd!");
+		//string fileName = metaData.Substring(fileNameStartIndex + 9, fileNameEndIndex - fileNameStartIndex - 9);
+
+		//int contentTypeStartIndex = metaData.IndexOf("!ctStart!");
+		//int contentTypeEndIndex = metaData.IndexOf("!ctEnd!");
+		//string contentType = metaData.Substring(contentTypeStartIndex + 9, contentTypeEndIndex - contentTypeStartIndex - 9);
+
+		//this.message = new Base64File
+		//	{
+		//		base64Data = Convert.ToBase64String(messageBytes.ToArray()),
+		//		contentType = contentType,
+		//		fileName = fileName,
+		//		fileSize = messageBytes.Count
+		//	};
+
+	}
+	async Task UpdateProgress(string progressText, int progressValue)
+	{
+		processingTask = Loc[progressText];
+		processingValue = progressValue;
+		StateHasChanged();
+		await Task.Delay(10);
+	}
+	async Task<byte[]> ReadJSStream(string jsFunction, List<byte[]>? aesInputs = null)
+	{
+		IJSStreamReference? dataStreamReference;
+		if (aesInputs is null)
+			dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction);
+		else
+			dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction, aesInputs[0], aesInputs[1], aesInputs[2], aesInputs[3]);
+
+		var dataBytes = new byte[dataStreamReference.Length];
+		using (var stream = await dataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 10))
+			await stream.ReadAsync(dataBytes);
+
+		return dataBytes;
+	}
+}

@@ -1,152 +1,156 @@
-﻿using SteganoBlaze.Shared.Classes.Types;
+﻿using Microsoft.JSInterop;
+using SteganoBlaze.Shared.Classes.Types;
 using System.Text;
 using System.Threading;
-
 namespace SteganoBlaze.Shared.Classes
 {
     public abstract class ImageSteganography
     {
-        protected byte[] carrier = Array.Empty<byte>();
-        protected int currentPixel;
-        protected int[] channelBitsLeft = new int[3];
-        protected PixelBits bitsToUse = new PixelBits();
-        protected enum PixelChannel
+        protected enum Channel
         {
             R,
             G,
             B
         }
-        protected PixelChannel currentChannel;
-
-        protected enum PixelOrder
+        public enum PixelOrder
         {
             Sequential,
             Random
         }
-        protected PixelOrder pixelOrder;
-        protected void FirstPixelSequential()
-        {
-            currentPixel = 0;
-            currentChannel = PixelChannel.R;
-            channelBitsLeft[(int)PixelChannel.R] = bitsToUse!.R;
-            channelBitsLeft[(int)PixelChannel.G] = bitsToUse!.G;
-            channelBitsLeft[(int)PixelChannel.B] = bitsToUse!.B;
-        }
-        protected void NextPixelSequential()
-        {
-            currentPixel += 4;
-            currentChannel = PixelChannel.R;
-            channelBitsLeft[(int)PixelChannel.R] = bitsToUse!.R;
-            channelBitsLeft[(int)PixelChannel.G] = bitsToUse!.G;
-            channelBitsLeft[(int)PixelChannel.B] = bitsToUse!.B;
-        }
-        protected void NextPixelRandom()
-        {
 
+        protected byte[] pixelData = Array.Empty<byte>();
+        protected int pixelIndex;
+        protected int[] channelBitsLeft = new int[3];
+        protected PixelBits bitsToUse = new PixelBits();
+
+        protected Channel channel;
+        protected PixelOrder pixelOrder;
+
+        protected int randomSeed;
+        protected Random? generator;
+        protected HashSet<int>? usedPixels;
+
+        protected void FirstPixel()
+        {
+            channel = Channel.R;
+            channelBitsLeft[(int)Channel.R] = bitsToUse!.R;
+            channelBitsLeft[(int)Channel.G] = bitsToUse!.G;
+            channelBitsLeft[(int)Channel.B] = bitsToUse!.B;
+
+            switch (pixelOrder)
+            {
+                case PixelOrder.Sequential:
+                    pixelIndex = 0;
+                    break;
+                case PixelOrder.Random:
+                    generator = new Random(randomSeed);
+                    usedPixels = new HashSet<int>();
+                    pixelIndex = generator.Next(pixelData.Length / 4) * 4;
+                    usedPixels.Add(pixelIndex);
+                    break;
+            }
         }
+        protected void NextPixel()
+        {
+            channel = Channel.R;
+            channelBitsLeft[(int)Channel.R] = bitsToUse!.R;
+            channelBitsLeft[(int)Channel.G] = bitsToUse!.G;
+            channelBitsLeft[(int)Channel.B] = bitsToUse!.B;
+
+            switch (pixelOrder)
+            {
+                case PixelOrder.Sequential:
+                    pixelIndex += 4;
+                    break;
+                case PixelOrder.Random:
+                    while (usedPixels!.Contains(pixelIndex))
+                        pixelIndex = generator!.Next(pixelData.Length / 4) * 4;
+                    usedPixels.Add(pixelIndex);
+                    break;
+            }
+        }
+        protected int BitIndex() { return channelBitsLeft[(int)channel] - 1; }
+        protected int ChannelIndex() { return pixelIndex + (int)channel; }
     }
     public class ImageEncoder : ImageSteganography
     {
-        public ImageEncoder(byte[] carrierToEncode, PixelBits bits)
+        public ImageEncoder(Image carrier, PixelBits bits, bool randomEncodingEnabled)
         {
-            carrier = carrierToEncode;
+            pixelData = carrier.pixelData;
             bitsToUse = bits;
-        }
+            randomSeed = carrier.height * carrier.width;
 
+            if (randomEncodingEnabled)
+                pixelOrder = PixelOrder.Random;
+            else
+                pixelOrder = PixelOrder.Sequential;
+
+            FirstPixel();
+        }
         public byte[] Encode(Message message)
         {
-            FirstPixelSequential();
+            foreach(byte headerByte in message.header)
+                EncodeByte(headerByte);
 
-            for (int i = 0; i < message.header.Length; i++)
-            {
-                EncodeByte(message.header[i]);
-            }
-            for (int i = 0; i < message.metadata.Length; i++)
-            {
-                EncodeByte(message.metadata[i]);
-            }
-            for (int i = 0; i < message.message.Length; i++)
-            {
-                EncodeByte(message.message[i]);
-            }
-            return carrier;
+            foreach (byte metadataByte in message.metadata)
+                EncodeByte(metadataByte);
+
+            foreach (byte fileByte in message.file)
+                EncodeByte(fileByte);
+
+            return pixelData;
         }
         private void EncodeByte(byte byteValue)
         {
             int encodedBits = 0;
             while (encodedBits < 8)
             {
-                while (channelBitsLeft[(int)currentChannel] > 0)
+                while (channelBitsLeft[(int)channel] > 0)
                 {
-                    int bit = byteValue % 2;
+                    int bitSign = byteValue % 2;
                     byteValue /= 2;
-                    //currentPixelValues[(int)currentChannel] = (byte)ChangeNthBit(currentPixelValues[(int)currentChannel], bit, channelBitsLeft[(int)currentChannel] - 1);
-                    carrier[currentPixel + (int)currentChannel] = (byte)ChangeNthBit(carrier[currentPixel + (int)currentChannel], bit, channelBitsLeft[(int)currentChannel] - 1);
+                    ChangeBit(ChannelIndex(), BitIndex(), bitSign);
 
-                    channelBitsLeft[(int)currentChannel]--;
+                    channelBitsLeft[(int)channel]--;
                     encodedBits++;
-                    if (encodedBits == 8) return;
+
+                    if (encodedBits == 8) 
+                        return;
                 }
 
-                if (currentChannel == PixelChannel.B)
+                switch (channel)
                 {
-                    NextPixelSequential();
+                    case Channel.R:
+                        channel = Channel.G;
+                        break;
+                    case Channel.G:
+                        channel = Channel.B;
+                        break;
+                    case Channel.B:
+                        NextPixel();
+                        break;  
                 }
-                else currentChannel++;
             }
         }
-        private int ChangeNthBit(int value, int bit, int n)
+        private void ChangeBit(int pixelIndex, int bitIndex, int bitSign)
         {
-            return (value & ~(1 << n) | (bit << n));
+            var mask = 1 << bitIndex;
+            if (bitSign == 1)
+                pixelData[pixelIndex] |= (byte)mask;
+            else
+                pixelData[pixelIndex] &= (byte)~mask;
         }
-
     }
     public class ImageDecoder : ImageSteganography
     {
-        public ImageDecoder(byte[] carrierToDecode)
+        public ImageDecoder(Image carrierToDecode)
         {
-            carrier = carrierToDecode;
-            bitsToUse = CheckCarrier(carrier);
+            pixelData = carrierToDecode.pixelData;
+            randomSeed = carrierToDecode.height * carrierToDecode.width;
+            CheckCarrier();
+            FirstPixel();
         }
-
-        public ByteFile Decode(byte[]? password = null)
-        {
-            FirstPixelSequential();
-
-            List<byte> decodedBytes = new List<byte>();
-            for (int i = 0; i < 16; i++)
-            {
-                decodedBytes.Add(DecodeByte());
-            }
-            if (password != null)
-            {
-                //string header = UnicodeEncoding.Default.GetString(decodedBytes.ToArray());
-            }
-            string header = UnicodeEncoding.Default.GetString(decodedBytes.ToArray());
-            var metadataSize = Int32.Parse(header.TakeLast(5).ToArray());
-
-            decodedBytes = new List<byte>();
-            for (int i = 0; i < metadataSize; i++)
-            {
-                decodedBytes.Add(DecodeByte());
-            }
-
-            string metadata = UnicodeEncoding.Default.GetString(decodedBytes.ToArray());
-
-            string fileName = metadata.Substring(metadata.IndexOf("!fnS!") + 5, metadata.IndexOf("!fnE!") - metadata.IndexOf("!fnS!") - 5);
-            string contentType = metadata.Substring(metadata.IndexOf("!ctS!") + 5, metadata.IndexOf("!ctE!") - metadata.IndexOf("!ctS!") - 5);
-            int fileSize = Int32.Parse(metadata.Substring(metadata.IndexOf("!fsS!") + 5, metadata.IndexOf("!fsE!") - metadata.IndexOf("!fsS!") - 5));
-
-            decodedBytes = new List<byte>();
-            for (int i = 0; i < fileSize; i++)
-            {
-                decodedBytes.Add(DecodeByte());
-            }
-
-            return new ByteFile { byteData = decodedBytes.ToArray(), contentType = contentType, fileName = fileName, fileSize = fileSize };
-        }
-
-        private PixelBits CheckCarrier(byte[] carrier)
+        private void CheckCarrier()
         {
             List<PixelBits> bitsToCheck = new List<PixelBits>();
             for (int i = 1; i < 9; i++)
@@ -169,25 +173,27 @@ namespace SteganoBlaze.Shared.Classes
                 }
             }
 
-            foreach (PixelBits bits in bitsToCheck)
+            foreach (PixelOrder order in new List<PixelOrder> { PixelOrder.Sequential, PixelOrder.Random })
             {
-                bitsToUse = bits;
-                FirstPixelSequential();
+                pixelOrder = order;
+                foreach (PixelBits bits in bitsToCheck)
+                {
+                    bitsToUse = bits;
+                    FirstPixel();
 
-                List<byte> decodedBytes = new List<byte>();
-                for (int i = 0; i < 11; i++)
-                {
-                    decodedBytes.Add(DecodeByte());
-                }
-                string decodedString = UnicodeEncoding.Default.GetString(decodedBytes.ToArray());
-                if (decodedString == "!#encoded#!")
-                {
-                    return bits;
+                    if (UnicodeEncoding.UTF8.GetString(Decode(11)) == "!#encoded#!")
+                        return;
                 }
             }
-
             throw new Exception("Carrier not encoded");
-            //return null;
+        }
+        public byte[] Decode(int bytesToDecode)
+        {
+            List<byte> decodedBytes = new List<byte>();
+            for (int i = 0; i < bytesToDecode; i++)
+                decodedBytes.Add(DecodeByte());
+
+            return decodedBytes.ToArray();
         }
         private byte DecodeByte()
         {
@@ -195,36 +201,35 @@ namespace SteganoBlaze.Shared.Classes
             int decodedBits = 0;
             while (decodedBits < 8)
             {
-                while (channelBitsLeft[(int)currentChannel] > 0)
+                while (channelBitsLeft[(int)channel] > 0)
                 {
-                    int bitSign = carrier[currentPixel + (int)currentChannel] / ((int)Math.Pow(2, channelBitsLeft[(int)currentChannel] - 1)) % 2;
+                    //int bitSign = pixelData[currentPixel + (int)channelIndex] / ((int)Math.Pow(2, channelBitsLeft[(int)channelIndex] - 1)) % 2;
+                    int bitSign = pixelData[ChannelIndex()] / ((int)Math.Pow(2, BitIndex())) % 2;
                     decodedByte += (int)Math.Pow(2, 7 - decodedBits) * bitSign;
 
-                    channelBitsLeft[(int)currentChannel]--;
+                    channelBitsLeft[(int)channel]--;
                     decodedBits++;
-                    if (decodedBits == 8) return Convert.ToByte(ReverseBits(decodedByte));
+
+                    if (decodedBits == 8) 
+                        return Convert.ToByte(ReverseBits(decodedByte));
                 }
 
-                if (currentChannel == PixelChannel.B)
-                {
-                    NextPixelSequential();
-                }
-                else currentChannel++;
+                if (channel == Channel.B)
+                    NextPixel();
+                else 
+                    channel++;
             }
             return Convert.ToByte(ReverseBits(decodedByte));
         }
         private int ReverseBits(int value)
         {
             int result = 0;
-
             for (int i = 0; i < 8; i++)
             {
                 result = result * 2 + value % 2;
                 value /= 2;
             }
-
             return result;
         }
     }
 }
-
