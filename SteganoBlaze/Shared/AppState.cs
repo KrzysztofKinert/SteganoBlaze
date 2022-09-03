@@ -7,6 +7,8 @@ namespace SteganoBlaze.Shared
         public Color themeColorBuffer { get; private set; }
         public string pageName { get; private set; } = "AboutSteganography";
 
+        public bool webPUnavailable { get; set; } = false;
+
         public event Action? OnChange;
         public Int64 maxAllowedCarrierSize { get; private set; } = 10000000;
         public Int64 maxAllowedMessageSize { get; private set; } = 5000000;

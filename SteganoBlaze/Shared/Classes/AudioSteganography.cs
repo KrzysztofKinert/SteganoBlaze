@@ -14,10 +14,9 @@ namespace SteganoBlaze.Shared.Classes
             Random
         }
 
-        protected byte[] pixelData = Array.Empty<byte>();
-        protected WAV carrier;
+        protected WAV? carrier;
         protected int sampleIndex;
-        protected int bitsLeft;
+        protected int sampleBitsLeft;
         protected int bitsToUse;
 
         protected SampleOrder sampleOrder;
@@ -28,8 +27,9 @@ namespace SteganoBlaze.Shared.Classes
 
         protected void FirstSample()
         {
-            bitsLeft = bitsToUse;
+            if (carrier is null) throw new Exception();
 
+            sampleBitsLeft = bitsToUse;
             switch (sampleOrder)
             {
                 case SampleOrder.Sequential:
@@ -38,16 +38,16 @@ namespace SteganoBlaze.Shared.Classes
                 case SampleOrder.Random:
                     generator = new Random(randomSeed);
                     usedSamples = new HashSet<int>();
-                    //sampleIndex = generator.Next(pixelData.Length / 4) * 4; ////AAAAAAAAAAAAA
-                    sampleIndex = generator.Next(carrier.samples);
+                    sampleIndex = generator.Next(carrier.GetSampleCount());
                     usedSamples.Add(sampleIndex);
                     break;
             }
         }
         protected void NextSample()
         {
-            bitsLeft = bitsToUse;
+            if (carrier is null) throw new Exception();
 
+            sampleBitsLeft = bitsToUse;
             switch (sampleOrder)
             {
                 case SampleOrder.Sequential:
@@ -55,20 +55,20 @@ namespace SteganoBlaze.Shared.Classes
                     break;
                 case SampleOrder.Random:
                     while (usedSamples!.Contains(sampleIndex))
-                        sampleIndex = generator!.Next(carrier.samples);
-                    //sampleIndex = generator!.Next(pixelData.Length / 4) * 4; //AAAAAAAAAAAAAAAA
+                        sampleIndex = generator!.Next(carrier!.GetSampleCount());
                     usedSamples.Add(sampleIndex);
                     break;
             }
         }
+        protected int BitIndex() { return sampleBitsLeft - 1; }
     }
 	public class AudioEncoder : AudioSteganography
 	{
-        public AudioEncoder(WAV carrier, int bits, bool randomEncodingEnabled)
+        public AudioEncoder(WAV audio, int bits, bool randomEncodingEnabled)
         {
-            this.carrier = carrier;
+            carrier = new WAV((byte[])audio.GetData().Clone());
             bitsToUse = bits;
-            randomSeed = carrier.samples;
+            randomSeed = carrier.GetSampleCount();
 
             if (randomEncodingEnabled)
                 sampleOrder = SampleOrder.Random;
@@ -77,8 +77,10 @@ namespace SteganoBlaze.Shared.Classes
 
             FirstSample();
         }
-        public WAV Encode(Message message)
+        public byte[] Encode(Message message)
         {
+            if (carrier is null) throw new Exception();
+
             foreach (byte headerByte in message.header)
                 EncodeByte(headerByte);
 
@@ -88,29 +90,28 @@ namespace SteganoBlaze.Shared.Classes
             foreach (byte fileByte in message.file)
                 EncodeByte(fileByte);
 
-            return carrier;
+            return carrier.GetData();
         }
         private void EncodeByte(byte byteValue)
         {
+            if (carrier is null) throw new Exception();
+
             int encodedBits = 0;
             while (encodedBits < 8)
             {
-                while (bitsLeft > 0)
+                while (sampleBitsLeft > 0)
                 {
-                    int bitSign = byteValue % 2;
+                    uint sample = carrier.GetSample(sampleIndex);
+
+                    if (byteValue % 2 == 1)
+                        sample = SetBit(sample, BitIndex());
+                    else
+                        sample = ClearBit(sample, BitIndex());
+
+                    carrier.SetSample(sampleIndex, sample);
+                    var aa = carrier.GetSample(sampleIndex);
                     byteValue /= 2;
-
-                    uint sample = carrier.GetSample2(sampleIndex);
-                    sample = (uint)ChangeNthBit((int)sample, bitSign, bitsLeft - 1);
-                    carrier.SetSample2(sampleIndex, sample);
-
-                    //var mask = 1 << (bitsLeft - 1);
-                    //if (bitSign == 1)
-                    //    sample |= (byte)mask;
-                    //else
-                    //    sample &= (byte)~mask;
-
-                    bitsLeft--;
+                    sampleBitsLeft--;
                     encodedBits++;
 
                     if (encodedBits == 8)
@@ -119,30 +120,30 @@ namespace SteganoBlaze.Shared.Classes
                 NextSample();
             }
         }
-        private static int ChangeNthBit(int value, int bit, int n)
+        private static uint SetBit(uint value, int bitIndex)
         {
-            return (value & ~(1 << n) | (bit << n));
+            value |= (uint)(1 << bitIndex);
+            return value;
         }
-        private void ChangeBit(int pixelIndex, int bitIndex, int bitSign)
+        private static uint ClearBit(uint value, int bitIndex)
         {
-            var mask = 1 << bitIndex;
-            if (bitSign == 1)
-                pixelData[pixelIndex] |= (byte)mask;
-            else
-                pixelData[pixelIndex] &= (byte)~mask;
+            value &= (uint)~(1 << bitIndex);
+            return value;
         }
     }
-    public class AudioDecoder : AudioSteganography
+    public class AudioDecoder : AudioSteganography, IDecoder
     {
         public AudioDecoder(WAV carrierToDecode)
         {
             carrier = carrierToDecode;
-            randomSeed = carrier.samples;
+            randomSeed = carrier.GetSampleCount();
             CheckCarrier();
             FirstSample();
         }
         private void CheckCarrier()
         {
+            if (carrier is null) throw new Exception();
+
             foreach (SampleOrder order in new List<SampleOrder> { SampleOrder.Sequential, SampleOrder.Random })
             {
                 sampleOrder = order;
@@ -167,31 +168,34 @@ namespace SteganoBlaze.Shared.Classes
         }
         private byte DecodeByte()
         {
-            uint decodedByte = 0;
+            if (carrier is null) throw new Exception();
+
+            int decodedByte = 0;
             int decodedBits = 0;
             while (decodedBits < 8)
             {
-                uint sample = carrier.GetSample2(sampleIndex);
-                while (bitsLeft > 0)
+                uint sample = carrier.GetSample(sampleIndex);
+
+                if (sampleBitsLeft > 0)
                 {
-                    //int bitSign = pixelData[currentPixel + (int)channelIndex] / ((int)Math.Pow(2, channelBitsLeft[(int)channelIndex] - 1)) % 2;
-                    int bitSign = (int)(sample / ((int)Math.Pow(2, bitsLeft - 1)) % 2);
-                    decodedByte += (uint)((int)Math.Pow(2, 7 - decodedBits) * bitSign);
+                    decodedByte += BitSign(sample, BitIndex()) << (7 - decodedBits);
 
-                    bitsLeft--;
+                    sampleBitsLeft--;
                     decodedBits++;
-
-                    if (decodedBits == 8)
-                        return Convert.ToByte(ReverseBits(decodedByte));
                 }
-
-                NextSample();
+                else
+                    NextSample();
             }
             return Convert.ToByte(ReverseBits(decodedByte));
         }
-        private uint ReverseBits(uint value)
+        private static int BitSign(uint value, int bitIndex)
         {
-            uint result = 0;
+            if ((value & (1 << bitIndex)) != 0) return 1;
+            else return 0;
+        }
+        private static int ReverseBits(int value)
+        {
+            int result = 0;
             for (int i = 0; i < 8; i++)
             {
                 result = result * 2 + value % 2;

@@ -138,6 +138,7 @@ async function decryptData(encryptedData, password, salt, iv) {
         );
         return decryptedData;
     } catch (e) {
+        throw new Error();
         console.log(`Error - ${e}`);
         return "";
     }

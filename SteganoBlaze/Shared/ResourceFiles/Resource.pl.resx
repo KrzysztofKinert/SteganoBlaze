@@ -190,13 +190,13 @@
     <value>Sprawdzanie...</value>
   </data>
   <data name="ReadingImageData" xml:space="preserve">
-    <value>Czytanie Danych Obrazu...</value>
+    <value>Czytanie danych obrazu...</value>
   </data>
   <data name="EncodingMessage" xml:space="preserve">
     <value>Kodowanie Wiadomości...</value>
   </data>
   <data name="SavingImageData" xml:space="preserve">
-    <value>Zapis Danych Obrazu...</value>
+    <value>Zapis danych obrazu...</value>
   </data>
   <data name="_encoded" xml:space="preserve">
     <value>_zakodowany</value>
@@ -220,7 +220,7 @@
     <value>Dekodowanie Wiadomości</value>
   </data>
   <data name="SavingMessageData" xml:space="preserve">
-    <value>Zapis Danych Wiadomości</value>
+    <value>Zapis danych wiadomości...</value>
   </data>
   <data name="DecodingDoneIn" xml:space="preserve">
     <value>Odkodowano W</value>
@@ -249,7 +249,7 @@
   <data name="MaxCarrierPixels" xml:space="preserve">
     <value>Maksymalna ilość pikseli nośnika to</value>
   </data>
-  <data name="Length" xml:space="preserve">
+  <data name="Duration" xml:space="preserve">
     <value>Długość</value>
   </data>
   <data name="SampleBitsToEncode" xml:space="preserve">
@@ -271,6 +271,57 @@
     <value>Audio Nie Zakodowane</value>
   </data>
   <data name="CarrierFormat" xml:space="preserve">
-    <value>Format Nośnika</value>
+    <value>Format nośnika</value>
+  </data>
+  <data name="ErrorCompressingMessage" xml:space="preserve">
+    <value>Błąd kompresji wiadomości</value>
+  </data>
+  <data name="PasswordsMustMatch" xml:space="preserve">
+    <value>Hasła muszą się zgadzać</value>
+  </data>
+  <data name="EnterPassword" xml:space="preserve">
+    <value>Podaj hasło</value>
+  </data>
+  <data name="RepeatPassword" xml:space="preserve">
+    <value>Powtórz hasło</value>
+  </data>
+  <data name="ErrorSavingCarrier" xml:space="preserve">
+    <value>Błąd zapisu nośnika</value>
+  </data>
+  <data name="DecryptingMessage" xml:space="preserve">
+    <value>Dekrypcja wiadomości</value>
+  </data>
+  <data name="ErrorSavingMessage" xml:space="preserve">
+    <value>Błąd zapisu wiadomości</value>
+  </data>
+  <data name="EnterPasswordIfEncrypted" xml:space="preserve">
+    <value>Podaj hasło jeśli wiadomość uległa dodatkowej enkrypcji</value>
+  </data>
+  <data name="LeaveEmptyIfNot" xml:space="preserve">
+    <value>Zostaw pole puste jeśli nie użyto enkrypcji</value>
+  </data>
+  <data name="MoreOptions" xml:space="preserve">
+    <value>Więcej opcji</value>
+  </data>
+  <data name="MessageCompression" xml:space="preserve">
+    <value>Kompresja wiadomości</value>
+  </data>
+  <data name="MessageEncryption" xml:space="preserve">
+    <value>Enkrypcja wiadomości</value>
+  </data>
+  <data name="ScatteredEncoding" xml:space="preserve">
+    <value>Rozproszone kodowanie</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Wyłącz</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Włącz</value>
+  </data>
+  <data name="EncryptionPassword" xml:space="preserve">
+    <value>Hasło enkrypcji</value>
+  </data>
+  <data name="DecompressingMessage" xml:space="preserve">
+    <value>Dekompresja wiadomości</value>
   </data>
 </root>

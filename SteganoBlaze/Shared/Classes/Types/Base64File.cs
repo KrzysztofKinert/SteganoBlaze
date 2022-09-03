@@ -14,13 +14,6 @@ namespace SteganoBlaze.Shared.Classes.Types
         {
 
         }
-        public Base64File(ByteFile byteFile)
-        {
-            base64Data = Convert.ToBase64String(byteFile.byteData);
-            contentType = byteFile.contentType;
-            fileName = byteFile.fileName;
-            fileSize = byteFile.fileSize;
-        }
         public Base64File(byte[] file, IBrowserFile fileInfo)
         {
             base64Data = Convert.ToBase64String(file);

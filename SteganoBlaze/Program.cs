@@ -24,9 +24,6 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.ClearAfterNavigation = true;
 });
 builder.Services.AddLocalization();
-
-//await builder.Build().RunAsync();
-
 builder.Services.AddSingleton<AppState>();
 
 var host = builder.Build();
@@ -35,19 +32,14 @@ CultureInfo culture;
 var js = host.Services.GetRequiredService<IJSRuntime>();
 var result = await js.InvokeAsync<string>("getCulture");
 
+var asa = host.Services.GetRequiredService<AppState>();
+asa.webPUnavailable = await js.InvokeAsync<bool>("disableWebP");
+
 if (result != null)
 {
     culture = new CultureInfo(result);
     CultureInfo.DefaultThreadCurrentCulture = culture;
     CultureInfo.DefaultThreadCurrentUICulture = culture;
 }
-//else
-//{
-//    culture = new CultureInfo("en-US");
-//    await js.InvokeVoidAsync("setCulture", "en-US");
-//}
-
-//CultureInfo.DefaultThreadCurrentCulture = culture;
-//CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 await host.RunAsync();

@@ -1,0 +1,167 @@
+﻿@using System.Diagnostics
+@using Microsoft.JSInterop
+@using System.Text;
+@using MudBlazor;
+@using ByteSizeLib;
+@using SteganoBlaze.Shared.Classes;
+@using SteganoBlaze.Shared.Classes.Types;
+@using System.IO.Compression;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+@inject IJSRuntime js
+@inherits BasePage
+
+@code {
+	protected Base64File? encodedCarrier;
+	protected Message? message;
+	protected byte[]? messageDecompressed;
+
+	public bool encryptionEnabled { get; set; } = false;
+	public bool scatteredEncodingEnabled { get; set; } = false;
+	public bool compressionEnabled { get; set; } = false;
+
+	public string passwordRepeat { get; set; } = "";
+
+	protected bool encodeButtonDisabled = true;
+
+	protected string? passwordError = null;
+	protected string? passwordRepeatError = null;
+
+	protected string carrierCapacity = "-";
+	protected string carrierUsage = "-";
+	protected MudBlazor.Color carrierUsageColor = Color.Default;
+
+	protected void EncryptionEnabledChanged(bool value)
+	{
+		encryptionEnabled = value;
+		if (encryptionEnabled is not true)
+		{
+			password = "";
+			passwordRepeat = "";
+		}
+	}
+	protected async Task CompressionEnabledChanged(bool value)
+	{
+		if (message is null) return;
+
+		compressionEnabled = value;
+		if (compressionEnabled is true)
+		{
+			try
+			{
+				messageDecompressed = message.file;
+				message.file = await Compress(message.file);
+				message.compressed = true;
+			}
+			catch
+			{
+				Snackbar.Add(Loc["ErrorCompressingMessage"], Severity.Error);
+			}
+		}
+		else
+		{
+			message.file = messageDecompressed!;
+			messageDecompressed = null;
+			message.compressed = false;
+		}
+		message.UpdateMetaData();
+		await CheckCapacity();
+	}
+
+	protected async Task OpenMessage(InputFileChangeEventArgs e)
+	{
+		message = null;
+		messageDecompressed = null;
+		compressionEnabled = false;
+
+		if (e.File.Size > AppState.maxAllowedMessageSize)
+		{
+			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
+			return;
+		}
+
+		var messageBytes = new byte[e.File.Size];
+
+		try
+		{
+			using (var stream = e.File.OpenReadStream(AppState.maxAllowedMessageSize))
+				await stream.ReadAsync(messageBytes);
+		}
+		catch
+		{
+			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
+			return;
+		}
+
+		message = new Message(messageBytes, e.File);
+		await CheckCapacity();
+	}
+
+	protected bool ValidatePassword()
+	{
+		if (encryptionEnabled is not true)
+		{
+			passwordError = null;
+			passwordRepeatError = null;
+			return true;
+		}
+		else
+		{
+			if (password != passwordRepeat)
+			{
+				passwordError = Loc["PasswordsMustMatch"];
+				passwordRepeatError = Loc["PasswordsMustMatch"];
+				return false;
+			}
+			else if (password == "")
+			{
+				passwordError = Loc["EnterPassword"];
+				passwordRepeatError = Loc["RepeatPassword"];
+				return false;
+			}
+			else
+			{
+				passwordError = null;
+				passwordRepeatError = null;
+				return true;
+			}
+		}
+	}
+	protected virtual Task CheckCapacity() { return Task.CompletedTask; }
+
+	protected async Task EncryptMessage()
+	{
+		if (message is null) return;
+		byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
+		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
+		byte[] iv = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
+
+		List<byte[]> aesInputs = new List<byte[]> { message.file, passwordBytes, salt, iv };
+		message.file = await ReadJSStream("encryptData", aesInputs);
+		message.UpdateMetaData();
+
+		aesInputs[0] = message!.metadata;
+		message.metadata = await ReadJSStream("encryptData", aesInputs);
+		message.UpdateHeader(salt, iv);
+	}
+	protected async Task<byte[]> Compress(byte[] data)
+	{
+		using MemoryStream output = new MemoryStream();
+		using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.SmallestSize))
+			await dstream.WriteAsync(data, 0, data.Length);
+		return output.ToArray();
+	}
+
+	protected async Task SaveCarrier()
+	{
+		try
+		{
+			await js.InvokeVoidAsync("saveFile", encodedCarrier);
+		}
+		catch
+		{
+			Snackbar.Add(Loc["ErrorSavingCarrier"], Severity.Error);
+		}
+	}
+}

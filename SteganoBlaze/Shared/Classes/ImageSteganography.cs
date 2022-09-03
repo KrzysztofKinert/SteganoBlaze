@@ -141,7 +141,7 @@ namespace SteganoBlaze.Shared.Classes
                 pixelData[pixelIndex] &= (byte)~mask;
         }
     }
-    public class ImageDecoder : ImageSteganography
+    public class ImageDecoder : ImageSteganography, IDecoder
     {
         public ImageDecoder(Image carrierToDecode)
         {

@@ -10,14 +10,16 @@
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Loc
 @inject ISnackbar Snackbar
+@inject IJSRuntime js
+@inherits BaseEncode
 
 <PageTitle>@Loc["ImageEncoding"]</PageTitle>
 
 <canvas hidden id="canvas"/>
 <a hidden id="saveLink" download="" href="" target="_blank"/>
-@if(originalCarrier is not null)
+@if(carrier is not null)
 {
-	<img hidden id="carrierImage" @onload="GetCarrierDimensions" src="data:@originalCarrier.contentType;base64,@originalCarrier.base64Data"/>
+	<img hidden id="carrierImage" @onload="GetCarrierDimensions" src="data:@carrier.contentType;base64,@carrier.base64Data"/>
 }
 
 <MudGrid Spacing="1">
@@ -25,7 +27,7 @@
         <MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
             <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
                 <MudListItem Class="py-0 my-0">
-                    <InputFile class="custom-file-input" OnChange="OpenImage" hidden accept="image/png, image/jpeg, image/apng, image/gif, image/svg+xml, image/webp, image/bmp, image/x-icon" id="inputImage"/>
+                    <InputFile class="custom-file-input" OnChange="OpenCarrier" hidden id="inputImage" accept="image/png, image/jpeg, image/apng, image/gif, image/svg+xml, image/webp, image/bmp, image/x-icon"/>
                     <MudButton HtmlTag="label"
                                 Variant="Variant.Filled"
                                 Color="Color.Primary"
@@ -38,14 +40,14 @@
                     </MudButton>
                 </MudListItem>
                 <MudListItem Class="py-0 my-0">
-                    <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @if(originalCarrier is not null) @originalCarrier.fileName</MudText>
+                    <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @(carrier?.fileName ?? "")</MudText>
                 </MudListItem>
                 <MudListItem Class="py-0 my-0" >
 					<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
-						<MudListItem Style="width:50%" Class="py-0 my-0">	
-							<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @if(originalCarrier is not null) @originalCarrier.SizeToString()</MudText>
+						<MudListItem Style="width:70%" Class="py-0 my-0">	
+							<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @(carrier?.SizeToString() ?? "")</MudText>
 						</MudListItem>
-						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 mx-1"/>
+						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2"/>
 						<MudListItem DisableGutters="true" Class="py-0 my-0">
 							<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
 								<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Dimensions"]:</MudText>
@@ -62,7 +64,7 @@
 		<MudPaper Elevation="3" Style="height:100%">
             <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
                 <MudListItem Class="py-0 my-0">
-                    <InputFile class="custom-file-input" OnChange="OpenFile" hidden id="inputFile" />
+                    <InputFile class="custom-file-input" OnChange="OpenMessage" hidden id="inputFile" />
                     <MudButton HtmlTag="label"
                                 Variant="Variant.Filled"
                                 Color="Color.Primary"
@@ -75,18 +77,18 @@
                     </MudButton>
                 </MudListItem>
                 <MudListItem Class="py-0 my-0">
-                    <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @if(message is not null) @message.fileName</MudText>
+                    <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @(message?.fileName ?? "")</MudText>
                 </MudListItem>
                 <MudListItem Class="py-0 my-0">
 					<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
-						<MudListItem Style="width:50%" Class="py-0 my-0">	
-							<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @if(message is not null) @message.SizeToString()</MudText>
+						<MudListItem Style="width:70%" Class="py-0 my-0">	
+							<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @(message?.SizeToString() ?? "")</MudText>
 						</MudListItem>
-						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-1"/>
+						<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2"/>
 						<MudListItem DisableGutters="true" Class="py-0 my-0">
 							<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
 								<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Type"]:</MudText>
-								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@if(message is not null) @message.contentType</MudText>
+								<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(message?.contentType ?? "")</MudText>
 							</MudContainer>
 						</MudListItem>
 					</MudList>
@@ -141,52 +143,52 @@
 				<MudExpansionPanel Dense="true">
 					<TitleContent>
 						<div class="d-flex">
-							<MudText>Advanced Options</MudText>
+							<MudText>@Loc["MoreOptions"]</MudText>
 						</div>
 					</TitleContent>
 					<ChildContent>
 						<MudGrid style="height:100%" Class="align-content-center justify-space-around" Spacing="0">
-							<MudItem sm="3" xs="12" Class="py-1" hidden="@disableWebP">
+							<MudItem sm="3" xs="12" Class="py-1" >
 								<MudText Typo="Typo.body1" Align="Align.Center">@Loc["CarrierFormat"]</MudText>
-								<MudContainer Class="d-flex flex-row align-content-center justify-center align-center">
-									<MudText Typo="Typo.body2" Align="Align.Justify">PNG</MudText>
-									<MudSwitch @bind-Checked="@webPEnabled" Color="Color.Primary" Class="mx-2" T="bool" Disabled="@processing"/>
-									<MudText Typo="Typo.body2" Align="Align.Justify">WebP</MudText>
+								<MudContainer Class="d-flex flex-row justify-space-around align-center">
+									<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">PNG</MudText>
+									<MudSwitch @bind-Checked="@webPEnabled" Color="Color.Primary" T="bool" Class="mr-n2" Disabled="@processing"/>
+									<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">WebP</MudText>
 								</MudContainer>
 							</MudItem>
 							<MudItem sm="3" xs="12" Class="py-1">
-								<MudText Typo="Typo.body1" Align="Align.Center">Message Compression</MudText>
-								<MudContainer Class="d-flex flex-row align-content-center justify-center align-center">
-									<MudText Typo="Typo.body2" Align="Align.Justify">Off</MudText>
-										<MudSwitch Checked="@compressionEnabled" CheckedChanged="@((bool c) => CompressionEnabledChanged(c))" Color="Color.Primary" Class="mx-2" T="bool" Disabled="@(message is null || processing is true)"/>
-									<MudText Typo="Typo.body2"  Align="Align.Justify">On</MudText>
+								<MudText Typo="Typo.body1" Align="Align.Center">@Loc["MessageCompression"]</MudText>
+									<MudContainer Class="d-flex flex-row justify-space-around align-center">
+									<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["Off"]</MudText>
+										<MudSwitch Checked="@compressionEnabled" CheckedChanged="@((bool c) => CompressionEnabledChanged(c))" Class="mr-n2" Color="Color.Primary" T="bool" Disabled="@(message is null || processing is true)" />
+									<MudText Typo="Typo.body2"  Align="Align.Center" Style="width:60px">@Loc["On"]</MudText>
 								</MudContainer>
 							</MudItem>
 							<MudItem sm="3" xs="12" Class="py-1">
-								<MudText Typo="Typo.body1" Align="Align.Center">Message Encryption</MudText>
-								<MudContainer Class="d-flex flex-row align-content-center justify-center align-center">
-									<MudText Typo="Typo.body2" Align="Align.Justify">Off</MudText>
-										<MudSwitch Checked="@encryptionEnabled" CheckedChanged="@((bool e) => EncryptionEnabledChanged(e))"  Color="Color.Primary" Class="mx-2" T="bool" Disabled="@processing"/>
-									<MudText Typo="Typo.body2"  Align="Align.Justify">On</MudText>
+								<MudText Typo="Typo.body1" Align="Align.Center">@Loc["MessageEncryption"]</MudText>
+								<MudContainer Class="d-flex flex-row justify-space-around align-center">
+									<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["Off"]</MudText>
+									<MudSwitch Checked="@encryptionEnabled" CheckedChanged="@((bool e) => EncryptionEnabledChanged(e))" Class="mr-n2" Color="Color.Primary" T="bool" Disabled="@processing" />
+									<MudText Typo="Typo.body2"  Align="Align.Center" Style="width:60px">@Loc["On"]</MudText>
 								</MudContainer>
 							</MudItem>
 							<MudItem sm="3" xs="12" Class="py-1">
-								<MudText Typo="Typo.body1" Align="Align.Center">Spread Out Encoding</MudText>
-								<MudContainer Class="d-flex flex-row align-content-center justify-center align-center">
-									<MudText Typo="Typo.body2" Align="Align.Justify">Off</MudText>
-									<MudSwitch @bind-Checked="@randomEncodingEnabled" Color="Color.Primary" Class="mx-2" T="bool" Disabled="@processing"/>
-									<MudText Typo="Typo.body2" Align="Align.Justify">On</MudText>
+								<MudText Typo="Typo.body1" Align="Align.Center">@Loc["ScatteredEncoding"]</MudText>
+								<MudContainer Class="d-flex flex-row justify-space-around align-center">
+									<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["Off"]</MudText>
+									<MudSwitch @bind-Checked="@scatteredEncodingEnabled" Class="mr-n2" Color="Color.Primary" T="bool" Disabled="@processing"/>
+									<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["On"]</MudText>
 								</MudContainer>
 							</MudItem>
 							<MudItem xs="12" hidden="@(!encryptionEnabled)">
 								<MudDivider/>
-								<MudText Typo="Typo.body1" Class="pt-4" Align="Align.Center">Loc["InputPassword"]</MudText>
+								<MudText Typo="Typo.body1" Class="pt-4" Align="Align.Center">@Loc["EncryptionPassword"]</MudText>
 								<MudGrid Class="align-content-center justify-space-evenly pb-4" Spacing="2">
 									<MudItem sm="4" xs="12">
-										<MudTextField @bind-Value="password" T="string" Label="Choose a password" HelperText="@passwordError" Error="@(passwordError is not null)" InputType="InputType.Password" HelperTextOnFocus="false"/>
+										<MudTextField @bind-Value="password" T="string" Label="@Loc["EnterPassword"]" HelperText="@passwordError" Error="@(passwordError is not null)" InputType="InputType.Password" HelperTextOnFocus="false"/>
 									</MudItem>
 									<MudItem sm="4" xs="12">
-										<MudTextField @bind-Value="passwordRepeat" T="string" Label="Repeat the password" HelperText="@passwordRepeatError" Error="@(passwordRepeatError is not null)" InputType="InputType.Password" HelperTextOnFocus="false"/>
+										<MudTextField @bind-Value="passwordRepeat" T="string" Label="@Loc["RepeatPassword"]" HelperText="@passwordRepeatError" Error="@(passwordRepeatError is not null)" InputType="InputType.Password" HelperTextOnFocus="false"/>
 									</MudItem>
 								</MudGrid>
 							</MudItem>
@@ -211,7 +213,7 @@
 									Variant="Variant.Filled"
 									Color="Color.Primary"
 									StartIcon="@Icons.Filled.UploadFile"
-									OnClick="Validate"
+									OnClick="EncodeFile"
 									Disabled=@encodeButtonDisabled
 									Style="width:100%">
 							<MudText Typo="Typo.button" Class="align-center">@Loc["Encode"]</MudText>
@@ -221,7 +223,7 @@
 									Variant="Variant.Filled" 
 									Color="Color.Primary"
 									StartIcon="@Icons.Filled.Download"
-									OnClick="SaveFile"
+									OnClick="SaveCarrier"
 									Disabled=@(encodedCarrier is null)
 									Style="width:100%">
 							<MudText Typo="Typo.button" Class="align-center">@Loc["Save"]</MudText>
@@ -232,7 +234,7 @@
         </MudPaper>
 	</MudItem>
 
-	<MudItem xs="12" hidden="@(originalCarrier is null)">
+	<MudItem xs="12" hidden="@(carrier is null)">
 		<MudPaper Elevation="3">
 			<MudList Clickable="false" Dense="true">
 				<MudListItem Class="py-0 my-0">
@@ -256,9 +258,9 @@
                 <MudListItem Class="py-0 my-0">
 					<MudSwipeArea OnSwipe="@OnSwipe">
 						<MudContainer Class="d-flex justify-center">
-							@if(originalCarrier is not null)
+							@if(carrier is not null)
 							{
-								<img id="carrierImagePreview" hidden="@showEmbeddedCarrier" class="center" style="max-width:100%; height:auto;" src="data:@originalCarrier.contentType;base64,@originalCarrier.base64Data" Fluid="true" Alt=@Loc["OriginalImage"]/>
+								<img id="carrierImagePreview" hidden="@showEmbeddedCarrier" class="center" style="max-width:100%; height:auto;" src="data:@carrier.contentType;base64,@carrier.base64Data" Fluid="true" Alt=@Loc["OriginalImage"]/>
 							}
 							@if (encodedCarrier is not null)
 							{
@@ -272,52 +274,24 @@
 	</MudItem>
 </MudGrid>
 
-@inject IJSRuntime js
 @code {
-	Base64File? originalCarrier;
-	Base64File? encodedCarrier;
-	Message? message;
-	byte[]? messageFileUncompressed;
-
-	Stopwatch watch = new Stopwatch();
-
-	int? imageWidth;
-	int? imageHeight;
-
 	public int redBitsToUse { get; set; } = 1;
 	public int greenBitsToUse { get; set; } = 1;
 	public int blueBitsToUse { get; set; } = 1;
 
-	public string password { get; set; } = "";
-	public string passwordRepeat { get; set; } = "";
-
 	public bool webPEnabled { get; set; } = false;
-	public bool encryptionEnabled { get; set; } = false;
-	public bool randomEncodingEnabled { get; set; } = false;
-	public bool compressionEnabled { get; set; } = false;
 
-	int processingValue = 0;
-
-	bool processing = false;
-	bool encodeButtonDisabled = true;
-	bool showEmbeddedCarrier = false;
-	bool disableWebP = false;
-
-	string? carrierCapacity = "-";
-	string? carrierUsage = "-";
+	int imageWidth;
+	int imageHeight;
 	string? carrierDimensions = ""; 
-	string? processingTask = "";
-	string? passwordError = null;
-	string? passwordRepeatError = null;
 
-	MudBlazor.Color carrierUsageColor = Color.Default;
+	bool showEmbeddedCarrier = false;
+
 	MudBlazor.Variant originalButtonVariant = Variant.Filled;
 	MudBlazor.Variant encodedButtonVariant = Variant.Outlined;
 
 	protected override void OnInitialized()
 	{
-		var jsInProcess = (IJSInProcessRuntime)js;
-		disableWebP = jsInProcess.Invoke<bool>("disableWebP");
 		AppState.OnChange += StateHasChanged;
 		AppState.SetPageTheme(Color.Primary, "ImageEncoding");
 	}
@@ -326,15 +300,8 @@
 		await InvokeAsync(StateHasChanged);
 		await Task.Delay(1);
 	}
-	async Task UpdateProgress(string progressText, int progressValue)
-	{
-		processingTask = progressText;
-		processingValue = progressValue;
-		StateHasChanged();
-		await Task.Delay(10);
-	}
 
-	async Task ResetCarrier()
+	protected override async Task ResetCarrier()
 	{
 		processingValue = 0;
 
@@ -346,9 +313,9 @@
 		carrierDimensions = ""; 
 		processingTask = "";
 
-		imageWidth = null;
-		imageHeight = null;
-		originalCarrier = null;
+		imageWidth = 0;
+		imageHeight = 0;
+		carrier = null;
 		encodedCarrier = null;
 
 		carrierUsageColor = Color.Default;
@@ -358,76 +325,34 @@
 		StateHasChanged();
 		await Task.Delay(1);
 	}
-	async Task OpenImage(InputFileChangeEventArgs e)
+	protected override async Task ReadCarrier(byte[] carrierBytes, IBrowserFile fileInfo)
 	{
-		await ResetCarrier();
-
-		if(e.File.Size > AppState.maxAllowedCarrierSize)
-		{
-			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
-			return;
-		}
-
-		var buf = new byte[e.File.Size];
-
-		try
-		{
-			using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
-				await stream.ReadAsync(buf);
-		}
-		catch
-		{
-			Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedCarrierSize).ToString(), Severity.Error);
-			return;
-		}
-
-		originalCarrier = new Base64File(buf, e.File);
-		carrierDimensions = Loc["Loading"]; 
-		await CheckCapacity();
-	}
-
-	async Task OpenFile(InputFileChangeEventArgs e)
-	{
-		message = null;
-		messageFileUncompressed = null;
-		compressionEnabled = false;
-
-		if(e.File.Size > AppState.maxAllowedMessageSize)
-		{
-			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
-			return;
-		}
-
-		var buf = new byte[e.File.Size];
-
-		try
-		{
-			using (var stream = e.File.OpenReadStream(AppState.maxAllowedMessageSize))
-				await stream.ReadAsync(buf);
-		}
-		catch
-		{
-			Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(AppState.maxAllowedMessageSize).ToString(), Severity.Error);
-			return;
-		}
-
-		message = new Message(buf, e.File);
-		await CheckCapacity();
+		carrier = new Base64File(carrierBytes, fileInfo);
+		carrierDimensions = Loc["Loading"];
 	}
 
 	async Task GetCarrierDimensions()
 	{
-		imageWidth = await js.InvokeAsync<int>("getImageWidth");
-		imageHeight = await js.InvokeAsync<int>("getImageHeight");
-		carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
-
-		if((imageHeight * imageWidth) > AppState.maxAllowedCarrierPixels)
+		try
 		{
-			Snackbar.Add(Loc["MaxCarrierPixels"] + " 5 MP", Severity.Error);
-			await ResetCarrier();
-			return;
+			imageWidth = await js.InvokeAsync<int>("getImageWidth");
+			imageHeight = await js.InvokeAsync<int>("getImageHeight");
+
+			if ((imageHeight * imageWidth) > AppState.maxAllowedCarrierPixels)
+				throw new Exception();
+
+			carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
 		}
-		await CheckCapacity();
+		catch
+		{
+		    Snackbar.Add(Loc["MaxCarrierPixels"] + " 5 MP", Severity.Error);
+			await ResetCarrier();
+		}
+	}
+	async Task CarrierCorrupted()
+	{
+		Snackbar.Add(Loc["CarrierImageCorrupted"], Severity.Error);
+		await ResetCarrier();
 	}
 
 	async Task RedBitsToUseChanged(int value)
@@ -457,44 +382,10 @@
 		}
 		await CheckCapacity();
 	}
-	void EncryptionEnabledChanged(bool value)
-	{
-		encryptionEnabled = value;
-		if (encryptionEnabled is not true)
-		{
-			password = "";
-			passwordRepeat = "";
-		}
-	}
-	async Task CompressionEnabledChanged(bool value)
-	{
-		compressionEnabled = value;
-		if (compressionEnabled is true)
-		{
-			messageFileUncompressed = message!.file;
-			message!.file = await Compress(message!.file);
-			message.compressed = true;
-		}
-		else
-		{
-			message!.file = messageFileUncompressed!;
-			messageFileUncompressed = null;
-			message.compressed = false;
-		}
-		message.UpdateMetaData();
-		await CheckCapacity();
-	}
-	async Task<byte[]> Compress(byte[] data)
-	{
-		using MemoryStream output = new MemoryStream();
-		using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.SmallestSize))
-			await dstream.WriteAsync(data, 0, data.Length);
 
-		return output.ToArray();
-	}
-	async Task CheckCapacity()
+	protected override async Task CheckCapacity()
 	{
-		if(originalCarrier is not null) carrierCapacity = @Loc["Checking"];
+		if(carrier is not null) carrierCapacity = @Loc["Checking"];
 		if(message is not null)
 		{
 			carrierUsageColor = Color.Default;
@@ -503,7 +394,7 @@
 		StateHasChanged();
 		await Task.Delay(1);
 
-		if(imageWidth is not null && imageHeight is not null)
+		if(imageWidth * imageHeight != 0)
 		{
 			var capacity = (double)(imageWidth * imageHeight * (redBitsToUse + greenBitsToUse + blueBitsToUse) / 8);
 			carrierCapacity = ByteSize.FromBytes(capacity).ToString();
@@ -541,51 +432,26 @@
 	public void OnSwipe(SwipeDirection direction)
 	{
 		if(direction == SwipeDirection.LeftToRight && encodedCarrier is not null)
-		{
 			ShowEncodedImage();
-		}
-		else if(direction == SwipeDirection.RightToLeft && originalCarrier is not null)
-		{
+		else if(direction == SwipeDirection.RightToLeft && carrier is not null)
 			ShowOriginalImage();
-		}
 	}
-	async Task Validate()
-	{
-		if (encryptionEnabled is not true)
-		{
-			passwordError = null;
-			passwordRepeatError = null;
-			await EncodeFile();
-		}
-		else
-		{
-			if (password != passwordRepeat)
-			{
-				passwordError = "Password must match";
-				passwordRepeatError = "Password must match";
-			}
-			else if (password == "")
-			{
-				passwordError = "Enter the password";
-				passwordRepeatError = "Repeat the password";
-			}
-			else
-			{
-				passwordError = null;
-				passwordRepeatError = null;
-				await EncodeFile();
-			}
-		}
-	}
+
 	async Task EncodeFile()
 	{
+		if (carrier is null || message is null)
+			return;
+		if (ValidatePassword() is false) 
+			return;
+
 		watch.Reset();
 		watch.Start();
 		processing = true;
+		encodedCarrier = null;
 
 		//Reading image data
 		await UpdateProgress(Loc["ReadingImageData"], 0);
-		Image carrier = new Image { pixelData = await ReadJSStream("getImageData"), height = imageHeight ?? 0, width = imageHeight ?? 0 };
+		Image carrierImage = new Image { pixelData = await ReadJSStream("getImageData"), height = imageHeight, width = imageHeight};
 
 		//Optional encryption
 		if (encryptionEnabled)
@@ -606,9 +472,9 @@
 		{
 			//Encoding message
 			await UpdateProgress(Loc["EncodingMessage"], 30);
-			PixelBits pixelBitsToEncode = new PixelBits { R = this.redBitsToUse, G = this.greenBitsToUse, B = this.blueBitsToUse };
-			ImageEncoder encoder = new ImageEncoder(carrier, pixelBitsToEncode, randomEncodingEnabled);
-			var encodedCarrierBytes = encoder.Encode(message!);
+			PixelBits pixelBitsToEncode = new PixelBits { R = redBitsToUse, G = greenBitsToUse, B = blueBitsToUse };
+			ImageEncoder encoder = new ImageEncoder(carrierImage, pixelBitsToEncode, scatteredEncodingEnabled);
+			var encodedCarrierBytes = encoder.Encode(message);
 
 			//Saving encoded image data
 			await UpdateProgress(Loc["SavingImageData"], 80);
@@ -618,7 +484,7 @@
 			var contentType = encodedCarrierURL.Split(";", 2)[0].Substring(5);
 			var base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7);
 
-			encodedCarrier = new Base64File { base64Data = base64Data, contentType = contentType, fileName = AddSuffix(originalCarrier!.fileName) };
+			encodedCarrier = new Base64File { base64Data = base64Data, contentType = contentType, fileName = AddSuffix(carrier.fileName) };
 		}
 		catch
 		{
@@ -632,51 +498,11 @@
 		processing = false;
 	}
 
-	async Task EncryptMessage()
-	{
-		byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(password);
-		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
-		byte[] iv = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
-
-		List<byte[]> aesInputs = new List<byte[]> {message!.file, passwordBytes, salt, iv};
-		message!.file = await ReadJSStream("encryptData", aesInputs);
-		message.UpdateMetaData();
-
-		aesInputs[0] = message!.metadata;
-		message!.metadata = await ReadJSStream("encryptData", aesInputs);
-		message.UpdateHeader(salt, iv);
-	}
-	async Task<byte[]> ReadJSStream(string jsFunction, List<byte[]>? aesInputs = null)
-	{
-		IJSStreamReference? dataStreamReference;
-		if (aesInputs is null)
-			dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction);
-		else
-			dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction, aesInputs[0], aesInputs[1], aesInputs[2], aesInputs[3]);
-
-		var dataBytes = new byte[dataStreamReference.Length];
-		using (var stream = await dataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 10))
-			await stream.ReadAsync(dataBytes);
-
-		return dataBytes;
-	}
-
-	private string AddSuffix(string fileName)
+	string AddSuffix(string fileName)
 	{
 		string name = Path.GetFileNameWithoutExtension(fileName);
 		if (webPEnabled) return String.Concat(name, Loc["_encoded"], ".webp");
 		else return String.Concat(name, Loc["_encoded"], ".png");
-	}
-	async Task SaveFile()
-	{
-		try
-		{
-			await js.InvokeVoidAsync("saveFile", encodedCarrier);
-		}
-		catch
-		{
-			Snackbar.Add(Loc["ErrorSavingImage"], Severity.Error);
-		}
 	}
 	string GetCarrierFormat()
 	{

@@ -42,9 +42,9 @@ namespace SteganoBlaze.Shared.Classes.Types
         {
             string metadataString = "!fnS!" + fileName + "!fnE!" + "!ctS!" + contentType + "!ctE!" + "!fsS!" + file.Length + "!fsE!" + "!cpS!" + compressed + "!cpE!";
             metadata = UnicodeEncoding.UTF8.GetBytes(metadataString);
-            messageSize = header.Length + metadata.Length + file.Length;
+            UpdateHeader();
         }
-        public void UpdateHeader(byte[] salt, byte[] iv)
+        public void UpdateHeader(byte[]? salt = null, byte[]? iv = null)
         {
             string headerString = "!#encoded#!" + metadata.Length;
             while ((UnicodeEncoding.UTF8.GetByteCount(headerString) % 15) != 0)
@@ -53,8 +53,8 @@ namespace SteganoBlaze.Shared.Classes.Types
             }
 
             header = UnicodeEncoding.UTF8.GetBytes(headerString);
-            header = header.Concat(salt).ToArray();
-            header = header.Concat(iv).ToArray();
+            header = header.Concat(salt ?? Array.Empty<byte>()).ToArray();
+            header = header.Concat(iv ?? Array.Empty<byte>()).ToArray();
             messageSize = header.Length + metadata.Length + file.Length;
         }
         public string SizeToString()
