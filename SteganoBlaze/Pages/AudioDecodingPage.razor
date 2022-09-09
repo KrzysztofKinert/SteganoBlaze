@@ -1,0 +1,81 @@
+﻿@page "/AudioDecodingPage"
+@using MudBlazor;
+@using SteganoBlaze.Shared.Classes;
+@using SteganoBlaze.Shared.Classes.Types;
+@using SteganoBlaze.Shared.Components;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+
+<PageTitle>@Loc["AudioDecoding"]g</PageTitle>
+
+<a hidden id="saveLink" download="" href="" target="_blank"/>
+<MudGrid Spacing="1">          
+	<MudItem sm="12" md="6" xs="12">
+		<MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
+			<OpenAudio Disabled=@processing OnAudioChanged=@((WAV c) => CarrierChanged(c))/>
+		</MudPaper>
+	</MudItem>
+
+	<MudItem sm="12" md="6" xs="12"> 
+		<MudPaper Elevation="3" Style="height:100%">
+			<ShowMessage Message=@message />
+		</MudPaper>
+	</MudItem>
+
+	<MudItem xs="12">
+		<MudPaper Elevation="3" Style="height:100%" Class="d-flex mud-width-full">
+			<MudGrid Class="align-center justify-space-evenly" Spacing="0">
+				<MudItem sm="4" xs="12" Class="pa-1">
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Loc["EnterPasswordIfEncrypted"]</MudText> 
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Loc["LeaveEmptyIfNot"]</MudText>
+				</MudItem>
+				<MudItem sm="4" xs="12" Class="pa-1">
+					<MudTextField @bind-Value="password" Immediate="true" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="@Loc["EnterPassword"]" InputType="InputType.Password"/>
+				</MudItem>
+			</MudGrid>
+		</MudPaper>
+	</MudItem>
+
+	<MudItem xs="12">
+		<MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
+			<AudioDecode 
+				EncodedCarrier=@encodedCarrier
+				Password=@password
+				OnProcessingChanged=@((bool p) => ProcessingChanged(p))
+				OnMessageChanged=@((File m) => MessageChanged(m))>
+			</AudioDecode>
+		</MudPaper>
+	</MudItem>
+
+	<MudItem xs="12" hidden="@(encodedCarrier is null)">
+		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
+			<AudioPreview Label=@Loc["EncodedAudio"] Carrier=@encodedCarrier />
+		</MudPaper>
+	</MudItem>
+</MudGrid>
+
+@code
+{
+	WAV? encodedCarrier;
+	File? message;
+
+	bool processing = false;
+	string? password;
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.SetPageTheme(Color.Tertiary, "AudioDecoding");
+	}
+
+	void CarrierChanged(WAV value)
+	{
+		encodedCarrier = value;
+		message = null;
+	}
+	void MessageChanged(File value)
+	{
+		message = value;
+	}
+	void ProcessingChanged(bool value) { processing = value; }
+}

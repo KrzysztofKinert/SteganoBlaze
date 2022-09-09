@@ -3,20 +3,39 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace SteganoBlaze.Shared.Classes.Types
 {
-    public class Base64File
+    public enum FileType
     {
+        Image,
+        EncodedImage,
+        Audio,
+        Message
+    }
+    public interface IFile
+    {
+        public byte[] byteData { get; set; }
+        public string base64Data { get; set; }
+        public string contentType { get; set; }
+        public string fileName { get; set; }
+        public long fileSize { get; set; } 
+    }
+
+    public class File : IFile
+    {
+        public byte[] byteData { get; set; } = Array.Empty<byte>();
         public string base64Data { get; set; } = "";
         public string contentType { get; set; } = "";
         public string fileName { get; set; } = "";
         public long fileSize { get; set; }
 
-        public Base64File()
+        public File()
         {
 
         }
-        public Base64File(byte[] file, IBrowserFile fileInfo)
+        public File(byte[] fileBytes, IBrowserFile fileInfo)
         {
-            base64Data = Convert.ToBase64String(file);
+            byteData = fileBytes;
+            base64Data = Convert.ToBase64String(fileBytes);
+
             var cT = fileInfo.ContentType;
             if (cT == "") cT = "application/octet-stream";
             contentType = cT;

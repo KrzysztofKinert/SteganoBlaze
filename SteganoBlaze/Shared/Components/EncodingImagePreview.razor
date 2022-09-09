@@ -1,0 +1,89 @@
+﻿@using Shared.Classes.Types;
+@inject IStringLocalizer<Resource> Loc
+
+<MudList Clickable="false" Dense="true">
+	<MudListItem Class="py-0 my-0">
+		<MudContainer Style="width:100%" Class="d-flex justify-center flex-row">
+			<MudButton Variant="@originalButtonVariant"
+					   Color="Color.Primary"
+					   OnClick="ShowOriginalImage"
+					   Size="Size.Small"
+					   Style="width:200px">
+				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["OriginalImage"]</MudText>
+			</MudButton>
+			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" />
+			<MudButton Variant="@encodedButtonVariant"
+					   Color="Color.Primary"
+					   OnClick="ShowEncodedImage"
+					   Disabled=@(EncodedCarrier is null)
+					   Size="Size.Small"
+					   Style="width:200px">
+				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedImage"]</MudText>
+			</MudButton>
+		</MudContainer>
+	</MudListItem>
+	<MudListItem Class="py-0 my-0">
+		<MudSwipeArea OnSwipe="@OnSwipe">
+			<MudContainer Class="d-flex justify-center">
+				<img class="center" style="max-width:100%; height:auto;" src=@source Fluid="true" Alt=@Loc["OriginalImage"] />
+			</MudContainer>
+		</MudSwipeArea>
+	</MudListItem>
+</MudList>
+
+@code {
+	[Parameter]
+	public File? Carrier { get; set; }
+	[Parameter]
+	public File? EncodedCarrier { get; set; }
+
+	string source = "";
+
+	MudBlazor.Variant originalButtonVariant = Variant.Filled;
+	MudBlazor.Variant encodedButtonVariant = Variant.Outlined;
+
+	bool shouldRender;
+	File? previousCarrier;
+	File? previousEncodedCarrier;
+
+	protected override void OnParametersSet()
+	{
+		if (Carrier is not null && (previousCarrier != Carrier))
+			ShowOriginalImage();
+
+		if (EncodedCarrier is not null && (previousEncodedCarrier != EncodedCarrier))
+			ShowEncodedImage();
+
+		if (Carrier != previousCarrier || EncodedCarrier != previousEncodedCarrier)
+		{
+			previousCarrier = Carrier;
+			previousEncodedCarrier = EncodedCarrier;
+			shouldRender = true;
+		}
+		else
+			shouldRender = false;
+	}
+	protected override bool ShouldRender() => shouldRender;
+
+	public void OnSwipe(SwipeDirection direction)
+	{
+		if (direction == SwipeDirection.LeftToRight && EncodedCarrier is not null)
+			ShowEncodedImage();
+		else if (direction == SwipeDirection.RightToLeft && Carrier is not null)
+			ShowOriginalImage();
+	}
+	public void ShowOriginalImage()
+	{
+		source = "data:" + (Carrier?.contentType ?? "") + ";base64," + (Carrier?.base64Data ?? "");
+		originalButtonVariant = Variant.Filled;
+		encodedButtonVariant = Variant.Outlined;
+		shouldRender = true;
+	}
+	public void ShowEncodedImage()
+	{
+		source = "data:" + (EncodedCarrier?.contentType ?? "") + ";base64," + (EncodedCarrier?.base64Data ?? "");
+		originalButtonVariant = Variant.Outlined;
+		encodedButtonVariant = Variant.Filled;
+		shouldRender = true;
+	}
+}

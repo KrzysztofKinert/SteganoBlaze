@@ -1,0 +1,53 @@
+﻿@using Shared.Classes.Types;
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.body1" Align="Align.Center">@Loc["PixelBitsToEncode"]</MudText>
+<MudDivider/>
+<MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Style="height:75%" Class="d-flex flex-row align-stretch">
+    <MudListItem>
+		<MudNumericField Value="@red" ValueChanged="@((int r) => RedBitsToEncodeChanged(r))" Class="pl-2" Label="@Loc["RChannel"]" Variant="Variant.Text" Min="0" Max= "8"/>
+    </MudListItem>
+    <MudListItem>
+		<MudNumericField Value="@green" ValueChanged="@((int g) => GreenBitsToEncodeChanged(g))" Class="px-1" Label="@Loc["GChannel"]" Variant="Variant.Text" Min="0" Max="8" />
+    </MudListItem>
+    <MudListItem>
+		<MudNumericField Value="@blue" ValueChanged="@((int b) => BlueBitsToEncodeChanged(b))" Class="pr-2" Label="@Loc["BChannel"]" Variant="Variant.Text" Min="0" Max="8" />
+    </MudListItem>
+</MudList>
+
+@code {
+	[Parameter] public EventCallback<PixelBits> OnPixelBitsChanged { get; set; }
+
+	int red { get; set; } = 1;
+	int green { get; set; } = 1;
+	int blue { get; set; } = 1;
+
+	async Task RedBitsToEncodeChanged(int value)
+	{
+		red = value;
+		if(value > 3)
+		{
+			Snackbar.Add(Loc["EncodingBitsWarning"], Severity.Warning);
+		}
+		await OnPixelBitsChanged.InvokeAsync(new PixelBits { R = red, G = green, B = blue });
+	}
+	async Task GreenBitsToEncodeChanged(int value)
+	{
+		green = value;
+		if(value > 3)
+		{
+			Snackbar.Add(Loc["EncodingBitsWarning"], Severity.Warning);
+		}
+		await OnPixelBitsChanged.InvokeAsync(new PixelBits { R = red, G = green, B = blue });
+	}
+	async Task BlueBitsToEncodeChanged(int value)
+	{
+		blue = value;
+		if(value > 3)
+		{
+			Snackbar.Add(Loc["EncodingBitsWarning"], Severity.Warning);
+		}
+		await OnPixelBitsChanged.InvokeAsync(new PixelBits { R = red, G = green, B = blue });
+	}
+}

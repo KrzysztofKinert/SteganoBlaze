@@ -95,7 +95,7 @@ namespace SteganoBlaze.Shared.Classes
             foreach (byte metadataByte in message.metadata)
                 EncodeByte(metadataByte);
 
-            foreach (byte fileByte in message.file)
+            foreach (byte fileByte in message.fileData)
                 EncodeByte(fileByte);
 
             return pixelData;

@@ -2,57 +2,35 @@
 
 namespace SteganoBlaze.Shared.Classes.Types
 {
-    public class WAV
+    public class WAV : File
     {
-        private byte[] data;
         public int bitsPerSample { get; private set; }
 
-        private int fmtChunkIndex;
-        private int dataChunkIndex;
+        int fmtChunkIndex;
+        int dataChunkIndex;
 
-        private int channels;
-        private int sampleRate;
-        private int samples;
+        int channels;
+        int sampleRate;
+        int samples;
 
-        public WAV(byte[] data)
+        public WAV(byte[] byteData)
         {
-            this.data = data;
-
-            byte[] chunkHeader = new byte[4];
-
-            int i = 0;
-            do
-            {
-                Array.Copy(data, i, chunkHeader, 0, 4);
-                i++;
-            }
-            while (Encoding.UTF8.GetString(chunkHeader) != "fmt ");
-            fmtChunkIndex = i - 1 + 8;
-
-            channels = BitConverter.ToInt16(data, fmtChunkIndex + 2);
-            sampleRate = BitConverter.ToInt32(data, fmtChunkIndex + 4);
-            bitsPerSample = BitConverter.ToInt16(data, fmtChunkIndex + 14);
-
-            i = 0;
-            do
-            {
-                Array.Copy(data, fmtChunkIndex + i, chunkHeader, 0, 4);
-                i++;
-            }
-            while (Encoding.UTF8.GetString(chunkHeader) != "data");
-            dataChunkIndex = fmtChunkIndex + i - 1 + 8;
-
-            samples = BitConverter.ToInt32(data, dataChunkIndex - 4) / (channels * bitsPerSample / 8);
-
-            bool validBitsPerSample = new List<int> { 8, 16, 24, 32 }.Contains(bitsPerSample);
-            bool validChannels = new List<int> { 1, 2 }.Contains(channels);
-
-            if(validBitsPerSample is false || validChannels is false)
-                throw new Exception();
+            this.byteData = byteData;
+            ParseWAV();
         }
+        public WAV(File file)
+        {
+            byteData = file.byteData;
+            base64Data = file.base64Data;
+            contentType = file.contentType;
+            fileName = file.fileName;
+            fileSize = file.fileSize;
+            ParseWAV();
+        }
+
         public byte[] GetData()
         {
-            return data;
+            return byteData;
         }
         public int GetSampleCount()
         {
@@ -71,23 +49,23 @@ namespace SteganoBlaze.Shared.Classes.Types
             switch (bitsPerSample)
             {
                 case 8:
-                    sample = data[dataChunkIndex + sampleIndex];
+                    sample = byteData[dataChunkIndex + sampleIndex];
                     break;
                 case 16:
                 default:
-                    sample = data[dataChunkIndex + sampleIndex];
-                    sample += (uint)(data[dataChunkIndex + sampleIndex + 1] << 8);
+                    sample = byteData[dataChunkIndex + sampleIndex];
+                    sample += (uint)(byteData[dataChunkIndex + sampleIndex + 1] << 8);
                     break;
                 case 24:
-                    sample = data[dataChunkIndex + sampleIndex];
-                    sample += (uint)(data[dataChunkIndex + sampleIndex + 1] << 8);
-                    sample += (uint)(data[dataChunkIndex + sampleIndex + 2] << 16);
+                    sample = byteData[dataChunkIndex + sampleIndex];
+                    sample += (uint)(byteData[dataChunkIndex + sampleIndex + 1] << 8);
+                    sample += (uint)(byteData[dataChunkIndex + sampleIndex + 2] << 16);
                     break;
                 case 32:
-                    sample = data[dataChunkIndex + sampleIndex];
-                    sample += (uint)(data[dataChunkIndex + sampleIndex + 1] << 8);
-                    sample += (uint)(data[dataChunkIndex + sampleIndex + 2] << 16);
-                    sample += (uint)(data[dataChunkIndex + sampleIndex + 3] << 24);
+                    sample = byteData[dataChunkIndex + sampleIndex];
+                    sample += (uint)(byteData[dataChunkIndex + sampleIndex + 1] << 8);
+                    sample += (uint)(byteData[dataChunkIndex + sampleIndex + 2] << 16);
+                    sample += (uint)(byteData[dataChunkIndex + sampleIndex + 3] << 24);
                     break;
             }
             return sample;
@@ -98,25 +76,62 @@ namespace SteganoBlaze.Shared.Classes.Types
             switch (bitsPerSample)
             {
                 case 8:
-                    data[dataChunkIndex + sampleIndex] = (byte)sample;
+                    byteData[dataChunkIndex + sampleIndex] = (byte)sample;
                     break;
                 case 16:
                 default:
-                    data[dataChunkIndex + sampleIndex] = (byte)(sample);
-                    data[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
+                    byteData[dataChunkIndex + sampleIndex] = (byte)(sample);
+                    byteData[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
                     break;
                 case 24:
-                    data[dataChunkIndex + sampleIndex] = (byte)(sample);
-                    data[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
-                    data[dataChunkIndex + sampleIndex + 2] = (byte)(sample >> 16);
+                    byteData[dataChunkIndex + sampleIndex] = (byte)(sample);
+                    byteData[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
+                    byteData[dataChunkIndex + sampleIndex + 2] = (byte)(sample >> 16);
                     break;
                 case 32:
-                    data[dataChunkIndex + sampleIndex] = (byte)(sample);
-                    data[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
-                    data[dataChunkIndex + sampleIndex + 2] = (byte)(sample >> 16);
-                    data[dataChunkIndex + sampleIndex + 3] = (byte)(sample >> 24);
+                    byteData[dataChunkIndex + sampleIndex] = (byte)(sample);
+                    byteData[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
+                    byteData[dataChunkIndex + sampleIndex + 2] = (byte)(sample >> 16);
+                    byteData[dataChunkIndex + sampleIndex + 3] = (byte)(sample >> 24);
                     break;
             }
+        }
+
+        public WAV Clone()
+        {
+            WAV clone = this;
+            clone.byteData = (byte[])byteData.Clone();
+            return clone;
+        }
+        void ParseWAV()
+        {
+            fmtChunkIndex = FindChunkIndex("fmt ");
+
+            channels = BitConverter.ToInt16(byteData, fmtChunkIndex + 2);
+            sampleRate = BitConverter.ToInt32(byteData, fmtChunkIndex + 4);
+            bitsPerSample = BitConverter.ToInt16(byteData, fmtChunkIndex + 14);
+
+            dataChunkIndex = FindChunkIndex("data");
+
+            samples = BitConverter.ToInt32(byteData, dataChunkIndex - 4) / (channels * bitsPerSample / 8);
+
+            bool validBitsPerSample = new List<int> { 8, 16, 24, 32 }.Contains(bitsPerSample);
+            bool validChannels = new List<int> { 1, 2 }.Contains(channels);
+
+            if (validBitsPerSample is false || validChannels is false)
+                throw new Exception();
+        }
+        int FindChunkIndex(string chunkID)
+        {
+            byte[] chunkHeader = new byte[4];
+            int i = 0;
+            do
+            {
+                Array.Copy(byteData, i, chunkHeader, 0, 4);
+                i++;
+            }
+            while (Encoding.UTF8.GetString(chunkHeader) != chunkID);
+            return i - 1 + 8;
         }
     }
 }

@@ -1,0 +1,54 @@
+﻿@using Shared.Classes.Types;
+@inject IStringLocalizer<Resource> Loc
+
+<MudList Clickable="false" Dense="true" Class="px-0 mx-0">
+	<MudListItem Class="pa-0 ma-0">
+		<MudContainer Style="width:100%" Class="d-flex justify-center flex-row px-4">
+			<MudButton Variant="Variant.Outlined"
+					   Color="Color.Primary"
+					   Size="Size.Small"
+					   FullWidth="true"
+					   DisableRipple="true"
+					   Class="mt-2 cursor-default">
+				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Label</MudText>
+			</MudButton>
+		</MudContainer>
+	</MudListItem>
+	<MudListItem Class="py-0 my-0">
+		<MudContainer Class="d-flex justify-center px-2">
+			@if (source != "")
+			{
+				<audio controls="controls" autobuffer="autobuffer">
+					<source id="encodedImagePreview" src=@source />
+				</audio>
+			}
+		</MudContainer> 
+	</MudListItem>
+</MudList>
+
+@code {
+	[Parameter] public string Label { get; set; } = "";
+
+	[Parameter] public IFile? Carrier { get; set; }
+
+	string source = "";
+
+	bool shouldRender;
+	IFile? previousCarrier;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if (Carrier != previousCarrier)
+		{
+			source = "";
+			StateHasChanged();
+			await Task.Delay(100);
+			source = "data:" + (Carrier?.contentType ?? "") + ";base64," + (Carrier?.base64Data ?? "");
+			previousCarrier = Carrier;
+			shouldRender = true;
+		}
+		else
+			shouldRender = false;
+	}
+	protected override bool ShouldRender() => shouldRender;
+}

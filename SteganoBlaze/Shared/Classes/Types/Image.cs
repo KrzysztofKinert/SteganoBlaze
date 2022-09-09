@@ -1,9 +1,17 @@
 ﻿namespace SteganoBlaze.Shared.Classes.Types
 {
-	public class Image
+	public class Image : File
 	{
-		public byte[] pixelData = Array.Empty<byte>();
+		public byte[]? pixelData;
 		public int height;
 		public int width;
+
+		public Image(File file)
+		{
+			base64Data = file.base64Data;
+			contentType = file.contentType;
+			fileName = file.fileName;
+			fileSize = file.fileSize;
+		}
 	}
 }
