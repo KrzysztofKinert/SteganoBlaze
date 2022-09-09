@@ -1,0 +1,183 @@
+﻿@using System.Diagnostics
+@using System.Text;
+@using System.IO.Compression;
+@using Shared.Classes;
+@using Shared.Classes.Types;
+@using ByteSizeLib;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject IJSRuntime js
+
+<canvas hidden id="canvas" />
+<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
+	<MudListItem Class="pb-2 pt-3">
+		<ProgressBar Task="@processingTask" ProgressValue="@processingValue" />
+	</MudListItem>
+	<MudListItem Class="pt-0">
+		<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
+			<MudButton HtmlTag="label"
+					   Variant="Variant.Filled"
+					   Color="Color.Primary"
+					   StartIcon="@Icons.Filled.FilePresent"
+					   OnClick="Decode"
+					   Disabled=@(EncodedCarrier is null)
+					   Style="width:100%">
+				<MudText Typo="Typo.button" Class="align-center">@Loc["Decode"]</MudText>
+			</MudButton>
+			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" />
+			<SaveButton fileToSave="@message"/>
+		</MudList>
+	</MudListItem>
+</MudList>
+
+@code {
+	[Parameter] public Image? EncodedCarrier { get; set; }
+
+	[Parameter] public string? Password { get; set; }
+
+	[Parameter] public EventCallback<bool> OnProcessingChanged { get; set; }
+
+	[Parameter] public EventCallback<File> OnMessageChanged { get; set; }
+
+	File? message;
+
+	int processingValue = 0;
+	string? processingTask = "";
+
+	Stopwatch watch = new Stopwatch();
+
+	string fileName = "";
+	string contentType = "";
+	int fileSize;
+	bool compressed;
+
+	async Task UpdateProgress(string progressBarText, int progressBarValue)
+	{
+		processingTask = progressBarText;
+		processingValue = progressBarValue;
+		StateHasChanged();
+		await Task.Delay(10);
+	}
+
+	async Task<byte[]> ReadJSStream(string jsFunction, List<byte[]>? aesInputs = null)
+	{
+		try
+		{
+			IJSStreamReference? dataStreamReference;
+			if (aesInputs is null)
+				dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction);
+			else
+				dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction, aesInputs[0], aesInputs[1], aesInputs[2], aesInputs[3]);
+
+			var dataBytes = new byte[dataStreamReference.Length];
+			using (var stream = await dataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 10))
+				await stream.ReadAsync(dataBytes);
+
+			return dataBytes;
+		}
+		catch
+		{
+			throw new Exception();
+		}
+	}
+
+	async Task Decode()
+	{
+		if (EncodedCarrier is null)
+			throw new Exception();
+
+		watch.Reset();
+		watch.Start();
+
+		await OnProcessingChanged.InvokeAsync(true);
+
+		await UpdateProgress(Loc["ReadingImageData"], 0);
+		EncodedCarrier.pixelData = await ReadJSStream("getImageData");
+
+		try
+		{
+			ImageDecoder decoder = new ImageDecoder(EncodedCarrier);
+
+			await UpdateProgress(Loc["DecodingMessage"], 20);
+
+			string header = UnicodeEncoding.UTF8.GetString(decoder.Decode(15));
+			var metadataSize = Int32.Parse(header.TakeLast(4).ToArray());
+
+			byte[] file;
+
+			if (Password is not null)
+				file = await DecryptMessage(decoder, metadataSize);
+			else
+			{
+				var metadataBytes = decoder.Decode(metadataSize);
+				ParseMetadata(metadataBytes);
+				file = decoder.Decode(fileSize);
+			}
+
+			if (compressed is true)
+			{
+				await UpdateProgress(Loc["DecompressingMessage"], 70);
+				file = await Decompress(file);
+			}
+
+			await UpdateProgress(Loc["SavingMessageData"], 80);
+
+			message = new File { base64Data = Convert.ToBase64String(file), contentType = contentType, fileName = fileName, fileSize = file.Length };
+
+			await OnMessageChanged.InvokeAsync(message);
+			await OnProcessingChanged.InvokeAsync(false);
+			watch.Stop();
+			await UpdateProgress(Loc["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
+		}
+		catch
+		{
+			await OnProcessingChanged.InvokeAsync(false);
+			await UpdateProgress(Loc["ImageNotEncoded"], 0);
+			return;
+		}
+	}
+
+
+	protected void ParseMetadata(byte[] metadataBytes)
+	{
+		string metadata = UnicodeEncoding.UTF8.GetString(metadataBytes);
+
+		fileName = metadata.Substring(metadata.IndexOf("!fnS!") + 5, metadata.IndexOf("!fnE!") - metadata.IndexOf("!fnS!") - 5);
+		contentType = metadata.Substring(metadata.IndexOf("!ctS!") + 5, metadata.IndexOf("!ctE!") - metadata.IndexOf("!ctS!") - 5);
+		fileSize = Int32.Parse(metadata.Substring(metadata.IndexOf("!fsS!") + 5, metadata.IndexOf("!fsE!") - metadata.IndexOf("!fsS!") - 5));
+		compressed = bool.Parse(metadata.Substring(metadata.IndexOf("!cpS!") + 5, metadata.IndexOf("!cpE!") - metadata.IndexOf("!cpS!") - 5));
+	}
+
+	async Task<byte[]> DecryptMessage(IDecoder decoder, int metadataSize)
+	{
+		if (Password is null)
+			throw new Exception();
+
+		byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(Password);
+		byte[] salt = decoder.Decode(16);
+		byte[] iv = decoder.Decode(16);
+
+		var metadataBytes = decoder.Decode(metadataSize);
+
+		List<byte[]> aesInputs = new List<byte[]> { metadataBytes, passwordBytes, salt, iv };
+		metadataBytes = await ReadJSStream("decryptData", aesInputs);
+
+		ParseMetadata(metadataBytes);
+
+		var file = decoder.Decode(fileSize);
+
+		await UpdateProgress(Loc["DecryptingMessage"], 60);
+
+		aesInputs = new List<byte[]> { file, passwordBytes, salt, iv };
+		return await ReadJSStream("decryptData", aesInputs);
+	}
+	protected async Task<byte[]> Decompress(byte[] data)
+	{
+		using MemoryStream input = new MemoryStream(data);
+		using MemoryStream output = new MemoryStream();
+		using (DeflateStream dstream = new DeflateStream(input, CompressionMode.Decompress))
+			await dstream.CopyToAsync(output);
+
+		return output.ToArray();
+	}
+}

@@ -43,4 +43,9 @@
 			<LastGenOutput>Resource.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Shared\Components\Audio\" />
+	  <Folder Include="Shared\Components\Image\" />
+	</ItemGroup>
 </Project>

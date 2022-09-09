@@ -1,0 +1,165 @@
+﻿@page "/ImageEncodingPage"
+@using MudBlazor;
+@using SteganoBlaze.Shared.Classes.Types;
+@using SteganoBlaze.Shared.Components;
+@using System.IO.Compression;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+
+<PageTitle>@Loc["ImageEncoding"]</PageTitle>
+
+<MudGrid Spacing="1">
+	<MudItem sm="12" md="6" xs="12">
+        <MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
+			<OpenImage Disabled=@processing EncodedImage="false" OnImageChanged=@((Image i) => CarrierChanged(i))/>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem sm="12" md="6" xs="12"> 
+		<MudPaper Elevation="3" Style="height:100%">
+			<OpenMessage Disabled=@processing OnMessageChanged=@((Message m) => MessageChanged(m))/>
+		</MudPaper>
+	</MudItem>
+
+	<MudItem xs="12" sm="6">
+        <MudPaper Elevation="3" Style="height:100%">
+			<PixelBitsPicker OnPixelBitsChanged=@((PixelBits b) => PixelBitsChanged(b))/>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem xs="12" sm="6">
+        <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
+			<EncodingInformation 
+				Capacity=@((carrier?.width ?? 0) * (carrier?.height ?? 0) * options.bitsToEncode.GetBitSum() / 8.0)
+				MessageSize=@(message?.messageSize ?? 0)
+				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
+			</EncodingInformation>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem xs="12">
+        <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
+			@if(AppState.webPUnavailable)
+			{
+				<EncodingOptions 
+						Disabled=@processing
+						OnOptionsChanged=@((Options o) => OptionsChanged(o))>
+				</EncodingOptions>
+			}
+			else
+			{
+				<EncodingOptions 
+						Disabled=@processing
+						OnWebPEnabledChagned=@((bool w) => WebPEnabledChanged(w))
+						OnOptionsChanged=@((Options o) => OptionsChanged(o))>
+				</EncodingOptions>
+			}
+        </MudPaper>
+	</MudItem>
+
+	<MudItem xs="12">
+        <MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
+			<ImageEncode 
+				CanEncode=@(messageFits && validPassword)
+				Carrier=@carrier 
+				Message=@message 
+				Options=@options
+				OnProcessingChanged=@((bool p) => ProcessingChanged(p))
+				OnEncodedCarrierChanged=@((File c) => EncodedCarrierChanged(c))>
+			</ImageEncode>
+        </MudPaper>
+	</MudItem>
+
+	<MudItem xs="12" hidden=@(carrier is null)>
+		<MudPaper Elevation="3">
+			<EncodingImagePreview Carrier=@carrier EncodedCarrier=@encodedCarrier/>
+        </MudPaper>
+	</MudItem>
+</MudGrid>
+
+@code {
+	Image? carrier;
+	Message? message;
+	File? encodedCarrier;
+
+	byte[]? messageDecompressed;
+
+	bool messageFits = false;
+	bool validPassword = true;
+	bool processing = false;
+
+	ImageOptions options = new ImageOptions();
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.SetPageTheme(Color.Primary, "ImageEncoding");
+	}
+
+	void PixelBitsChanged(PixelBits bits) { options.bitsToEncode = bits; }
+	void MessageFitsChanged(bool value) { messageFits = value; }
+	void ProcessingChanged(bool value) { processing = value; }
+	void EncodedCarrierChanged(File value) { encodedCarrier = value; }
+	void WebPEnabledChanged(bool value) { options.webPFormatEnabled = value; }
+	void CarrierChanged(Image newCarrier)
+	{
+		encodedCarrier = null;
+		carrier = newCarrier;
+	}
+	async Task MessageChanged(Message newMessage)
+	{
+		messageDecompressed = null;
+		message = newMessage;
+		if(options.compressionEnabled is true)
+			await ChangeCompression(true);
+	}
+	async Task OptionsChanged(Options value)
+	{
+		if (options.compressionEnabled != value.compressionEnabled)
+			await ChangeCompression(value.compressionEnabled);
+
+		options.compressionEnabled = value.compressionEnabled;
+		options.encryptionEnabled = value.encryptionEnabled;
+		options.scatteredEncodingEnabled = value.scatteredEncodingEnabled;
+		options.password = value.password;
+
+		if (options.encryptionEnabled is false || (options.encryptionEnabled is true && options.password is not null))
+			validPassword = true;
+		else
+			validPassword = false;
+	}
+
+	async Task ChangeCompression(bool compressionEnabled)
+	{
+		if (message is null) return;
+
+		if (compressionEnabled is true)
+		{
+			try
+			{
+				messageDecompressed = message.fileData;
+				message.fileData = await Compress(message.fileData);
+				message.compressed = true;
+			}
+			catch
+			{
+				Snackbar.Add(Loc["ErrorCompressingMessage"], Severity.Error);
+			}
+		}
+		else
+		{
+			message.fileData = messageDecompressed!;
+			messageDecompressed = null;
+			message.compressed = false;
+		}
+		message.UpdateMetaData();
+	}
+	async Task<byte[]> Compress(byte[] data)
+	{
+		using MemoryStream output = new MemoryStream();
+		using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.SmallestSize))
+			await dstream.WriteAsync(data, 0, data.Length);
+		return output.ToArray();
+	}
+}

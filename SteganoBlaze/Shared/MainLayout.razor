@@ -2,32 +2,14 @@
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Loc
 @implements IDisposable
-@using System.Globalization
-@inject NavigationManager Nav
-<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="theme"/>
+@using SteganoBlaze.Shared.Components;
+
+<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme=@AppState.Theme/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
-@*    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">SteganoBlaze</MudText>
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
-            @Body
-        </MudContainer>
-    </MudMainContent>*@
-
-    <MudAppBar Elevation="0" Class="d-flex justify-space-between" Color="@AppState.themeColor">
+    <MudAppBar Elevation="0" Class="d-flex justify-space-between" Color="Color.Primary">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => ToggleNavDrawer())" />
         <MudSpacer />
         <MudText Align="Align.Center" Typo="Typo.h6">@pageName</MudText>
@@ -35,30 +17,10 @@
         <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => ToggleSettingsDrawer())" />
     </MudAppBar>
     <MudDrawer @bind-Open="navDrawerOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Align="Align.Center" Typo="Typo.h6">SteganoBlaze</MudText>
-        </MudDrawerHeader>
-        <NavMenu />
+        <NavMenu/>
     </MudDrawer>
     <MudDrawer @bind-Open="settingsDrawerOpen" Anchor="Anchor.End" Elevation="1" Width="200px">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6" Align="Align.Center">@Loc["Settings"]</MudText>
-        </MudDrawerHeader>
-        <MudText Align="Align.Center" Typo="Typo.h6">@Loc["DarkMode"]</MudText>
-        <MudContainer Class="d-flex flex-row align-center justify-center ma-0 pa-0" Style="width:100%">
-            <MudIcon Icon="@Icons.Material.Outlined.LightMode" Title="Light Mode" />
-            <MudSwitch Checked="isDarkMode" CheckedChanged="@((e) => ToggleDarkMode())" Color="@AppState.themeColorBuffer" Class="ma-4" T="bool" />
-            <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Title="Dark Mode" />
-        </MudContainer>
-        <MudDivider />
-        <MudText Align="Align.Center" Typo="Typo.h6">@Loc["ChooseLanguage"]</MudText>
-        <MudContainer Class="d-flex flex-row align-center justify-center py-0 pr-4 pl-8" Style="width:100%">
-            <MudIcon Icon="@Icons.Material.Outlined.Translate" Title="Dark Mode" />
-            <MudSelect Value="@cultureValue" ValueChanged="@((CultureInfo ci) => CultureChanged(ci))" HelperText="@Loc["Language"]" ToStringFunc="@convertFunc" AnchorOrigin="Origin.BottomCenter" Class="mx-4">
-                <MudSelectItem Value="@(CultureInfo.GetCultureInfo("en-US"))">English</MudSelectItem>
-                <MudSelectItem Value="@(CultureInfo.GetCultureInfo("pl-PL"))">Polski</MudSelectItem>
-            </MudSelect>
-        </MudContainer>
+        <SettingsMenu OnDarkModeChanged=@((bool d) => DarkModeChanged(d))/>
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
@@ -67,29 +29,21 @@
     </MudMainContent>
 </MudLayout>
 
-@inject IJSRuntime js
 @code {
-    bool _drawerOpen = true;
     bool navDrawerOpen = true;
     bool settingsDrawerOpen = false;
-    private MudTheme theme = new();
     private bool isDarkMode = false;
     string? pageName;
-    private CultureInfo? cultureValue { get; set; } = CultureInfo.CurrentCulture;
-    private Func<CultureInfo?, string> convertFunc = ci => ci!.DisplayName;
 
-    void DrawerToggle()
+    protected override void OnInitialized()
     {
-        _drawerOpen = !_drawerOpen;
+        AppState.OnChange += LocalizePageName;
+        AppState.OnChange += StateHasChanged;
     }
-    void CultureChanged(CultureInfo value)
+    void DarkModeChanged(bool value)
     {
-        cultureValue = value;
-        js.InvokeVoidAsync("setCulture", value.Name);
-
-        Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        isDarkMode = value;
     }
-
     void ToggleNavDrawer()
     {
         navDrawerOpen = !navDrawerOpen;
@@ -98,42 +52,9 @@
     {
         settingsDrawerOpen = !settingsDrawerOpen;
     }
-    void ToggleDarkMode()
-    {
-        var jsInProcess = (IJSInProcessRuntime)js;
-        isDarkMode = !isDarkMode;
-        if (isDarkMode)
-        {
-            jsInProcess.Invoke<string>("setDarkMode", "true");
-        }
-        else
-        {
-            jsInProcess.Invoke<string>("setDarkMode", "false");
-        }
-        AppState.ToggleDarkMode();
-    }
-    void ChangeCulture()
-    {
-        AppState.StateChanged();
-    }
     void LocalizePageName()
     {
         pageName = Loc[AppState.pageName];
-    }
-    protected override void OnInitialized()
-    {
-        var jsInProcess = (IJSInProcessRuntime)js;
-        var result = jsInProcess.Invoke<string>("getDarkMode");
-        if (result == "true")
-        {
-            ToggleDarkMode();
-        }
-        else
-        {
-            jsInProcess.Invoke<string>("setDarkMode", "false");
-        }
-        AppState.OnChange += LocalizePageName;
-        AppState.OnChange += StateHasChanged;
     }
     public void Dispose()
     {

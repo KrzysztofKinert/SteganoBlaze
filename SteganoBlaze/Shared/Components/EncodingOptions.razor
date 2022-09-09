@@ -1,0 +1,104 @@
+﻿@using System.Diagnostics
+@using System.Text;
+@using Shared.Classes;
+@using Shared.Classes.Types;
+@using ByteSizeLib;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+@inject IJSRuntime js
+
+<MudExpansionPanels Style="width:100%">
+	<MudExpansionPanel Dense="true">
+		<TitleContent>
+			<div class="d-flex">
+				<MudText>@Loc["MoreOptions"]</MudText>
+			</div>
+		</TitleContent>
+		<ChildContent>
+			<MudGrid style="height:100%" Class="align-content-center justify-space-around" Spacing="0">
+				<MudItem sm="3" xs="12" Class="py-1" hidden="@(!OnWebPEnabledChagned.HasDelegate)">
+					<MudText Typo="Typo.body1" Align="Align.Center">@Loc["CarrierFormat"]</MudText>
+					<MudContainer Class="d-flex flex-row justify-space-around align-center">
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">PNG</MudText>
+						<MudSwitch Checked="@webPEnabled" CheckedChanged="@((bool w) => WebPEnabledChanged(w))" Color=@Color.Primary T="bool" Class="mr-n2" Disabled="@Disabled" />
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">WebP</MudText>
+					</MudContainer>
+				</MudItem>
+				<MudItem sm="3" xs="12" Class="py-1">
+					<MudText Typo="Typo.body1" Align="Align.Center">@Loc["MessageCompression"]</MudText>
+					<MudContainer Class="d-flex flex-row justify-space-around align-center">
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["Off"]</MudText>
+						<MudSwitch Checked="@compressionEnabled" CheckedChanged="@((bool c) => CompressionEnabledChanged(c))" Class="mr-n2" Color=@Color.Primary T="bool" Disabled="@Disabled" />
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["On"]</MudText>
+					</MudContainer>
+				</MudItem>
+				<MudItem sm="3" xs="12" Class="py-1">
+					<MudText Typo="Typo.body1" Align="Align.Center">@Loc["MessageEncryption"]</MudText>
+					<MudContainer Class="d-flex flex-row justify-space-around align-center">
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["Off"]</MudText>
+						<MudSwitch Checked="@encryptionEnabled" CheckedChanged="@((bool e) => EncryptionEnabledChanged(e))" Class="mr-n2" Color=@Color.Primary T="bool" Disabled="@Disabled" />
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["On"]</MudText>
+					</MudContainer>
+				</MudItem>
+				<MudItem sm="3" xs="12" Class="py-1">
+					<MudText Typo="Typo.body1" Align="Align.Center">@Loc["ScatteredEncoding"]</MudText>
+					<MudContainer Class="d-flex flex-row justify-space-around align-center">
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["Off"]</MudText>
+						<MudSwitch Checked="@scatteredEncodingEnabled" CheckedChanged="@((bool s) => ScatteredEncodingEnabledChanged(s))" Class="mr-n2" Color=@Color.Primary T="bool" Disabled="@Disabled" />
+						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Loc["On"]</MudText>
+					</MudContainer>
+				</MudItem>
+				<MudItem xs="12" hidden="@(!encryptionEnabled)">
+					<PasswordInput OnPasswordChanged="@((string p) => PasswordChanged(p))"/>
+				</MudItem>
+			</MudGrid>
+		</ChildContent>
+	</MudExpansionPanel>
+</MudExpansionPanels>
+
+@code {
+	[Parameter] public bool Disabled { get; set; } = false;
+
+	[Parameter] public EventCallback<Options> OnOptionsChanged { get; set; }
+
+	[Parameter] public EventCallback<bool> OnWebPEnabledChagned { get; set; }
+
+	bool webPEnabled = false;
+	bool compressionEnabled = false;
+	bool encryptionEnabled = false;
+	string? password;
+	bool scatteredEncodingEnabled = false;
+
+	Options options = new Options();
+
+	async Task WebPEnabledChanged(bool value)
+	{
+		webPEnabled = value;
+		await OnWebPEnabledChagned.InvokeAsync(webPEnabled); 
+	}
+	async Task CompressionEnabledChanged(bool value)
+	{
+		compressionEnabled = value;
+		options.compressionEnabled = compressionEnabled;
+		await OnOptionsChanged.InvokeAsync(options);
+	}
+	async Task ScatteredEncodingEnabledChanged(bool value)
+	{
+		scatteredEncodingEnabled = value;
+		options.scatteredEncodingEnabled = scatteredEncodingEnabled;
+		await OnOptionsChanged.InvokeAsync(options); 
+	}
+	async Task EncryptionEnabledChanged(bool value)
+	{
+		encryptionEnabled = value;
+		options.encryptionEnabled = encryptionEnabled;
+		await OnOptionsChanged.InvokeAsync(options);
+	}
+	async Task PasswordChanged(string? value)
+	{
+		options.password = value;
+		await OnOptionsChanged.InvokeAsync(options);
+	}
+
+}

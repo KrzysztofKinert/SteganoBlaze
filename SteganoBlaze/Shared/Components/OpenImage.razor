@@ -1,0 +1,96 @@
+﻿@using Shared.Classes.Types;
+@using ByteSizeLib;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+@inject IJSRuntime js
+
+@if (carrier is not null)
+{
+	<img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@carrier.contentType;base64,@carrier.base64Data" />
+}
+
+<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
+	<MudListItem Class="py-0 my-0">
+		<OpenFileButton Disabled=@Disabled Type=@type OnFileOpened=@((File file) => GetCarrier(file))/>
+	</MudListItem>
+	<MudListItem Class="py-0 my-0">
+		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @(carrier?.fileName ?? "")</MudText>
+	</MudListItem>
+	<MudListItem Class="py-0 my-0">
+		<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+			<MudListItem Style="width:70%" Class="py-0 my-0">
+				<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @(carrier?.SizeToString() ?? "")</MudText>
+			</MudListItem>
+			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2" />
+			<MudListItem DisableGutters="true" Class="py-0 my-0">
+				<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Dimensions"]:</MudText>
+					<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@carrierDimensions</MudText>
+				</MudContainer>
+			</MudListItem>
+		</MudList>
+	</MudListItem>
+</MudList>
+
+	@code {
+	[Parameter]
+	public bool Disabled { get; set; } = false;
+
+	[Parameter]
+	public bool EncodedImage { get; set; } = false;
+
+	[Parameter]
+	public EventCallback<Image> OnImageChanged { get; set; }
+
+	Image? carrier;
+
+	int imageWidth;
+	int imageHeight;
+	string? carrierDimensions = "";
+
+	FileType type = FileType.Image;
+
+	protected override void OnParametersSet()
+	{
+		if (EncodedImage is true) 
+			type = FileType.EncodedImage;
+		else
+			type = FileType.Image;
+	}
+
+	void GetCarrier(File file)
+	{
+		carrier = new Image(file);
+		carrierDimensions = Loc["Loading"];
+	}
+	async Task GetCarrierDimensions()
+	{
+		if (carrier is null) return;
+		try
+		{
+			imageWidth = await js.InvokeAsync<int>("getImageWidth");
+			imageHeight = await js.InvokeAsync<int>("getImageHeight");
+
+			if ((imageHeight * imageWidth) > AppState.maxAllowedCarrierPixels)
+				throw new Exception();
+
+			carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
+			carrier.height = imageHeight;
+			carrier.width = imageWidth;
+		}
+		catch
+		{
+			Snackbar.Add(Loc["MaxCarrierPixels"] + " 5 MP", Severity.Error);
+			carrier = null;
+		}
+		await OnImageChanged.InvokeAsync(carrier);
+	}
+	async Task CarrierCorrupted()
+	{
+		Snackbar.Add(Loc["CarrierImageCorrupted"], Severity.Error);
+		carrier = null;
+		carrierDimensions = null;
+		await OnImageChanged.InvokeAsync(null);
+	}
+}

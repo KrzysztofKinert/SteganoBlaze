@@ -1,0 +1,102 @@
+﻿@using Shared.Classes.Types;
+@using ByteSizeLib;
+@inject AppState AppState
+@inject IStringLocalizer<Resource> Loc
+@inject ISnackbar Snackbar
+
+<InputFile hidden
+           class="custom-file-input" 
+           OnChange="OpenFile"
+           id=@id
+           accept=@accept>
+</InputFile>
+<MudButton HtmlTag="label"
+            Variant="Variant.Filled"
+            Color=@Color.Primary
+            StartIcon=@icon
+            FullWidth="true"
+			Disabled=@Disabled
+			Class="mt-2"
+            for=@id>
+    <MudText Typo="Typo.button" Class="align-center">@text</MudText>
+</MudButton>
+
+
+@code {
+    [Parameter] public bool Disabled { get; set; } = false;
+
+    [Parameter] public FileType Type { get; set; }
+
+    [Parameter] public EventCallback<File> OnFileOpened { get; set; }
+
+    string id = "";
+    string accept = "";
+    string icon = "";
+    string text = "";
+
+    protected override void OnParametersSet()
+    {
+        switch (Type)
+        {
+            case FileType.Image:
+                id = "carrier";
+                accept = "image/png, image/jpeg, image/apng, image/gif, image/svg+xml, image/webp, image/bmp, image/x-icon";
+                icon = Icons.Filled.Image;
+                text = Loc["ChooseCarrier"];
+                break;
+            case FileType.EncodedImage:
+                id = "carrier";
+                accept = "image/png, image/webp";
+                icon = Icons.Filled.Image;
+                text = Loc["ChooseCarrier"];
+                break;
+            case FileType.Audio:
+                id = "carrier";
+                accept = "audio/wav, audio/x-wav";
+                icon = Icons.Filled.Audiotrack;
+                text = Loc["ChooseCarrier"];
+                break;
+            case FileType.Message:
+                id = "message";
+                accept = "";
+                icon = Icons.Filled.AttachFile;
+                text = Loc["ChooseMessage"];
+                break;
+        }
+    }
+
+    async Task OpenFile(InputFileChangeEventArgs e)
+    {
+        long maxFileSize;
+        if (Type == FileType.Message) 
+            maxFileSize = AppState.maxAllowedMessageSize;
+        else 
+            maxFileSize = AppState.maxAllowedCarrierSize;
+
+        if (e.File.Size > maxFileSize)
+        {
+            if (Type == FileType.Message) 
+                Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+            else 
+                Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+            return;
+        }
+
+        var fileBytes = new byte[e.File.Size];
+        try
+        {
+            using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
+                await stream.ReadAsync(fileBytes);
+
+            await OnFileOpened.InvokeAsync(new File(fileBytes, e.File));
+        }
+        catch
+        {
+            if (Type == FileType.Message) 
+                Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+            else 
+                Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+            return;
+        }
+    }
+}

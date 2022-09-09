@@ -1,0 +1,51 @@
+﻿@inject IStringLocalizer<Resource> Loc
+@inject AppState AppState
+@inject IJSRuntime js
+@inject NavigationManager Nav
+@using System.Globalization
+
+<MudDrawerHeader>
+    <MudText Typo="Typo.h6" Align="Align.Center">@Loc["Settings"]</MudText>
+</MudDrawerHeader>
+<MudText Align="Align.Center" Typo="Typo.h6">@Loc["DarkMode"]</MudText>
+<MudContainer Class="d-flex flex-row align-center justify-center ma-0 pa-0" Style="width:100%">
+    <MudIcon Icon="@Icons.Material.Outlined.LightMode" Title="Light Mode" />
+    <MudSwitch Checked="isDarkMode" CheckedChanged="@((e) => ToggleDarkMode())" Color="Color.Primary" Class="ma-4" T="bool" />
+    <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Title="Dark Mode" />
+</MudContainer>
+<MudDivider />
+<MudText Align="Align.Center" Typo="Typo.h6">@Loc["ChooseLanguage"]</MudText>
+<MudContainer Class="d-flex flex-row align-center justify-center py-0 pr-4 pl-8" Style="width:100%">
+    <MudIcon Icon="@Icons.Material.Outlined.Translate" Title="Dark Mode" />
+    <MudSelect Value="@cultureValue" ValueChanged="@((CultureInfo ci) => CultureChanged(ci))" HelperText="@Loc["Language"]" ToStringFunc="@convertFunc" AnchorOrigin="Origin.BottomCenter" Class="mx-4">
+        <MudSelectItem Value="@(CultureInfo.GetCultureInfo("en-US"))">English</MudSelectItem>
+        <MudSelectItem Value="@(CultureInfo.GetCultureInfo("pl-PL"))">Polski</MudSelectItem>
+    </MudSelect>
+</MudContainer>
+
+@code{
+    [Parameter] public EventCallback<bool> OnDarkModeChanged { get; set; }
+
+    private bool isDarkMode = false;
+    private CultureInfo? cultureValue { get; set; } = CultureInfo.CurrentCulture;
+    private Func<CultureInfo?, string> convertFunc = ci => ci!.DisplayName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await js.InvokeAsync<string>("getDarkMode");
+        if (Boolean.Parse(result) is true)
+            await ToggleDarkMode();
+    }
+    async Task ToggleDarkMode()
+    {
+        isDarkMode = !isDarkMode;
+        await js.InvokeVoidAsync("setDarkMode", isDarkMode.ToString());
+        await OnDarkModeChanged.InvokeAsync(isDarkMode);
+    }
+    void CultureChanged(CultureInfo value)
+    {
+        cultureValue = value;
+        js.InvokeVoidAsync("setCulture", value.Name);
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
+    }
+}
