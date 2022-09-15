@@ -1,21 +1,16 @@
-﻿@inject IStringLocalizer<Resource> Loc
-@inject AppState AppState
+﻿@inject IStringLocalizer<Resource> Localize
 
 <MudDrawerHeader>
     <MudText Align="Align.Center" Typo="Typo.h6">SteganoBlaze</MudText>
 </MudDrawerHeader>
 <MudNavMenu Bordered="true" Rounded="true" Color="Color.Primary">
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@Loc["AboutSteganography"]</MudNavLink>
-    <MudNavLink Href="ImageEncodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Image">@Loc["ImageEncoding"]</MudNavLink>
-    <MudNavLink Href="ImageDecodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.FileFormats.FileImage">@Loc["ImageDecoding"]</MudNavLink>
-    <MudNavLink Href="AudioEncodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Audiotrack">@Loc["AudioEncoding"]</MudNavLink>
-    <MudNavLink Href="AudioDecodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.FileFormats.FileMusic">@Loc["AudioDecoding"]</MudNavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@Localize["AboutSteganography"]</MudNavLink>
+    <MudNavLink Href="ImageEncodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Image">@Localize["ImageEncoding"]</MudNavLink>
+    <MudNavLink Href="ImageDecodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.FileFormats.FileImage">@Localize["ImageDecoding"]</MudNavLink>
+    <MudNavLink Href="AudioEncodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Audiotrack">@Localize["AudioEncoding"]</MudNavLink>
+    <MudNavLink Href="AudioDecodingPage" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.FileFormats.FileMusic">@Localize["AudioDecoding"]</MudNavLink>
 </MudNavMenu>
 
 @code
 {
-    protected override void OnInitialized()
-    {
-        AppState.OnChange += StateHasChanged;
-    }
 }

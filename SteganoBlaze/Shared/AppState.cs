@@ -1,5 +1,4 @@
 ﻿using MudBlazor;
-
 namespace SteganoBlaze.Shared
 {
     public class AppState
@@ -8,11 +7,12 @@ namespace SteganoBlaze.Shared
         public bool webPUnavailable { get; set; } = false;
 
         public event Action? OnChange;
-        public Int64 maxAllowedCarrierSize { get; private set; } = 10000000;
-        public Int64 maxAllowedMessageSize { get; private set; } = 5000000;
-        public Int64 maxAllowedCarrierPixels { get; private set; } = 25000000;
 
         public MudTheme Theme = new MudTheme();
+
+        public static readonly int MAX_CARRIER_SIZE = 10000000;
+        public static readonly int MAX_MESSAGE_SIZE = 5000000;
+        public static readonly int MAX_CARRIER_PIXELS = 25000000;
 
         public void StateChanged()
         {

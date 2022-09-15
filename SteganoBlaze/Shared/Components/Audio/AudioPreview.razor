@@ -1,5 +1,4 @@
-﻿@using Shared.Classes.Types;
-@inject IStringLocalizer<Resource> Loc
+﻿@inject IStringLocalizer<Resource> Localize
 
 <MudList Clickable="false" Dense="true" Class="px-0 mx-0">
 	<MudListItem Class="pa-0 ma-0">
@@ -16,7 +15,7 @@
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
 		<MudContainer Class="d-flex justify-center px-2">
-			@if (source != "")
+			@if (source is not null)
 			{
 				<audio controls="controls" autobuffer="autobuffer">
 					<source id="encodedImagePreview" src=@source />
@@ -31,19 +30,16 @@
 
 	[Parameter] public IFile? Carrier { get; set; }
 
-	string source = "";
+	string? source = null;
 
 	bool shouldRender;
 	IFile? previousCarrier;
 
-	protected override async Task OnParametersSetAsync()
+	protected override void OnParametersSet()
 	{
 		if (Carrier != previousCarrier)
 		{
-			source = "";
-			StateHasChanged();
-			await Task.Delay(100);
-			source = "data:" + (Carrier?.contentType ?? "") + ";base64," + (Carrier?.base64Data ?? "");
+			source = Carrier is null ? null : "data:" + Carrier.contentType + ";base64," + Carrier.base64Data;
 			previousCarrier = Carrier;
 			shouldRender = true;
 		}

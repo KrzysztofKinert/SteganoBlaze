@@ -1,6 +1,4 @@
-﻿@using Shared.Classes.Types;
-@inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+﻿@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
 @inject IJSRuntime js
 
@@ -12,7 +10,7 @@
 		   OnClick="SaveFile"
 		   Disabled=@(fileToSave is null)
 		   Style="width:100%">
-	<MudText Typo="Typo.button" Class="align-center">@Loc["Save"]</MudText>
+	<MudText Typo="Typo.button" Class="align-center">@Localize["Save"]</MudText>
 </MudButton>
 
 @code {
@@ -27,7 +25,7 @@
 		}
 		catch
 		{
-			Snackbar.Add(Loc["ErrorSavingMessage"], Severity.Error);
+			Snackbar.Add(Localize["ErrorSavingMessage"], Severity.Error);
 		}
 	}
 }

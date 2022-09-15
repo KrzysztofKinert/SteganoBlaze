@@ -1,23 +1,22 @@
-﻿@using Shared.Classes.Types;
-@using ByteSizeLib;
-@inject IStringLocalizer<Resource> Loc
+﻿@using ByteSizeLib;
+@inject IStringLocalizer<Resource> Localize
 
 <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
     <MudListItem Class="py-0 my-0">
 		<OpenFileButton Disabled=@Disabled Type=@FileType.Message OnFileOpened=@((File file) => GetMessage(file)) />
     </MudListItem>
     <MudListItem Class="py-0 my-0">
-        <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Loc["Name"]: @(message?.fileName ?? "")</MudText>
+        <MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(message?.fileName ?? "")</MudText>
     </MudListItem>
     <MudListItem Class="py-0 my-0">
 		<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
 			<MudListItem Style="width:70%" Class="py-0 my-0">	
-				<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Size"]: @(message?.SizeToString() ?? "")</MudText>
+				<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(message?.SizeToString() ?? "")</MudText>
 			</MudListItem>
 			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2"/>
 			<MudListItem DisableGutters="true" Class="py-0 my-0">
 				<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
-					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Loc["Type"]:</MudText>
+					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Type"]:</MudText>
 					<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(message?.contentType ?? "")</MudText>
 				</MudContainer>
 			</MudListItem>

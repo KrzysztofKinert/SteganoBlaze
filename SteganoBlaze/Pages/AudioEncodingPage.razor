@@ -1,18 +1,12 @@
 ﻿@page "/AudioEncodingPage"
-@using System.Diagnostics
-@using Microsoft.JSInterop
-@using System.Text;
-@using MudBlazor;
 @using ByteSizeLib;
-@using System.IO.Compression;
-@using SteganoBlaze.Shared.Classes;
-@using SteganoBlaze.Shared.Classes.Types;
-@using SteganoBlaze.Shared.Components;
+@using SteganoBlaze.Shared.Components.Audio;
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
+@implements IDisposable
 
-<PageTitle>@Loc["AudioEncoding"]</PageTitle>
+<PageTitle>@Localize["AudioEncoding"]</PageTitle>
 
 <a hidden id="saveLink" download="" href="" target="_blank"/>
 <MudGrid Spacing="1">
@@ -38,7 +32,7 @@
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
 			<EncodingInformation 
 				Capacity=@((carrier?.GetSampleCount() ?? 0) * options.bitsToEncode / 8.0)
-				MessageSize=@(message?.messageSize ?? 0)
+				MessageSize=@(message?.GetMessageSize() ?? 0)
 				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
 			</EncodingInformation>
         </MudPaper>
@@ -66,17 +60,15 @@
         </MudPaper>
 	</MudItem>
 
-	<div>@time</div>
-
 	<MudItem xs="12" hidden="@(carrier is null)">
 		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
-			<AudioPreview Label=@Loc["OriginalAudio"] Carrier=@carrier/>
+			<AudioPreview Label=@Localize["OriginalAudio"] Carrier=@carrier/>
         </MudPaper>
 	</MudItem>
 
 	<MudItem xs="12" hidden=" @(encodedCarrier is null)">
 		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
-			<AudioPreview Label=@Loc["EncodedAudio"] Carrier=@encodedCarrier/>
+			<AudioPreview Label=@Localize["EncodedAudio"] Carrier=@encodedCarrier/>
         </MudPaper>
 	</MudItem>
 
@@ -96,29 +88,27 @@
 
 	AudioOptions options = new AudioOptions();
 
-	Stopwatch watch = new Stopwatch();
-	double time = 0;
-
-	protected override void OnAfterRender(bool firstRender)
-	{
-		watch.Stop();
-		time = watch.Elapsed.TotalSeconds;
-		watch.Restart();
-	}
 	protected override void OnInitialized()
 	{
 		AppState.OnChange += StateHasChanged;
 		AppState.SetPageTheme(Color.Tertiary, "AudioEncoding");
-		watch.Start();
 	}
 
-	void CarrierChanged(WAV value)
+	async Task CarrierChanged(WAV value)
 	{
+		carrier = null;
+		StateHasChanged();
+		await Task.Delay(100);
 		encodedCarrier = null;
 		carrier = value;
 	}
 	void MessageFitsChanged(bool value) { messageFits = value; }
-	void ProcessingChanged(bool value) { processing = value; }
+	void ProcessingChanged(bool value) 
+	{ 
+		processing = value;
+		if(processing is true)
+			encodedCarrier = null;
+	}
 	void EncodedCarrierChanged(File value) { encodedCarrier = value; }
 
 	async Task MessageChanged(Message newMessage)
@@ -153,12 +143,12 @@
 			try
 			{
 				messageDecompressed = message.fileData;
-				message.fileData = await Compress(message.fileData);
+				message.fileData = await Compression.Compress(message.fileData);
 				message.compressed = true;
 			}
 			catch
 			{
-				Snackbar.Add(Loc["ErrorCompressingMessage"], Severity.Error);
+				Snackbar.Add(Localize["ErrorCompressingMessage"], Severity.Error);
 			}
 		}
 		else
@@ -167,17 +157,14 @@
 			messageDecompressed = null;
 			message.compressed = false;
 		}
-		message.UpdateMetaData();
-	}
-	async Task<byte[]> Compress(byte[] data)
-	{
-		using MemoryStream output = new MemoryStream();
-		using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.SmallestSize))
-			await dstream.WriteAsync(data, 0, data.Length);
-		return output.ToArray();
+		message.UpdateHeader();
 	}
 	void SampleBitsToEncodeChanged(int value)
 	{
 		options.bitsToEncode = value;
+	}
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
 	}
 }

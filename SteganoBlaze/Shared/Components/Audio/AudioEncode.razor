@@ -1,9 +1,7 @@
 ﻿@using System.Diagnostics
 @using System.Text;
-@using Shared.Classes;
-@using Shared.Classes.Types;
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
 
 <canvas hidden id="canvas"/>
@@ -18,10 +16,10 @@
 				Variant="Variant.Filled"
 				Color="Color.Primary"
 				StartIcon="@Icons.Filled.UploadFile"
-				OnClick="EncodeFile"
+				OnClick="Encode"
 				Disabled=@(!CanEncode)
 				Style="width:100%">
-				<MudText Typo="Typo.button" Class="align-center">@Loc["Encode"]</MudText>
+				<MudText Typo="Typo.button" Class="align-center">@Localize["Encode"]</MudText>
 			</MudButton>
 			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
 			<SaveButton fileToSave="@encodedCarrier"/>
@@ -57,29 +55,7 @@
 		await Task.Delay(10);
 	}
 
-	async Task<byte[]> ReadJSStream(string jsFunction, List<byte[]>? aesInputs = null)
-	{
-		try
-		{
-			IJSStreamReference? dataStreamReference;
-			if (aesInputs is null)
-				dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction);
-			else
-				dataStreamReference = await js.InvokeAsync<IJSStreamReference>(jsFunction, aesInputs[0], aesInputs[1], aesInputs[2], aesInputs[3]);
-
-			var dataBytes = new byte[dataStreamReference.Length];
-			using (var stream = await dataStreamReference.OpenReadStreamAsync(AppState.maxAllowedCarrierSize * 10))
-				await stream.ReadAsync(dataBytes);
-
-			return dataBytes;
-		}
-		catch
-		{
-			throw new Exception();
-		}
-	}
-
-	async Task EncodeFile()
+	async Task Encode()
 	{
 		if (Carrier is null || Message is null || Options is null)
 			throw new Exception();
@@ -90,63 +66,86 @@
 		await OnProcessingChanged.InvokeAsync(true);
 		encodedCarrier = null;
 
-		//Optional encryption
 		if (Options.password is not null)
 		{
 			try
 			{
-				await UpdateProgress(Loc["Encrypting message"], 20);
+				await UpdateProgress(Localize["EncryptingMessage"], 20);
 				await EncryptMessage();
 			}
 			catch
 			{
-				await UpdateProgress(Loc["ErrorEncryptingMessage"], 0);
+				await UpdateProgress(Localize["ErrorEncryptingMessage"], 0);
 				return;
 			}
 		}
 
 		try
 		{
-			//Encoding message
-			await UpdateProgress(Loc["EncodingMessage"], 25);
-			AudioEncoder encoder = new AudioEncoder(Carrier, Options.bitsToEncode, Options.scatteredEncodingEnabled);
-			var encodedCarrierBytes = encoder.Encode(Message);
+			SampleParams sampleParams = new SampleParams(Options.scatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.bitsToEncode);
+			AudioEncoder encoder = new AudioEncoder(Carrier, sampleParams);
 
-			encodedCarrier = new File { base64Data = Convert.ToBase64String(encodedCarrierBytes), contentType = Carrier.contentType, fileName = AddSuffix(Carrier.fileName) };
+			encodedCarrier = new File { base64Data = Convert.ToBase64String(await EncodeFile(encoder)), contentType = Carrier.contentType, fileName = AddSuffix(Carrier.fileName) };
 		}
 		catch
 		{
-			await UpdateProgress(Loc["ErrorEncodingMessage"], 0);
+			await UpdateProgress(Localize["ErrorEncodingMessage"], 0);
 			return;
 		}
 
 		watch.Stop();
-		await UpdateProgress(Loc["EncodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
+		await UpdateProgress(Localize["EncodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
 
 		await OnProcessingChanged.InvokeAsync(false);
 		await OnEncodedCarrierChanged.InvokeAsync(encodedCarrier);
 	}
+	async Task<byte[]> EncodeFile(AudioEncoder encoder)
+	{
+		if (Message is null)
+			throw new Exception();
+
+		await UpdateProgress(Localize["EncodingMessage"], 25);
+
+		encoder.Encode(Message.header);
+
+		int updates = Message.fileData.Length / 250000 + 1;
+		int updatesDone = 0;
+		int bytesLeft = Message.fileData.Length;
+
+		while(bytesLeft > 250000)
+		{
+			encoder.Encode(Message.fileData[(250000 * updatesDone)..(250000 * (updatesDone + 1))]);
+			updatesDone++;
+			bytesLeft -= 250000;
+			await UpdateProgress(Localize["EncodingMessage"], 25 + updatesDone * 75 / updates);
+		}
+
+		encoder.Encode(Message.fileData[(250000 * updatesDone)..]);
+
+		return encoder.GetEncodedCarrier();
+	}
+
 	protected async Task EncryptMessage()
 	{
 		if (Message is null || Options?.password is null)
 			return;
 
-		byte[] passwordBytes = UTF8Encoding.UTF8.GetBytes(Options.password);
+		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.password);
 		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
-		byte[] iv = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
+		byte[] ivHeader = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
+		byte[] ivFile = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
 
-		List<byte[]> aesInputs = new List<byte[]> { Message.fileData, passwordBytes, salt, iv };
-		Message.fileData = await ReadJSStream("encryptData", aesInputs);
-		Message.UpdateMetaData();
+		List<byte[]> aesInputs = new List<byte[]> { Message.fileData, passwordBytes, salt, ivFile };
+		Message.fileData = await JSInterop.ReadStream(js, "encryptData", aesInputs);
+		Message.UpdateHeader();
 
-		aesInputs[0] = Message.metadata;
-		Message.metadata = await ReadJSStream("encryptData", aesInputs);
-		Message.UpdateHeader(salt, iv);
+		aesInputs = new List<byte[]> { Message.GenerateMetadata(), passwordBytes, salt, ivHeader };
+		Message.UpdateHeader(await JSInterop.ReadStream(js, "encryptData", aesInputs), salt.Concat(ivHeader).Concat(ivFile).ToList());
 	}
 	private string AddSuffix(string fileName)
 	{
 		string name = Path.GetFileNameWithoutExtension(fileName);
 		string ext = Path.GetExtension(fileName);
-		return String.Concat(name, Loc["_encoded"], ext);
+		return String.Concat(name, Localize["_encoded"], ext);
 	}
 }

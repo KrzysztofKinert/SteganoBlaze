@@ -1,8 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
 @implements IDisposable
-@using SteganoBlaze.Shared.Components;
 
 <MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme=@AppState.Theme/>
 <MudDialogProvider/>
@@ -54,7 +53,7 @@
     }
     void LocalizePageName()
     {
-        pageName = Loc[AppState.pageName];
+        pageName = Localize[AppState.pageName];
     }
     public void Dispose()
     {

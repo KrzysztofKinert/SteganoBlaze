@@ -31,22 +31,22 @@ function getImageHeight() {
 }
 
 function getImageData() {
-    var myimage = document.getElementById('carrierImage');
+    var img = document.getElementById('carrierImage');
     var canvas = document.getElementById('canvas');
-    canvas.width = myimage.width;
-    canvas.height = myimage.height;
+    canvas.width = img.width;
+    canvas.height = img.height;
     var ctx = canvas.getContext('2d');
-    ctx.drawImage(myimage, 0, 0);
-    const data = ctx.getImageData(0, 0, myimage.width, myimage.height).data;
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, img.width, img.height).data;
     return data;
 }
 
 function getImageURL(data, type) {
-    var myimage = document.getElementById('carrierImage');
+    var img = document.getElementById('carrierImage');
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
-    let imageData = new ImageData(Uint8ClampedArray.from(data), myimage.width, myimage.height)
+    let imageData = new ImageData(Uint8ClampedArray.from(data), img.width, img.height)
 
     for (let i = 0; i < imageData.data.length; i += 4) {
         imageData.data[i + 3] = 255;

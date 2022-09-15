@@ -28,12 +28,13 @@ builder.Services.AddSingleton<AppState>();
 
 var host = builder.Build();
 
-CultureInfo culture;
 var js = host.Services.GetRequiredService<IJSRuntime>();
-var result = await js.InvokeAsync<string>("getCulture");
 
-var asa = host.Services.GetRequiredService<AppState>();
-asa.webPUnavailable = await js.InvokeAsync<bool>("disableWebP");
+var appState = host.Services.GetRequiredService<AppState>();
+appState.webPUnavailable = await js.InvokeAsync<bool>("disableWebP");
+
+CultureInfo culture;
+var result = await js.InvokeAsync<string>("getCulture");
 
 if (result != null)
 {

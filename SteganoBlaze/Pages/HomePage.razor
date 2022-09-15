@@ -1,8 +1,9 @@
 ﻿@page "/"
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
+@implements IDisposable
 
-<PageTitle>@Loc["AboutSteganography"]</PageTitle>
+<PageTitle>@Localize["AboutSteganography"]</PageTitle>
 
 <h1>TODO</h1>
 
@@ -13,4 +14,8 @@
         AppState.OnChange += StateHasChanged;
         AppState.SetPageTheme(Color.Info, "AboutSteganography");
     }
+    public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+	}
 }

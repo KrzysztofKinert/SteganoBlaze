@@ -1,13 +1,10 @@
 ﻿@page "/ImageDecodingPage"
-@using MudBlazor;
-@using SteganoBlaze.Shared.Classes;
-@using SteganoBlaze.Shared.Classes.Types;
-@using SteganoBlaze.Shared.Components;
+@using SteganoBlaze.Shared.Components.Image;
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
+@implements IDisposable
 
-
-<PageTitle>@Loc["ImageDecoding"]</PageTitle>
+<PageTitle>@Localize["ImageDecoding"]</PageTitle>
 
 <MudGrid Spacing="1">          
 	<MudItem sm="12" md="6" xs="12">
@@ -26,11 +23,11 @@
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex mud-width-full">
 			<MudGrid Class="align-center justify-space-evenly" Spacing="0">
 				<MudItem sm="4" xs="12" Class="pa-1">
-					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Loc["EnterPasswordIfEncrypted"]</MudText>
-					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Loc["LeaveEmptyIfNot"]</MudText>
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["EnterPasswordIfEncrypted"]</MudText>
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["LeaveEmptyIfNot"]</MudText>
 				</MudItem>
 				<MudItem sm="4" xs="12" Class="pa-1">
-					<MudTextField @bind-Value="password" Immediate="true" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="@Loc["EnterPassword"]" InputType="InputType.Password"/>
+					<MudTextField @bind-Value="password" Immediate="true" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="@Localize["EnterPassword"]" InputType="InputType.Password"/>
 				</MudItem>
 			</MudGrid>
         </MudPaper>
@@ -77,4 +74,8 @@
 		message = value;
 	}
 	void ProcessingChanged(bool value) { processing = value; }
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+	}
 }

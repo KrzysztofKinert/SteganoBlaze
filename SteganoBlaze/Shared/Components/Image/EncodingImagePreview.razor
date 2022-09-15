@@ -1,5 +1,4 @@
-﻿@using Shared.Classes.Types;
-@inject IStringLocalizer<Resource> Loc
+﻿@inject IStringLocalizer<Resource> Localize
 
 <MudList Clickable="false" Dense="true">
 	<MudListItem Class="py-0 my-0">
@@ -9,7 +8,7 @@
 					   OnClick="ShowOriginalImage"
 					   Size="Size.Small"
 					   Style="width:200px">
-				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["OriginalImage"]</MudText>
+				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Localize["OriginalImage"]</MudText>
 			</MudButton>
 			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" />
 			<MudButton Variant="@encodedButtonVariant"
@@ -18,14 +17,14 @@
 					   Disabled=@(EncodedCarrier is null)
 					   Size="Size.Small"
 					   Style="width:200px">
-				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedImage"]</MudText>
+				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Localize["EncodedImage"]</MudText>
 			</MudButton>
 		</MudContainer>
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
 		<MudSwipeArea OnSwipe="@OnSwipe">
 			<MudContainer Class="d-flex justify-center">
-				<img class="center" style="max-width:100%; height:auto;" src=@source Fluid="true" Alt=@Loc["OriginalImage"] />
+				<img class="center" style="max-width:100%; height:auto;" src=@source Fluid="true" Alt=@Localize["OriginalImage"] />
 			</MudContainer>
 		</MudSwipeArea>
 	</MudListItem>

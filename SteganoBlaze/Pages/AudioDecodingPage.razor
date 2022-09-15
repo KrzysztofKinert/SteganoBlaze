@@ -1,12 +1,11 @@
 ﻿@page "/AudioDecodingPage"
 @using MudBlazor;
-@using SteganoBlaze.Shared.Classes;
-@using SteganoBlaze.Shared.Classes.Types;
-@using SteganoBlaze.Shared.Components;
+@using SteganoBlaze.Shared.Components.Audio;
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
+@implements IDisposable
 
-<PageTitle>@Loc["AudioDecoding"]g</PageTitle>
+<PageTitle>@Localize["AudioDecoding"]g</PageTitle>
 
 <a hidden id="saveLink" download="" href="" target="_blank"/>
 <MudGrid Spacing="1">          
@@ -26,11 +25,11 @@
 		<MudPaper Elevation="3" Style="height:100%" Class="d-flex mud-width-full">
 			<MudGrid Class="align-center justify-space-evenly" Spacing="0">
 				<MudItem sm="4" xs="12" Class="pa-1">
-					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Loc["EnterPasswordIfEncrypted"]</MudText> 
-					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Loc["LeaveEmptyIfNot"]</MudText>
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["EnterPasswordIfEncrypted"]</MudText> 
+					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["LeaveEmptyIfNot"]</MudText>
 				</MudItem>
 				<MudItem sm="4" xs="12" Class="pa-1">
-					<MudTextField @bind-Value="password" Immediate="true" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="@Loc["EnterPassword"]" InputType="InputType.Password"/>
+					<MudTextField @bind-Value="password" Immediate="true" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="@Localize["EnterPassword"]" InputType="InputType.Password"/>
 				</MudItem>
 			</MudGrid>
 		</MudPaper>
@@ -49,7 +48,7 @@
 
 	<MudItem xs="12" hidden="@(encodedCarrier is null)">
 		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
-			<AudioPreview Label=@Loc["EncodedAudio"] Carrier=@encodedCarrier />
+			<AudioPreview Label=@Localize["EncodedAudio"] Carrier=@encodedCarrier />
 		</MudPaper>
 	</MudItem>
 </MudGrid>
@@ -78,4 +77,9 @@
 		message = value;
 	}
 	void ProcessingChanged(bool value) { processing = value; }
+
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+	}
 }

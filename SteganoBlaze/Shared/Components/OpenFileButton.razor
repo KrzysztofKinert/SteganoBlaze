@@ -1,7 +1,6 @@
-﻿@using Shared.Classes.Types;
-@using ByteSizeLib;
+﻿@using ByteSizeLib;
 @inject AppState AppState
-@inject IStringLocalizer<Resource> Loc
+@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
 
 <InputFile hidden
@@ -42,50 +41,46 @@
                 id = "carrier";
                 accept = "image/png, image/jpeg, image/apng, image/gif, image/svg+xml, image/webp, image/bmp, image/x-icon";
                 icon = Icons.Filled.Image;
-                text = Loc["ChooseCarrier"];
+                text = Localize["ChooseCarrier"];
                 break;
             case FileType.EncodedImage:
                 id = "carrier";
                 accept = "image/png, image/webp";
                 icon = Icons.Filled.Image;
-                text = Loc["ChooseCarrier"];
+                text = Localize["ChooseCarrier"];
                 break;
             case FileType.Audio:
                 id = "carrier";
                 accept = "audio/wav, audio/x-wav";
                 icon = Icons.Filled.Audiotrack;
-                text = Loc["ChooseCarrier"];
+                text = Localize["ChooseCarrier"];
                 break;
             case FileType.Message:
                 id = "message";
                 accept = "";
                 icon = Icons.Filled.AttachFile;
-                text = Loc["ChooseMessage"];
+                text = Localize["ChooseMessage"];
                 break;
         }
     }
 
     async Task OpenFile(InputFileChangeEventArgs e)
     {
-        long maxFileSize;
-        if (Type == FileType.Message) 
-            maxFileSize = AppState.maxAllowedMessageSize;
-        else 
-            maxFileSize = AppState.maxAllowedCarrierSize;
+        int maxFileSize = (Type == FileType.Message) ? AppState.MAX_MESSAGE_SIZE : AppState.MAX_CARRIER_SIZE;
 
         if (e.File.Size > maxFileSize)
         {
             if (Type == FileType.Message) 
-                Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
             else 
-                Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
             return;
         }
 
         var fileBytes = new byte[e.File.Size];
         try
         {
-            using (var stream = e.File.OpenReadStream(AppState.maxAllowedCarrierSize))
+            using (var stream = e.File.OpenReadStream(maxFileSize))
                 await stream.ReadAsync(fileBytes);
 
             await OnFileOpened.InvokeAsync(new File(fileBytes, e.File));
@@ -93,9 +88,9 @@
         catch
         {
             if (Type == FileType.Message) 
-                Snackbar.Add(Loc["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
             else 
-                Snackbar.Add(Loc["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
             return;
         }
     }

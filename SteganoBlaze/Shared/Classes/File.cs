@@ -1,7 +1,6 @@
 ﻿using ByteSizeLib;
 using Microsoft.AspNetCore.Components.Forms;
-
-namespace SteganoBlaze.Shared.Classes.Types
+namespace SteganoBlaze.Shared.Classes
 {
     public enum FileType
     {
@@ -16,7 +15,7 @@ namespace SteganoBlaze.Shared.Classes.Types
         public string base64Data { get; set; }
         public string contentType { get; set; }
         public string fileName { get; set; }
-        public long fileSize { get; set; } 
+        public long fileSize { get; set; }
     }
 
     public class File : IFile

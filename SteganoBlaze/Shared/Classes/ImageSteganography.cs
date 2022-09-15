@@ -1,9 +1,20 @@
-﻿using Microsoft.JSInterop;
-using SteganoBlaze.Shared.Classes.Types;
-using System.Text;
-using System.Threading;
-namespace SteganoBlaze.Shared.Classes
+﻿namespace SteganoBlaze.Shared.Classes
 {
+    public enum PixelOrder
+    {
+        Sequential,
+        Random
+    }
+    public readonly struct PixelParams
+    {
+        public readonly PixelOrder pixelOrder;
+        public readonly PixelBits pixelBitsToUse;
+        public PixelParams(PixelOrder order, PixelBits bits)
+        {
+            pixelOrder = order;
+            pixelBitsToUse = bits;
+        }
+    }
     public abstract class ImageSteganography
     {
         protected enum Channel
@@ -12,19 +23,12 @@ namespace SteganoBlaze.Shared.Classes
             G,
             B
         }
-        public enum PixelOrder
-        {
-            Sequential,
-            Random
-        }
 
         protected byte[] pixelData = Array.Empty<byte>();
+        protected PixelParams parameters;
         protected int pixelIndex;
         protected int[] channelBitsLeft = new int[3];
-        protected PixelBits bitsToUse = new PixelBits();
-
         protected Channel channel;
-        protected PixelOrder pixelOrder;
 
         protected int randomSeed;
         protected Random? generator;
@@ -33,11 +37,11 @@ namespace SteganoBlaze.Shared.Classes
         protected void FirstPixel()
         {
             channel = Channel.R;
-            channelBitsLeft[(int)Channel.R] = bitsToUse!.R;
-            channelBitsLeft[(int)Channel.G] = bitsToUse!.G;
-            channelBitsLeft[(int)Channel.B] = bitsToUse!.B;
+            channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
+            channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
+            channelBitsLeft[(int)Channel.B] = parameters.pixelBitsToUse.B;
 
-            switch (pixelOrder)
+            switch (parameters.pixelOrder)
             {
                 case PixelOrder.Sequential:
                     pixelIndex = 0;
@@ -53,11 +57,11 @@ namespace SteganoBlaze.Shared.Classes
         protected void NextPixel()
         {
             channel = Channel.R;
-            channelBitsLeft[(int)Channel.R] = bitsToUse!.R;
-            channelBitsLeft[(int)Channel.G] = bitsToUse!.G;
-            channelBitsLeft[(int)Channel.B] = bitsToUse!.B;
+            channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
+            channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
+            channelBitsLeft[(int)Channel.B] = parameters.pixelBitsToUse.B;
 
-            switch (pixelOrder)
+            switch (parameters.pixelOrder)
             {
                 case PixelOrder.Sequential:
                     pixelIndex += 4;
@@ -74,30 +78,23 @@ namespace SteganoBlaze.Shared.Classes
     }
     public class ImageEncoder : ImageSteganography
     {
-        public ImageEncoder(Image carrier, PixelBits bits, bool randomEncodingEnabled)
+        public ImageEncoder(Image carrier, PixelParams pixelParams)
         {
+            if (carrier.pixelData is null)
+                throw new Exception();
+
             pixelData = carrier.pixelData;
-            bitsToUse = bits;
             randomSeed = carrier.height * carrier.width;
-
-            if (randomEncodingEnabled)
-                pixelOrder = PixelOrder.Random;
-            else
-                pixelOrder = PixelOrder.Sequential;
-
+            parameters = pixelParams;
             FirstPixel();
         }
-        public byte[] Encode(Message message)
+        public void Encode(byte[] bytesToEncode)
         {
-            foreach(byte headerByte in message.header)
-                EncodeByte(headerByte);
-
-            foreach (byte metadataByte in message.metadata)
-                EncodeByte(metadataByte);
-
-            foreach (byte fileByte in message.fileData)
-                EncodeByte(fileByte);
-
+            foreach (byte byteToEncode in bytesToEncode)
+                EncodeByte(byteToEncode);
+        }
+        public byte[] GetEncodedCarrier()
+        {
             return pixelData;
         }
         private void EncodeByte(byte byteValue)
@@ -107,10 +104,10 @@ namespace SteganoBlaze.Shared.Classes
             {
                 while (channelBitsLeft[(int)channel] > 0)
                 {
-                    int bitSign = byteValue % 2;
+                    pixelData[ChannelIndex()] = byteValue % 2 == 1 ? SetBit(pixelData[ChannelIndex()], BitIndex()) 
+                                                                   : ClearBit(pixelData[ChannelIndex()], BitIndex());
+                    
                     byteValue /= 2;
-                    ChangeBit(ChannelIndex(), BitIndex(), bitSign);
-
                     channelBitsLeft[(int)channel]--;
                     encodedBits++;
 
@@ -132,60 +129,20 @@ namespace SteganoBlaze.Shared.Classes
                 }
             }
         }
-        private void ChangeBit(int pixelIndex, int bitIndex, int bitSign)
-        {
-            var mask = 1 << bitIndex;
-            if (bitSign == 1)
-                pixelData[pixelIndex] |= (byte)mask;
-            else
-                pixelData[pixelIndex] &= (byte)~mask;
-        }
+        private static byte SetBit(byte value, int bitIndex) { return value |= (byte)(1 << bitIndex); }
+        private static byte ClearBit(byte value, int bitIndex) { return value &= (byte)~(1 << bitIndex); }
     }
-    public class ImageDecoder : ImageSteganography, IDecoder
+    public class ImageDecoder : ImageSteganography
     {
-        public ImageDecoder(Image carrierToDecode)
+        public ImageDecoder(Image carrierToDecode, PixelParams pixelParams)
         {
+            if (carrierToDecode.pixelData is null)
+                throw new Exception();
+
             pixelData = carrierToDecode.pixelData;
             randomSeed = carrierToDecode.height * carrierToDecode.width;
-            CheckCarrier();
+            parameters = pixelParams;
             FirstPixel();
-        }
-        private void CheckCarrier()
-        {
-            List<PixelBits> bitsToCheck = new List<PixelBits>();
-            for (int i = 1; i < 9; i++)
-            {
-                bitsToCheck.Add(new PixelBits { R = i, G = i, B = i });
-            }
-            for (int r = 0; r < 9; r++)
-            {
-                for (int g = 0; g < 9; g++)
-                {
-                    for (int b = 0; b < 9; b++)
-                    {
-                        if (!(r == g && g == b))
-                        {
-                            {
-                                bitsToCheck.Add(new PixelBits { R = r, G = g, B = b });
-                            }
-                        }
-                    }
-                }
-            }
-
-            foreach (PixelOrder order in new List<PixelOrder> { PixelOrder.Sequential, PixelOrder.Random })
-            {
-                pixelOrder = order;
-                foreach (PixelBits bits in bitsToCheck)
-                {
-                    bitsToUse = bits;
-                    FirstPixel();
-
-                    if (UnicodeEncoding.UTF8.GetString(Decode(11)) == "!#encoded#!")
-                        return;
-                }
-            }
-            throw new Exception("Carrier not encoded");
         }
         public byte[] Decode(int bytesToDecode)
         {
@@ -203,7 +160,6 @@ namespace SteganoBlaze.Shared.Classes
             {
                 while (channelBitsLeft[(int)channel] > 0)
                 {
-                    //int bitSign = pixelData[currentPixel + (int)channelIndex] / ((int)Math.Pow(2, channelBitsLeft[(int)channelIndex] - 1)) % 2;
                     int bitSign = pixelData[ChannelIndex()] / ((int)Math.Pow(2, BitIndex())) % 2;
                     decodedByte += (int)Math.Pow(2, 7 - decodedBits) * bitSign;
 
@@ -221,7 +177,29 @@ namespace SteganoBlaze.Shared.Classes
             }
             return Convert.ToByte(ReverseBits(decodedByte));
         }
-        private int ReverseBits(int value)
+        public static List<PixelParams> GenerateParams()
+        {
+            List<PixelBits> bitsToCheck = new List<PixelBits>();
+            for (int r = 0; r < 9; r++)
+            {
+                for (int g = 0; g < 9; g++)
+                {
+                    for (int b = 0; b < 9; b++)
+                    {
+                        if (!(r == 0 && g == 0 && b == 0))
+                            bitsToCheck.Add(new PixelBits { R = r, G = g, B = b });
+                    }
+                }
+            }
+
+            List<PixelParams> paramsToCheck = new List<PixelParams>();
+            foreach(PixelBits pixelBits in bitsToCheck)
+                paramsToCheck.Add(new PixelParams(PixelOrder.Sequential, pixelBits));
+            foreach (PixelBits pixelBits in bitsToCheck)
+                paramsToCheck.Add(new PixelParams(PixelOrder.Random, pixelBits));
+            return paramsToCheck;
+        }
+        private static int ReverseBits(int value)
         {
             int result = 0;
             for (int i = 0; i < 8; i++)

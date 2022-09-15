@@ -1,6 +1,5 @@
 ﻿using System.Text;
-
-namespace SteganoBlaze.Shared.Classes.Types
+namespace SteganoBlaze.Shared.Classes
 {
     public class WAV : File
     {
@@ -13,11 +12,6 @@ namespace SteganoBlaze.Shared.Classes.Types
         int sampleRate;
         int samples;
 
-        public WAV(byte[] byteData)
-        {
-            this.byteData = byteData;
-            ParseWAV();
-        }
         public WAV(File file)
         {
             byteData = file.byteData;
@@ -80,16 +74,16 @@ namespace SteganoBlaze.Shared.Classes.Types
                     break;
                 case 16:
                 default:
-                    byteData[dataChunkIndex + sampleIndex] = (byte)(sample);
+                    byteData[dataChunkIndex + sampleIndex] = (byte)sample;
                     byteData[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
                     break;
                 case 24:
-                    byteData[dataChunkIndex + sampleIndex] = (byte)(sample);
+                    byteData[dataChunkIndex + sampleIndex] = (byte)sample;
                     byteData[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
                     byteData[dataChunkIndex + sampleIndex + 2] = (byte)(sample >> 16);
                     break;
                 case 32:
-                    byteData[dataChunkIndex + sampleIndex] = (byte)(sample);
+                    byteData[dataChunkIndex + sampleIndex] = (byte)sample;
                     byteData[dataChunkIndex + sampleIndex + 1] = (byte)(sample >> 8);
                     byteData[dataChunkIndex + sampleIndex + 2] = (byte)(sample >> 16);
                     byteData[dataChunkIndex + sampleIndex + 3] = (byte)(sample >> 24);

@@ -16,7 +16,7 @@ const deriveKey = (passwordKey, salt, keyUsage) =>
             hash: "SHA-256",
         },
         passwordKey,
-        { name: "AES-CBC", length: 256 },
+        { name: "AES-GCM", length: 256 },
         false,
         keyUsage
     );
@@ -27,7 +27,7 @@ async function encryptData(secretData, password, salt, iv) {
         const aesKey = await deriveKey(passwordKey, salt, ["encrypt"]);
         const encryptedContent = await window.crypto.subtle.encrypt(
             {
-                name: "AES-CBC",
+                name: "AES-GCM",
                 iv: iv,
             },
             aesKey,
@@ -37,6 +37,7 @@ async function encryptData(secretData, password, salt, iv) {
 
     } catch (e) {
         console.log(`Error - ${e}`);
+        throw new Error();
         return "";
     }
 }
@@ -46,7 +47,7 @@ async function decryptData(encryptedData, password, salt, iv) {
         const aesKey = await deriveKey(passwordKey, salt, ["decrypt"]);
         const decryptedData = await window.crypto.subtle.decrypt(
             {
-                name: "AES-CBC",
+                name: "AES-GCM",
                 iv: iv,
             },
             aesKey,
@@ -54,8 +55,8 @@ async function decryptData(encryptedData, password, salt, iv) {
         );
         return decryptedData;
     } catch (e) {
-        throw new Error();
         console.log(`Error - ${e}`);
+        throw new Error();
         return "";
     }
 }

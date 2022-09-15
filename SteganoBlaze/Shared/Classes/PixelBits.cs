@@ -1,4 +1,4 @@
-﻿namespace SteganoBlaze.Shared.Classes.Types
+﻿namespace SteganoBlaze.Shared.Classes
 {
     public class PixelBits
     {

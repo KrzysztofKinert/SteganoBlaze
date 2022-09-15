@@ -1,6 +1,4 @@
-﻿@inject AppState AppState
-
-<MudProgressLinear Color=@Color.Primary Rounded="true" Size="Size.Large" Style="transform: scaleY(2)" Value="@ProgressValue">
+﻿<MudProgressLinear Color=@Color.Primary Rounded="true" Size="Size.Large" Style="transform: scaleY(2)" Value="@ProgressValue">
 	<MudText Typo="Typo.subtitle2" Color=@Color.Tertiary Style="transform: scaleY(0.5);" Class="align-center">@Task</MudText>
 </MudProgressLinear>
 
@@ -9,12 +7,4 @@
 	public int ProgressValue { get; set; }
 	[Parameter]
 	public string Task { get; set; } = "";
-
-	Color textColor = Color.Primary;
-
-	protected override void OnInitialized()
-	{
-		if (Color.Primary == Color.Primary) textColor = Color.Primary;
-		else textColor = Color.Primary;
-	}
 }

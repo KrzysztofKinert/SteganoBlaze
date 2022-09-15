@@ -1,5 +1,4 @@
-﻿@using Shared.Classes.Types;
-@inject IStringLocalizer<Resource> Loc
+﻿@inject IStringLocalizer<Resource> Localize
 
 <MudList Clickable="false" Dense="true">
 	<MudListItem Class="py-0 my-0">
@@ -9,7 +8,7 @@
 						Size="Size.Small"
 						DisableRipple = "true"
 						Class="mt-2 cursor-default">
-				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Loc["EncodedImage"]</MudText>
+				<MudText Typo="Typo.button" Style="font-size: min(2vw, 16px);" Class="align-center">@Localize["EncodedImage"]</MudText>
 			</MudButton>
 		</MudContainer>
     </MudListItem>
@@ -17,7 +16,7 @@
 		<MudContainer Class="d-flex justify-center">
 			@if(EncodedCarrier is not null)
 			{
-				<img class="center" style="max-width:100%; height:auto;" src=@source Fluid="true" Alt=@Loc["EncodedImage"] />
+				<img class="center" style="max-width:100%; height:auto;" src=@source Fluid="true" Alt=@Localize["EncodedImage"] />
 			}
 		</MudContainer>
     </MudListItem>
