@@ -16,7 +16,7 @@
 			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2" />
 			<MudListItem DisableGutters="true" Class="py-0 my-0">
 				<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
-					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Length"]:</MudText>
+					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Duration"]:</MudText>
 					<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(carrier?.GetDuration() ?? "")</MudText>
 				</MudContainer>
 			</MudListItem>
@@ -42,7 +42,7 @@
 		}
 		catch
 		{
-			Snackbar.Add(Localize["CarrierImageCorrupted"], Severity.Error);
+			Snackbar.Add(Localize["CarrierAudioCorrupted"], Severity.Error);
 			carrier = null;
 			await OnAudioChanged.InvokeAsync(null);
 		}

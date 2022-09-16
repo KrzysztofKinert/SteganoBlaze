@@ -127,7 +127,7 @@
     <value>Audio Encoding</value>
   </data>
   <data name="ChooseCarrier" xml:space="preserve">
-    <value>Choose Carrier</value>
+    <value>Choose carrier</value>
   </data>
   <data name="Dimensions" xml:space="preserve">
     <value>Dimensions</value>
@@ -145,7 +145,7 @@
     <value>Size</value>
   </data>
   <data name="ChooseMessage" xml:space="preserve">
-    <value>Choose Message</value>
+    <value>Choose message</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Type</value>
@@ -163,13 +163,13 @@
     <value>G Channel</value>
   </data>
   <data name="EncodingInformation" xml:space="preserve">
-    <value>Encoding Details</value>
+    <value>Encoding details</value>
   </data>
   <data name="CarrierCapacity" xml:space="preserve">
-    <value>Carrier Capacity</value>
+    <value>Carrier capacity</value>
   </data>
   <data name="CarrierUsage" xml:space="preserve">
-    <value>Carrier Usage</value>
+    <value>Carrier usage</value>
   </data>
   <data name="Encode" xml:space="preserve">
     <value>Encode</value>
@@ -193,7 +193,7 @@
     <value>Reading image data...</value>
   </data>
   <data name="EncodingMessage" xml:space="preserve">
-    <value>Encoding Message...</value>
+    <value>Encoding message...</value>
   </data>
   <data name="SavingImageData" xml:space="preserve">
     <value>Saving image data...</value>
@@ -202,13 +202,13 @@
     <value>_encoded</value>
   </data>
   <data name="EncodingDoneIn" xml:space="preserve">
-    <value>Encoding Done In</value>
+    <value>Encoding done in</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>Language</value>
   </data>
   <data name="DecodedFile" xml:space="preserve">
-    <value>Decoded File</value>
+    <value>Decoded file</value>
   </data>
   <data name="Decode" xml:space="preserve">
     <value>Decode</value>
@@ -217,18 +217,15 @@
     <value>Image not encoded!</value>
   </data>
   <data name="DecodingMessage" xml:space="preserve">
-    <value>Decoding Message</value>
+    <value>Decoding message...</value>
   </data>
   <data name="SavingMessageData" xml:space="preserve">
     <value>Saving message data...</value>
   </data>
   <data name="DecodingDoneIn" xml:space="preserve">
-    <value>Decoding Done In</value>
+    <value>Decoding done in</value>
   </data>
-  <data name="ChooseLanguage" xml:space="preserve">
-    <value>Language</value>
-  </data>
-  <data name="DarkMode" xml:space="preserve">
+  <data name="Theme" xml:space="preserve">
     <value>Theme</value>
   </data>
   <data name="Settings" xml:space="preserve">
@@ -259,7 +256,7 @@
     <value>Bits</value>
   </data>
   <data name="BitsPerSample" xml:space="preserve">
-    <value>Bits Per Sample</value>
+    <value>Bits per sample</value>
   </data>
   <data name="OriginalAudio" xml:space="preserve">
     <value>Original Audio</value>
@@ -268,7 +265,7 @@
     <value>Encoded Audio</value>
   </data>
   <data name="AudioNotEncoded" xml:space="preserve">
-    <value>Audio Not Encoded</value>
+    <value>Audio not encoded</value>
   </data>
   <data name="CarrierFormat" xml:space="preserve">
     <value>Carrier format</value>
@@ -323,5 +320,20 @@
   </data>
   <data name="DecompressingMessage" xml:space="preserve">
     <value>Decompressing message</value>
+  </data>
+  <data name="CarrierImageCorrupted" xml:space="preserve">
+    <value>Image corrupted</value>
+  </data>
+  <data name="EncryptingMessage" xml:space="preserve">
+    <value>Encrypting message...</value>
+  </data>
+  <data name="ErrorEncryptingMessage" xml:space="preserve">
+    <value>Message encryption error</value>
+  </data>
+  <data name="ErrorEncodingMessage" xml:space="preserve">
+    <value>Message encoding error</value>
+  </data>
+  <data name="CarrierAudioCorrupted" xml:space="preserve">
+    <value>Audio corrupted</value>
   </data>
 </root>

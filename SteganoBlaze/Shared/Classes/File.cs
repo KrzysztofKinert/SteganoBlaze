@@ -15,7 +15,7 @@ namespace SteganoBlaze.Shared.Classes
         public string base64Data { get; set; }
         public string contentType { get; set; }
         public string fileName { get; set; }
-        public long fileSize { get; set; }
+        public int fileSize { get; set; }
     }
 
     public class File : IFile
@@ -24,7 +24,7 @@ namespace SteganoBlaze.Shared.Classes
         public string base64Data { get; set; } = "";
         public string contentType { get; set; } = "";
         public string fileName { get; set; } = "";
-        public long fileSize { get; set; }
+        public int fileSize { get; set; }
 
         public File()
         {
@@ -40,7 +40,7 @@ namespace SteganoBlaze.Shared.Classes
             contentType = cT;
 
             fileName = fileInfo.Name;
-            fileSize = fileInfo.Size;
+            fileSize = (int)fileInfo.Size;
         }
         public string SizeToString()
         {

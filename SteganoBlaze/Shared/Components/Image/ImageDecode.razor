@@ -19,7 +19,7 @@
 					   Style="width:100%">
 				<MudText Typo="Typo.button" Class="align-center">@Localize["Decode"]</MudText>
 			</MudButton>
-			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" />
+			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
 			<SaveButton fileToSave="@message"/>
 		</MudList>
 	</MudListItem>
@@ -86,7 +86,6 @@
 				}
 
 				await UpdateProgress(Localize["SavingMessageData"], 90);
-
 				message = new File { base64Data = Convert.ToBase64String(file), contentType = contentType, fileName = fileName, fileSize = fileSize };
 
 				await OnMessageChanged.InvokeAsync(message);

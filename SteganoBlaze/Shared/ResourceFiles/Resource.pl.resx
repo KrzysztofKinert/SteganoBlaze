@@ -127,7 +127,7 @@
     <value>Kodowanie Audio</value>
   </data>
   <data name="ChooseCarrier" xml:space="preserve">
-    <value>Wybierz Nośnik</value>
+    <value>Wybierz nośnik</value>
   </data>
   <data name="Dimensions" xml:space="preserve">
     <value>Wymiary</value>
@@ -145,7 +145,7 @@
     <value>Rozmiar</value>
   </data>
   <data name="ChooseMessage" xml:space="preserve">
-    <value>Wybierz Wiadomość</value>
+    <value>Wybierz wiadomość</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Typ</value>
@@ -163,19 +163,19 @@
     <value>Kanał G</value>
   </data>
   <data name="EncodingInformation" xml:space="preserve">
-    <value>Szczegóły Kodowania</value>
+    <value>Szczegóły kodowania</value>
   </data>
   <data name="CarrierCapacity" xml:space="preserve">
-    <value>Pojemność Nośnika</value>
+    <value>Pojemność nośnika</value>
   </data>
   <data name="CarrierUsage" xml:space="preserve">
-    <value>Wykorzystanie Nośnika</value>
+    <value>Wykorzystanie nośnika</value>
   </data>
   <data name="Encode" xml:space="preserve">
     <value>Zakoduj</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Pobierz</value>
+    <value>Zapisz</value>
   </data>
   <data name="OriginalImage" xml:space="preserve">
     <value>Oryginalny Obraz</value>
@@ -193,7 +193,7 @@
     <value>Czytanie danych obrazu...</value>
   </data>
   <data name="EncodingMessage" xml:space="preserve">
-    <value>Kodowanie Wiadomości...</value>
+    <value>Kodowanie wiadomości...</value>
   </data>
   <data name="SavingImageData" xml:space="preserve">
     <value>Zapis danych obrazu...</value>
@@ -202,13 +202,13 @@
     <value>_zakodowany</value>
   </data>
   <data name="EncodingDoneIn" xml:space="preserve">
-    <value>Zakodowano W</value>
+    <value>Zakodowano w</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>Język</value>
   </data>
   <data name="DecodedFile" xml:space="preserve">
-    <value>Odkodowany Plik</value>
+    <value>Odkodowany plik</value>
   </data>
   <data name="Decode" xml:space="preserve">
     <value>Dekoduj</value>
@@ -217,18 +217,15 @@
     <value>Obraz nie zakodowany!</value>
   </data>
   <data name="DecodingMessage" xml:space="preserve">
-    <value>Dekodowanie Wiadomości</value>
+    <value>Dekodowanie wiadomości...</value>
   </data>
   <data name="SavingMessageData" xml:space="preserve">
     <value>Zapis danych wiadomości...</value>
   </data>
   <data name="DecodingDoneIn" xml:space="preserve">
-    <value>Odkodowano W</value>
+    <value>Odkodowano w</value>
   </data>
-  <data name="ChooseLanguage" xml:space="preserve">
-    <value>Język</value>
-  </data>
-  <data name="DarkMode" xml:space="preserve">
+  <data name="Theme" xml:space="preserve">
     <value>Motyw</value>
   </data>
   <data name="Settings" xml:space="preserve">
@@ -259,7 +256,7 @@
     <value>Bity</value>
   </data>
   <data name="BitsPerSample" xml:space="preserve">
-    <value>Bity Na Próbkę</value>
+    <value>Bity na próbkę</value>
   </data>
   <data name="OriginalAudio" xml:space="preserve">
     <value>Oryginalne Audio</value>
@@ -268,7 +265,7 @@
     <value>Zakodowane Audio</value>
   </data>
   <data name="AudioNotEncoded" xml:space="preserve">
-    <value>Audio Nie Zakodowane</value>
+    <value>Audio nie zakodowane</value>
   </data>
   <data name="CarrierFormat" xml:space="preserve">
     <value>Format nośnika</value>
@@ -323,5 +320,20 @@
   </data>
   <data name="DecompressingMessage" xml:space="preserve">
     <value>Dekompresja wiadomości</value>
+  </data>
+  <data name="CarrierImageCorrupted" xml:space="preserve">
+    <value>Obraz uszkodzony</value>
+  </data>
+  <data name="EncryptingMessage" xml:space="preserve">
+    <value>Enkrypcja wiadomości...</value>
+  </data>
+  <data name="ErrorEncryptingMessage" xml:space="preserve">
+    <value>Błąd enkrypcji wiadomości</value>
+  </data>
+  <data name="ErrorEncodingMessage" xml:space="preserve">
+    <value>Błąd kodowania wiadomości</value>
+  </data>
+  <data name="CarrierAudioCorrupted" xml:space="preserve">
+    <value>Audio uszkodzone</value>
   </data>
 </root>

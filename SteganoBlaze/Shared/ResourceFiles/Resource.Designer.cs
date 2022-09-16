@@ -97,7 +97,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Audio Not Encoded.
+        ///   Looks up a localized string similar to Audio not encoded.
         /// </summary>
         public static string AudioNotEncoded {
             get {
@@ -124,7 +124,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bits Per Sample.
+        ///   Looks up a localized string similar to Bits per sample.
         /// </summary>
         public static string BitsPerSample {
             get {
@@ -133,7 +133,16 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Carrier Capacity.
+        ///   Looks up a localized string similar to Audio corrupted.
+        /// </summary>
+        public static string CarrierAudioCorrupted {
+            get {
+                return ResourceManager.GetString("CarrierAudioCorrupted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Carrier capacity.
         /// </summary>
         public static string CarrierCapacity {
             get {
@@ -151,7 +160,16 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Carrier Usage.
+        ///   Looks up a localized string similar to Image corrupted.
+        /// </summary>
+        public static string CarrierImageCorrupted {
+            get {
+                return ResourceManager.GetString("CarrierImageCorrupted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Carrier usage.
         /// </summary>
         public static string CarrierUsage {
             get {
@@ -169,7 +187,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Choose Carrier.
+        ///   Looks up a localized string similar to Choose carrier.
         /// </summary>
         public static string ChooseCarrier {
             get {
@@ -178,29 +196,11 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Language.
-        /// </summary>
-        public static string ChooseLanguage {
-            get {
-                return ResourceManager.GetString("ChooseLanguage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Choose Message.
+        ///   Looks up a localized string similar to Choose message.
         /// </summary>
         public static string ChooseMessage {
             get {
                 return ResourceManager.GetString("ChooseMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Theme.
-        /// </summary>
-        public static string DarkMode {
-            get {
-                return ResourceManager.GetString("DarkMode", resourceCulture);
             }
         }
         
@@ -214,7 +214,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decoded File.
+        ///   Looks up a localized string similar to Decoded file.
         /// </summary>
         public static string DecodedFile {
             get {
@@ -223,7 +223,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decoding Done In.
+        ///   Looks up a localized string similar to Decoding done in.
         /// </summary>
         public static string DecodingDoneIn {
             get {
@@ -232,7 +232,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decoding Message.
+        ///   Looks up a localized string similar to Decoding message....
         /// </summary>
         public static string DecodingMessage {
             get {
@@ -313,7 +313,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Encoding Done In.
+        ///   Looks up a localized string similar to Encoding done in.
         /// </summary>
         public static string EncodingDoneIn {
             get {
@@ -322,7 +322,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Encoding Details.
+        ///   Looks up a localized string similar to Encoding details.
         /// </summary>
         public static string EncodingInformation {
             get {
@@ -331,11 +331,20 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Encoding Message....
+        ///   Looks up a localized string similar to Encoding message....
         /// </summary>
         public static string EncodingMessage {
             get {
                 return ResourceManager.GetString("EncodingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encrypting message....
+        /// </summary>
+        public static string EncryptingMessage {
+            get {
+                return ResourceManager.GetString("EncryptingMessage", resourceCulture);
             }
         }
         
@@ -372,6 +381,24 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string ErrorCompressingMessage {
             get {
                 return ResourceManager.GetString("ErrorCompressingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message encoding error.
+        /// </summary>
+        public static string ErrorEncodingMessage {
+            get {
+                return ResourceManager.GetString("ErrorEncodingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message encryption error.
+        /// </summary>
+        public static string ErrorEncryptingMessage {
+            get {
+                return ResourceManager.GetString("ErrorEncryptingMessage", resourceCulture);
             }
         }
         
@@ -669,6 +696,15 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string Steganography {
             get {
                 return ResourceManager.GetString("Steganography", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Theme.
+        /// </summary>
+        public static string Theme {
+            get {
+                return ResourceManager.GetString("Theme", resourceCulture);
             }
         }
         
