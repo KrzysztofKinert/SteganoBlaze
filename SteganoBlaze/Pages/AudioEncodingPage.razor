@@ -144,7 +144,7 @@
 			{
 				messageDecompressed = message.fileData;
 				message.fileData = await Compression.Compress(message.fileData);
-				message.compressed = true;
+				message.isCompressed = true;
 			}
 			catch
 			{
@@ -155,7 +155,7 @@
 		{
 			message.fileData = messageDecompressed!;
 			messageDecompressed = null;
-			message.compressed = false;
+			message.isCompressed = false;
 		}
 		message.UpdateHeader();
 	}

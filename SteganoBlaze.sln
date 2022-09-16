@@ -20,6 +20,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		RESX_ShowPerformanceTraces = True
 		SolutionGuid = {64787214-F899-446D-A77B-D35AD381A2EA}
 	EndGlobalSection
 EndGlobal

@@ -8,7 +8,7 @@ namespace SteganoBlaze.Shared.Classes
         public byte[] fileData { get; set; } = Array.Empty<byte>();
         public string contentType { get; set; }
         public string fileName { get; set; }
-        public bool compressed { get; set; }
+        public bool isCompressed { get; set; }
 
         //4 4-byte markers + 2-byte filename size + 2-byte type size + 4-byte file size + 1-byte bool = 25 bytes 
         public static readonly int MIN_HEADER_SIZE = 4 * 4 + 2 * 2 + 4 + 1;
@@ -20,7 +20,7 @@ namespace SteganoBlaze.Shared.Classes
             fileData = file.byteData;
             contentType = file.contentType;
             fileName = file.fileName;
-            compressed = false;
+            isCompressed = false;
             UpdateHeader();
         }
 
@@ -39,7 +39,7 @@ namespace SteganoBlaze.Shared.Classes
             metadata.AddRange(BitConverter.GetBytes(fileData.Length));
 
             metadata.AddRange(Encoding.UTF8.GetBytes("CMPR"));
-            metadata.AddRange(BitConverter.GetBytes(compressed));
+            metadata.AddRange(BitConverter.GetBytes(isCompressed));
             return metadata.ToArray();
         }
         public void UpdateHeader(byte[]? metadata = null, List<byte>? aesParams = null)

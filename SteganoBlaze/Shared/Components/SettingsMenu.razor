@@ -7,14 +7,14 @@
 <MudDrawerHeader>
     <MudText Typo="Typo.h6" Align="Align.Center">@Localize["Settings"]</MudText>
 </MudDrawerHeader>
-<MudText Align="Align.Center" Typo="Typo.h6">@Localize["DarkMode"]</MudText>
+<MudText Align="Align.Center" Typo="Typo.h6">@Localize["Theme"]</MudText>
 <MudContainer Class="d-flex flex-row align-center justify-center ma-0 pa-0" Style="width:100%">
     <MudIcon Icon="@Icons.Material.Outlined.LightMode" Title="Light Mode" />
     <MudSwitch Checked="isDarkMode" CheckedChanged="@((e) => ToggleDarkMode())" Color="Color.Primary" Class="ma-4" T="bool" />
     <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Title="Dark Mode" />
 </MudContainer>
-<MudDivider />
-<MudText Align="Align.Center" Typo="Typo.h6">@Localize["ChooseLanguage"]</MudText>
+<MudDivider Class="mb-2"/>
+<MudText Align="Align.Center" Typo="Typo.h6">@Localize["Language"]</MudText>
 <MudContainer Class="d-flex flex-row align-center justify-center py-0 pr-4 pl-8" Style="width:100%">
     <MudIcon Icon="@Icons.Material.Outlined.Translate" Title="Dark Mode" />
     <MudSelect Value="@cultureValue" ValueChanged="@((CultureInfo ci) => CultureChanged(ci))" HelperText="@Localize["Language"]" ToStringFunc="@convertFunc" AnchorOrigin="Origin.BottomCenter" Class="mx-4">
