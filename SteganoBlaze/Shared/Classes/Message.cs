@@ -1,5 +1,4 @@
-﻿using ByteSizeLib;
-using System.Text;
+﻿using System.Text;
 namespace SteganoBlaze.Shared.Classes
 {
     public class Message
@@ -52,7 +51,8 @@ namespace SteganoBlaze.Shared.Classes
             header = headerList.ToArray();
         }
         public int GetMessageSize() { return header.Length + fileData.Length; }
-        public string SizeToString() { return ByteSize.FromBytes(GetMessageSize()).ToString(); }
+        //public string SizeToString() { return ByteSize.FromBytes(GetMessageSize()).ToString(); }
+        public string SizeToString() { return ReduceSize.ToString(GetMessageSize()); }
         public static File ParseMetadata(byte[] header, ref bool isCompressed)
         {
             File file = new File();

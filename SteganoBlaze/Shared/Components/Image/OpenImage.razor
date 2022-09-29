@@ -1,8 +1,8 @@
-﻿@using ByteSizeLib;
-@inject AppState AppState
+﻿@inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
 @inject IJSRuntime js
+@implements IDisposable
 
 @if (carrier is not null)
 {
@@ -49,6 +49,9 @@
 	string? carrierDimensions = "";
 
 	FileType type = FileType.Image;
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	protected override void OnParametersSet()
 	{

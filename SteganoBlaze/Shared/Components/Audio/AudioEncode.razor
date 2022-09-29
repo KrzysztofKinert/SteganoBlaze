@@ -3,6 +3,7 @@
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
+@implements IDisposable
 
 <canvas hidden id="canvas"/>
 <MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
@@ -46,6 +47,9 @@
 	string? processingTask = "";
 
 	Stopwatch watch = new Stopwatch();
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task UpdateProgress(string progressBarText, int progressBarValue)
 	{

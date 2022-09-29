@@ -1,5 +1,7 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
+@inject AppState AppState
+@implements IDisposable
 
 <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
 	<MudListItem Class="py-0 my-0">
@@ -32,6 +34,9 @@
 	public EventCallback<WAV> OnAudioChanged { get; set; }
 
 	WAV? carrier;
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task GetCarrier(File file)
 	{

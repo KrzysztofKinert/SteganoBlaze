@@ -1,5 +1,6 @@
-﻿@using ByteSizeLib;
-@inject IStringLocalizer<Resource> Localize
+﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
 
 <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
     <MudListItem Class="py-0 my-0">
@@ -32,6 +33,9 @@
 	public EventCallback<Message> OnMessageChanged { get; set; }
 
 	Message? message;
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task GetMessage(File file)
 	{

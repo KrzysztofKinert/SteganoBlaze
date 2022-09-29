@@ -1,4 +1,6 @@
 ﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
 
 <MudList Clickable="false" Dense="true" Class="px-0 mx-0">
 	<MudListItem Class="pa-0 ma-0">
@@ -35,6 +37,21 @@
 	bool shouldRender;
 	IFile? previousCarrier;
 
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.OnChange += SetShouldRender;
+	}
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+		AppState.OnChange -= SetShouldRender;
+	}
+	void SetShouldRender()
+	{
+		shouldRender = true;
+		StateHasChanged();
+	}
 	protected override void OnParametersSet()
 	{
 		if (Carrier != previousCarrier)

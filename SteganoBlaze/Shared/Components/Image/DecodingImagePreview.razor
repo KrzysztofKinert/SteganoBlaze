@@ -1,4 +1,6 @@
 ﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
 
 <MudList Clickable="false" Dense="true">
 	<MudListItem Class="py-0 my-0">
@@ -30,6 +32,21 @@
 	bool shouldRender;
 	File? previousEncodedCarrier;
 
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.OnChange += SetShouldRender;
+	}
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+		AppState.OnChange -= SetShouldRender;
+	}
+	void SetShouldRender()
+	{
+		shouldRender = true;
+		StateHasChanged();
+	}
 	protected override void OnParametersSet()
 	{
 		if (EncodedCarrier != previousEncodedCarrier)

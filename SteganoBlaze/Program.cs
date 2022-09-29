@@ -27,20 +27,12 @@ builder.Services.AddLocalization();
 builder.Services.AddSingleton<AppState>();
 
 var host = builder.Build();
-
 var js = host.Services.GetRequiredService<IJSRuntime>();
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pl-Pl");
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("pl-Pl");
 
 var appState = host.Services.GetRequiredService<AppState>();
 appState.webPUnavailable = await js.InvokeAsync<bool>("disableWebP");
-
-CultureInfo culture;
-var result = await js.InvokeAsync<string>("getCulture");
-
-if (result != null)
-{
-    culture = new CultureInfo(result);
-    CultureInfo.DefaultThreadCurrentCulture = culture;
-    CultureInfo.DefaultThreadCurrentUICulture = culture;
-}
 
 await host.RunAsync();

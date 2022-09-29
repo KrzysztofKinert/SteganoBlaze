@@ -23,7 +23,7 @@
             G,
             B
         }
-
+        
         protected byte[] pixelData = Array.Empty<byte>();
         protected PixelParams parameters;
         protected int pixelIndex;

@@ -1,4 +1,6 @@
 ﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
 
 <MudDrawerHeader>
     <MudText Align="Align.Center" Typo="Typo.h6">SteganoBlaze</MudText>
@@ -13,4 +15,6 @@
 
 @code
 {
+    protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+    public void Dispose() { AppState.OnChange -= StateHasChanged; }
 }

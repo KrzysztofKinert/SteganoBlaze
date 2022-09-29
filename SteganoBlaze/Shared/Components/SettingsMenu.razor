@@ -1,7 +1,6 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject AppState AppState
 @inject IJSRuntime js
-@inject NavigationManager Nav
 @using System.Globalization
 
 <MudDrawerHeader>
@@ -32,20 +31,25 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await js.InvokeAsync<string>("getDarkMode");
-        if (Boolean.Parse(result) is true)
+        var browserLanguage = await js.InvokeAsync<string>("getLanguage");
+        cultureValue = (browserLanguage == "pl" || browserLanguage == "pl-PL") ? CultureInfo.GetCultureInfo("pl-Pl") : CultureInfo.GetCultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentCulture = cultureValue;
+        CultureInfo.DefaultThreadCurrentUICulture = cultureValue;
+        AppState.StateChanged();
+
+        if (await js.InvokeAsync<bool>("isDarkMode"))
             await ToggleDarkMode();
     }
     async Task ToggleDarkMode()
     {
         isDarkMode = !isDarkMode;
-        await js.InvokeVoidAsync("setDarkMode", isDarkMode.ToString());
         await OnDarkModeChanged.InvokeAsync(isDarkMode);
     }
     void CultureChanged(CultureInfo value)
     {
         cultureValue = value;
-        js.InvokeVoidAsync("setCulture", value.Name);
-        Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        CultureInfo.DefaultThreadCurrentCulture = cultureValue;
+        CultureInfo.DefaultThreadCurrentUICulture = cultureValue;
+        AppState.StateChanged();
     }
 }

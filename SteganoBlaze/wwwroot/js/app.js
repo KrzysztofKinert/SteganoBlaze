@@ -5,22 +5,37 @@
     saveLink.click();
 }
 
-function getPageTitle() {
-    return document.title;
+function getLanguage() {
+    return navigator.language;
 }
 
-function getCulture() {
-    return window.localStorage['Culture'];
+function isDarkMode() {
+    if (window.matchMedia) {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return true;
+        }
+    }
+    return false;
 }
 
-function setCulture(value) {
-    window.localStorage['Culture'] = value
-}
+function disableWebP() {
+    let userAgent = navigator.userAgent;
+    let browserName;
 
-function getDarkMode() {
-    return window.localStorage['DarkMode'];
-}
+    if (userAgent.match(/chrome|chromium|crios/i)) {
+        browserName = "chrome";
+    } else if (userAgent.match(/firefox|fxios/i)) {
+        browserName = "firefox";
+    } else if (userAgent.match(/safari/i)) {
+        browserName = "safari";
+    } else if (userAgent.match(/opr\//i)) {
+        browserName = "opera";
+    } else if (userAgent.match(/edg/i)) {
+        browserName = "edge";
+    } else {
+        browserName = "No browser detection";
+    }
 
-function setDarkMode(value) {
-    window.localStorage['DarkMode'] = value
+    if (browserName == "firefox" || browserName == "safari") return true;
+    else return false;
 }

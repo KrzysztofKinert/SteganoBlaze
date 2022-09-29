@@ -2,6 +2,8 @@
 @using System.Text;
 @inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
+@inject AppState AppState
+@implements IDisposable
 
 <canvas hidden id="canvas" />
 <MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
@@ -45,6 +47,9 @@
 	string contentType = "";
 	int fileSize;
 	bool isCompressed;
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task UpdateProgress(string progressBarText, int progressBarValue)
 	{

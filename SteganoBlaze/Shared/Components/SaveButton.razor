@@ -1,6 +1,8 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
 @inject IJSRuntime js
+@inject AppState AppState
+@implements IDisposable
 
 <a hidden id="saveLink" download="" href="" target="_blank"/>
 <MudButton HtmlTag="label"
@@ -14,8 +16,10 @@
 </MudButton>
 
 @code {
-	[Parameter]
-	public File? fileToSave { get; set; }
+	[Parameter] public File? fileToSave { get; set; }
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	protected async Task SaveFile()
 	{

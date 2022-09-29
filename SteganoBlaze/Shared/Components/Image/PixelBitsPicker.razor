@@ -1,5 +1,7 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
+@inject AppState AppState
+@implements IDisposable
 
 <MudText Typo="Typo.body1" Align="Align.Center">@Localize["PixelBitsToEncode"]</MudText>
 <MudDivider/>
@@ -21,6 +23,9 @@
 	int red { get; set; } = 1;
 	int green { get; set; } = 1;
 	int blue { get; set; } = 1;
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task RedBitsToEncodeChanged(int value)
 	{

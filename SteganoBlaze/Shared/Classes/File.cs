@@ -1,5 +1,4 @@
-﻿using ByteSizeLib;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using Microsoft.AspNetCore.Components.Forms;
 namespace SteganoBlaze.Shared.Classes
 {
     public enum FileType
@@ -44,7 +43,7 @@ namespace SteganoBlaze.Shared.Classes
         }
         public string SizeToString()
         {
-            return ByteSize.FromBytes(fileSize).ToString();
+            return ReduceSize.ToString(fileSize);
         }
     }
 }

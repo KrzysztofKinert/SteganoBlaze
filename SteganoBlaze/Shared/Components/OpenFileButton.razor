@@ -1,7 +1,7 @@
-﻿@using ByteSizeLib;
-@inject AppState AppState
+﻿@inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
+@implements IDisposable
 
 <InputFile hidden
            class="custom-file-input" 
@@ -32,6 +32,9 @@
     string accept = "";
     string icon = "";
     string text = "";
+
+    protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+    public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
     protected override void OnParametersSet()
     {
@@ -71,9 +74,9 @@
         if (e.File.Size > maxFileSize)
         {
             if (Type == FileType.Message) 
-                Snackbar.Add(Localize["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxMessageSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
             else 
-                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
             return;
         }
 
@@ -88,9 +91,9 @@
         catch
         {
             if (Type == FileType.Message) 
-                Snackbar.Add(Localize["MaxMessageSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxMessageSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
             else 
-                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ByteSize.FromBytes(maxFileSize).ToString(), Severity.Error);
+                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
             return;
         }
     }

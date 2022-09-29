@@ -1,4 +1,7 @@
 ﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
+
 <MudExpansionPanels Style="width:100%">
 	<MudExpansionPanel Dense="true">
 		<TitleContent>
@@ -61,6 +64,9 @@
 	bool scatteredEncodingEnabled = false;
 
 	Options options = new Options();
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task WebPEnabledChanged(bool value)
 	{

@@ -36,7 +36,6 @@ async function encryptData(secretData, password, salt, iv) {
         return encryptedContent;
 
     } catch (e) {
-        console.log(`Error - ${e}`);
         throw new Error();
         return "";
     }
@@ -55,7 +54,6 @@ async function decryptData(encryptedData, password, salt, iv) {
         );
         return decryptedData;
     } catch (e) {
-        console.log(`Error - ${e}`);
         throw new Error();
         return "";
     }

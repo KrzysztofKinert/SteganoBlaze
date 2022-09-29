@@ -2,6 +2,8 @@
 @using System.Text;
 @inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
+@inject AppState AppState
+@implements IDisposable
 
 <canvas hidden id="canvas"/>
 <MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
@@ -26,6 +28,8 @@
 	</MudListItem>
 </MudList>
 
+<div>@time2.ToString()</div>
+<div><br />@time3.ToString()</div>
 @code {
 	[Parameter] public bool CanEncode { get; set; } = false;
 
@@ -45,6 +49,14 @@
 	string? processingTask = "";
 
 	Stopwatch watch = new Stopwatch();
+
+	Stopwatch watch2 = new Stopwatch();
+	Stopwatch watch3 = new Stopwatch();
+	double time2 = 0;
+	double time3 = 0;
+
+	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
+	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task UpdateProgress(string progressBarText, int progressBarValue)
 	{
@@ -89,11 +101,8 @@
 			var encodedCarrierBytes = await EncodeFile(encoder);
 
 			await UpdateProgress(Localize["SavingImageData"], 80);
-			var jsInProcess = (IJSInProcessRuntime)js;
-			string encodedCarrierURL = jsInProcess.Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.webPFormatEnabled ?? false) ? "image/webp" : "image/png");
 
-			var contentType = encodedCarrierURL.Split(";", 2)[0].Substring(5);
-			var base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7);
+			string encodedCarrierURL = ((IJSInProcessRuntime)js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.webPFormatEnabled ?? false) ? "image/webp" : "image/png");
 
 			encodedCarrier = new File { base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
 										contentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),

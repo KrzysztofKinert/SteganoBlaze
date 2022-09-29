@@ -1,5 +1,6 @@
-﻿@using ByteSizeLib;
-@inject IStringLocalizer<Resource> Localize
+﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
 
 <MudText Typo="Typo.body1" Align="Align.Center">@Localize["EncodingInformation"]</MudText>
 <MudDivider />
@@ -37,6 +38,16 @@
 	long previousMessageSize;
 	bool shouldRender;
 
+	protected override void OnInitialized()
+	{ 
+		AppState.OnChange += StateHasChanged;
+		AppState.OnChange += SetShouldRender;
+	}
+	public void Dispose()
+	{ 
+		AppState.OnChange -= StateHasChanged;
+		AppState.OnChange -= SetShouldRender;
+	}
 	protected override async Task OnParametersSetAsync()
 	{
 		if (Capacity != previousCapacity || MessageSize != previousMessageSize)
@@ -50,6 +61,11 @@
 			shouldRender = false;
 	}
 	protected override bool ShouldRender() => shouldRender;
+	void SetShouldRender() 
+	{ 
+		shouldRender = true;
+		StateHasChanged();
+	}
 
 	async Task CheckCapacity()
 	{
@@ -64,7 +80,7 @@
 
 		if (Capacity != 0)
 		{
-			carrierCapacity = ByteSize.FromBytes(Capacity).ToString();
+			carrierCapacity = ReduceSize.ToString(Capacity);
 
 			if (MessageSize != 0)
 			{

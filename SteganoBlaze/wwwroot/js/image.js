@@ -1,26 +1,4 @@
-﻿function disableWebP() {
-    let userAgent = navigator.userAgent;
-    let browserName;
-
-    if (userAgent.match(/chrome|chromium|crios/i)) {
-        browserName = "chrome";
-    } else if (userAgent.match(/firefox|fxios/i)) {
-        browserName = "firefox";
-    } else if (userAgent.match(/safari/i)) {
-        browserName = "safari";
-    } else if (userAgent.match(/opr\//i)) {
-        browserName = "opera";
-    } else if (userAgent.match(/edg/i)) {
-        browserName = "edge";
-    } else {
-        browserName = "No browser detection";
-    }
-
-    if (browserName == "firefox" || browserName == "safari") return true;
-    else return false;
-}
-
-function getImageWidth() {
+﻿function getImageWidth() {
     var image = document.getElementById('carrierImage');
     return image.width;
 }
@@ -30,14 +8,14 @@ function getImageHeight() {
     return image.height;
 }
 
-function getImageData() {
+async function getImageData() {
     var img = document.getElementById('carrierImage');
     var canvas = document.getElementById('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
     var ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
-    const data = ctx.getImageData(0, 0, img.width, img.height).data;
+    const data = await ctx.getImageData(0, 0, img.width, img.height).data;
     return data;
 }
 
