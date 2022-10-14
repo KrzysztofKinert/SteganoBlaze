@@ -1,20 +1,8 @@
-﻿namespace SteganoBlaze.Shared.Classes
+﻿using SteganoBlaze.Enums;
+using SteganoBlaze.Models;
+
+namespace SteganoBlaze.Steganography
 {
-    public enum PixelOrder
-    {
-        Sequential,
-        Random
-    }
-    public readonly struct PixelParams
-    {
-        public readonly PixelOrder pixelOrder;
-        public readonly PixelBits pixelBitsToUse;
-        public PixelParams(PixelOrder order, PixelBits bits)
-        {
-            pixelOrder = order;
-            pixelBitsToUse = bits;
-        }
-    }
     public abstract class ImageSteganography
     {
         protected enum Channel
@@ -23,8 +11,9 @@
             G,
             B
         }
-        
-        protected byte[] pixelData = Array.Empty<byte>();
+
+        protected byte[]? pixelData;
+
         protected PixelParams parameters;
         protected int pixelIndex;
         protected int[] channelBitsLeft = new int[3];
@@ -36,6 +25,9 @@
 
         protected void FirstPixel()
         {
+            if (pixelData is null)
+                throw new Exception();
+
             channel = Channel.R;
             channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
             channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
@@ -56,6 +48,9 @@
         }
         protected void NextPixel()
         {
+            if (pixelData is null)
+                throw new Exception();
+
             channel = Channel.R;
             channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
             channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
@@ -73,8 +68,10 @@
                     break;
             }
         }
-        protected int BitIndex() { return channelBitsLeft[(int)channel] - 1; }
-        protected int ChannelIndex() { return pixelIndex + (int)channel; }
+        protected int BitIndex() =>
+            channelBitsLeft[(int)channel] - 1;
+        protected int ChannelIndex() =>
+            pixelIndex + (int)channel;
     }
     public class ImageEncoder : ImageSteganography
     {
@@ -93,44 +90,39 @@
             foreach (byte byteToEncode in bytesToEncode)
                 EncodeByte(byteToEncode);
         }
-        public byte[] GetEncodedCarrier()
-        {
-            return pixelData;
-        }
+        public byte[] GetEncodedCarrier() =>
+            pixelData is null ? throw new Exception() : pixelData;
+
         private void EncodeByte(byte byteValue)
         {
+            if (pixelData is null)
+                throw new Exception();
+
             int encodedBits = 0;
             while (encodedBits < 8)
             {
                 while (channelBitsLeft[(int)channel] > 0)
                 {
-                    pixelData[ChannelIndex()] = byteValue % 2 == 1 ? SetBit(pixelData[ChannelIndex()], BitIndex()) 
+                    pixelData[ChannelIndex()] = byteValue % 2 == 1 ? SetBit(pixelData[ChannelIndex()], BitIndex())
                                                                    : ClearBit(pixelData[ChannelIndex()], BitIndex());
-                    
+
                     byteValue /= 2;
                     channelBitsLeft[(int)channel]--;
                     encodedBits++;
 
-                    if (encodedBits == 8) 
+                    if (encodedBits == 8)
                         return;
                 }
-
-                switch (channel)
-                {
-                    case Channel.R:
-                        channel = Channel.G;
-                        break;
-                    case Channel.G:
-                        channel = Channel.B;
-                        break;
-                    case Channel.B:
-                        NextPixel();
-                        break;  
-                }
+                if (channel == Channel.B)
+                    NextPixel();
+                else
+                    channel++;
             }
         }
-        private static byte SetBit(byte value, int bitIndex) { return value |= (byte)(1 << bitIndex); }
-        private static byte ClearBit(byte value, int bitIndex) { return value &= (byte)~(1 << bitIndex); }
+        private static byte SetBit(byte value, int bitIndex) =>
+            value |= (byte)(1 << bitIndex);
+        private static byte ClearBit(byte value, int bitIndex) =>
+            value &= (byte)~(1 << bitIndex);
     }
     public class ImageDecoder : ImageSteganography
     {
@@ -146,7 +138,7 @@
         }
         public byte[] Decode(int bytesToDecode)
         {
-            List<byte> decodedBytes = new List<byte>();
+            List<byte> decodedBytes = new();
             for (int i = 0; i < bytesToDecode; i++)
                 decodedBytes.Add(DecodeByte());
 
@@ -154,32 +146,37 @@
         }
         private byte DecodeByte()
         {
+            if (pixelData is null)
+                throw new Exception();
+
             int decodedByte = 0;
             int decodedBits = 0;
             while (decodedBits < 8)
             {
                 while (channelBitsLeft[(int)channel] > 0)
                 {
-                    int bitSign = pixelData[ChannelIndex()] / ((int)Math.Pow(2, BitIndex())) % 2;
-                    decodedByte += (int)Math.Pow(2, 7 - decodedBits) * bitSign;
+                    //int bitSign = pixelData[ChannelIndex()] / (int)Math.Pow(2, BitIndex()) % 2;
+                    //decodedByte += (int)Math.Pow(2, 7 - decodedBits) * bitSign;
+                    decodedByte += BitSign(pixelData[ChannelIndex()], BitIndex()) << 7 - decodedBits;
+
 
                     channelBitsLeft[(int)channel]--;
                     decodedBits++;
 
-                    if (decodedBits == 8) 
+                    if (decodedBits == 8)
                         return Convert.ToByte(ReverseBits(decodedByte));
                 }
 
                 if (channel == Channel.B)
                     NextPixel();
-                else 
+                else
                     channel++;
             }
             return Convert.ToByte(ReverseBits(decodedByte));
         }
         public static List<PixelParams> GenerateParams()
         {
-            List<PixelBits> bitsToCheck = new List<PixelBits>();
+            List<PixelBits> bitsToCheck = new();
             for (int r = 0; r < 9; r++)
             {
                 for (int g = 0; g < 9; g++)
@@ -192,14 +189,16 @@
                 }
             }
 
-            List<PixelParams> paramsToCheck = new List<PixelParams>();
-            foreach(PixelBits pixelBits in bitsToCheck)
+            List<PixelParams> paramsToCheck = new();
+            foreach (PixelBits pixelBits in bitsToCheck)
                 paramsToCheck.Add(new PixelParams(PixelOrder.Sequential, pixelBits));
             foreach (PixelBits pixelBits in bitsToCheck)
                 paramsToCheck.Add(new PixelParams(PixelOrder.Random, pixelBits));
             return paramsToCheck;
         }
-        private static int ReverseBits(int value)
+        private static int BitSign(uint value, int bitIndex) =>
+            (value & 1 << bitIndex) != 0 ? 1 : 0;
+        protected static int ReverseBits(int value)
         {
             int result = 0;
             for (int i = 0; i < 8; i++)

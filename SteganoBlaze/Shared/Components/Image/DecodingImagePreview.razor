@@ -51,7 +51,7 @@
 	{
 		if (EncodedCarrier != previousEncodedCarrier)
 		{
-			source = "data:" + (EncodedCarrier?.contentType ?? "") + ";base64," + (EncodedCarrier?.base64Data ?? "");
+			source = "data:" + (EncodedCarrier?.ContentType ?? "") + ";base64," + (EncodedCarrier?.base64Data ?? "");
 			previousEncodedCarrier = EncodedCarrier;
 			shouldRender = true;
 		}

@@ -1,5 +1,6 @@
 ﻿@page "/ImageEncodingPage"
-@using SteganoBlaze.Shared.Components.Image;
+@using SteganoBlaze.Shared.Components.Image
+@using SteganoBlaze.Models
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
@@ -29,7 +30,7 @@
 	<MudItem xs="12" sm="6">
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
 			<EncodingInformation 
-				Capacity=@((carrier?.width ?? 0) * (carrier?.height ?? 0) * options.bitsToEncode.GetBitSum() / 8.0)
+				Capacity=@((carrier?.width ?? 0) * (carrier?.height ?? 0) * options.BitsToEncode.GetBitSum() / 8.0)
 				MessageSize=@(message?.GetMessageSize() ?? 0)
 				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
 			</EncodingInformation>
@@ -42,7 +43,7 @@
 			{
 				<EncodingOptions 
 						Disabled=@processing
-						OnOptionsChanged=@((Options o) => OptionsChanged(o))>
+						OnOptionsChanged=@((SteganographyOptions o) => OptionsChanged(o))>
 				</EncodingOptions>
 			}
 			else
@@ -50,7 +51,7 @@
 				<EncodingOptions 
 						Disabled=@processing
 						OnWebPEnabledChagned=@((bool w) => WebPEnabledChanged(w))
-						OnOptionsChanged=@((Options o) => OptionsChanged(o))>
+						OnOptionsChanged=@((SteganographyOptions o) => OptionsChanged(o))>
 				</EncodingOptions>
 			}
         </MudPaper>
@@ -87,7 +88,7 @@
 	bool validPassword = true;
 	bool processing = false;
 
-	ImageOptions options = new ImageOptions();
+	ImageSteganographyOptions options = new ImageSteganographyOptions();
 
 	protected override void OnInitialized()
 	{
@@ -95,11 +96,11 @@
 		AppState.SetPageTheme(Color.Primary, "ImageEncoding");
 	}
 
-	void PixelBitsChanged(PixelBits bits) { options.bitsToEncode = bits; }
+	void PixelBitsChanged(PixelBits bits) { options.BitsToEncode = bits; }
 	void MessageFitsChanged(bool value) { messageFits = value; }
-	void ProcessingChanged(bool value) { processing = value; }
+	void ProcessingChanged(bool value) => processing = value;
 	void EncodedCarrierChanged(File value) { encodedCarrier = value; }
-	void WebPEnabledChanged(bool value) { options.webPFormatEnabled = value; }
+	void WebPEnabledChanged(bool value) { options.WebPFormatEnabled = value; }
 	void CarrierChanged(Image newCarrier)
 	{
 		encodedCarrier = null;
@@ -109,20 +110,20 @@
 	{
 		messageDecompressed = null;
 		message = newMessage;
-		if(options.compressionEnabled is true)
+		if(options.CompressionEnabled is true)
 			await ChangeCompression(true);
 	}
-	async Task OptionsChanged(Options value)
+	async Task OptionsChanged(SteganographyOptions value)
 	{
-		if (options.compressionEnabled != value.compressionEnabled)
-			await ChangeCompression(value.compressionEnabled);
+		if (options.CompressionEnabled != value.CompressionEnabled)
+			await ChangeCompression(value.CompressionEnabled);
 
-		options.compressionEnabled = value.compressionEnabled;
-		options.encryptionEnabled = value.encryptionEnabled;
-		options.scatteredEncodingEnabled = value.scatteredEncodingEnabled;
-		options.password = value.password;
+		options.CompressionEnabled = value.CompressionEnabled;
+		options.EncryptionEnabled = value.EncryptionEnabled;
+		options.ScatteredEncodingEnabled = value.ScatteredEncodingEnabled;
+		options.Password = value.Password;
 
-		validPassword = (options.encryptionEnabled is false || (options.encryptionEnabled is true && options.password is not null)) ? true : false;
+		validPassword = (options.EncryptionEnabled is false || (options.EncryptionEnabled is true && options.Password is not null)) ? true : false;
 	}
 
 	async Task ChangeCompression(bool compressionEnabled)

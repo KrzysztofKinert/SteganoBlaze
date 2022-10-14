@@ -1,5 +1,5 @@
 ﻿@using System.Diagnostics
-@using System.Text;
+@using System.Text
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
@@ -35,7 +35,7 @@
 
 	[Parameter] public Message? Message { get; set; }
 
-	[Parameter] public AudioOptions? Options { get; set; }
+	[Parameter] public AudioSteganographyOptions? Options { get; set; }
 
 	[Parameter] public EventCallback<bool> OnProcessingChanged { get; set; }
 
@@ -70,7 +70,7 @@
 		await OnProcessingChanged.InvokeAsync(true);
 		encodedCarrier = null;
 
-		if (Options.password is not null)
+		if (Options.Password is not null)
 		{
 			try
 			{
@@ -86,10 +86,10 @@
 
 		try
 		{
-			SampleParams sampleParams = new SampleParams(Options.scatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.bitsToEncode);
+			SampleParams sampleParams = new SampleParams(Options.ScatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.BitsToEncode);
 			AudioEncoder encoder = new AudioEncoder(Carrier, sampleParams);
 
-			encodedCarrier = new File { base64Data = Convert.ToBase64String(await EncodeFile(encoder)), contentType = Carrier.contentType, fileName = AddSuffix(Carrier.fileName) };
+			encodedCarrier = new File { base64Data = Convert.ToBase64String(await EncodeFile(encoder)), ContentType = Carrier.ContentType, FileName = AddSuffix(Carrier.FileName) };
 		}
 		catch
 		{
@@ -131,10 +131,10 @@
 
 	protected async Task EncryptMessage()
 	{
-		if (Message is null || Options?.password is null)
+		if (Message is null || Options?.Password is null)
 			return;
 
-		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.password);
+		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.Password);
 		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
 		byte[] ivHeader = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
 		byte[] ivFile = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);

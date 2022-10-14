@@ -1,4 +1,4 @@
-﻿namespace SteganoBlaze.Shared.Classes
+﻿namespace SteganoBlaze.Models
 {
     public class Image : File
     {
@@ -9,9 +9,9 @@
         public Image(File file)
         {
             base64Data = file.base64Data;
-            contentType = file.contentType;
-            fileName = file.fileName;
-            fileSize = file.fileSize;
+            ContentType = file.ContentType;
+            FileName = file.FileName;
+            FileSize = file.FileSize;
         }
     }
 }

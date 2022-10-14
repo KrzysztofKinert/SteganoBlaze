@@ -6,7 +6,7 @@
 
 @if (carrier is not null)
 {
-	<img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@carrier.contentType;base64,@carrier.base64Data" />
+	<img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@carrier.ContentType;base64,@carrier.base64Data" />
 }
 
 <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
@@ -14,7 +14,7 @@
 		<OpenFileButton Disabled=@Disabled Type=@type OnFileOpened=@((File file) => GetCarrier(file))/>
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
-		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(carrier?.fileName ?? "")</MudText>
+		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(carrier?.FileName ?? "")</MudText>
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
 		<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">

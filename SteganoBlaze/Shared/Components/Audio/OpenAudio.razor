@@ -8,7 +8,7 @@
 		<OpenFileButton Disabled=@Disabled Type=@FileType.Audio OnFileOpened=@((File file) => GetCarrier(file)) />
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
-		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(carrier?.fileName ?? "")</MudText>
+		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(carrier?.FileName ?? "")</MudText>
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
 		<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">

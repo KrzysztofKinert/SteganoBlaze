@@ -1,22 +1,10 @@
-﻿namespace SteganoBlaze.Shared.Classes
+﻿using SteganoBlaze.Enums;
+using SteganoBlaze.Models;
+
+namespace SteganoBlaze.Steganography
 {
-    public enum SampleOrder
-    {
-        Sequential,
-        Random
-    }
-    public readonly struct SampleParams
-    {
-        public readonly SampleOrder sampleOrder;
-        public readonly int sampleBitsToUse;
-        public SampleParams(SampleOrder order, int bits)
-        {
-            sampleOrder = order;
-            sampleBitsToUse = bits;
-        }
-    }
     public abstract class AudioSteganography
-	{
+    {
         protected WAV? carrier;
 
         protected SampleParams parameters;
@@ -26,10 +14,10 @@
         protected int randomSeed;
         protected Random? generator;
         protected HashSet<int>? usedSamples;
-
         protected void FirstSample()
         {
-            if (carrier is null) throw new Exception();
+            if (carrier is null) 
+                throw new Exception();
 
             sampleBitsLeft = parameters.sampleBitsToUse;
             switch (parameters.sampleOrder)
@@ -47,7 +35,8 @@
         }
         protected void NextSample()
         {
-            if (carrier is null) throw new Exception();
+            if (carrier is null) 
+                throw new Exception();
 
             sampleBitsLeft = parameters.sampleBitsToUse;
             switch (parameters.sampleOrder)
@@ -62,10 +51,11 @@
                     break;
             }
         }
-        protected int BitIndex() { return sampleBitsLeft - 1; }
+        protected int BitIndex() 
+            => sampleBitsLeft - 1;
     }
-	public class AudioEncoder : AudioSteganography
-	{
+    public class AudioEncoder : AudioSteganography
+    {
         public AudioEncoder(WAV audio, SampleParams sampleParams)
         {
             carrier = audio.Clone();
@@ -78,14 +68,12 @@
             foreach (byte byteToEncode in bytesToEncode)
                 EncodeByte(byteToEncode);
         }
-        public byte[] GetEncodedCarrier()
-        {
-            return carrier is null ? throw new Exception() : carrier.GetData();
-        }
+        public byte[] GetEncodedCarrier() =>
+            carrier is null ? throw new Exception() : carrier.GetData();
 
         private void EncodeByte(byte byteValue)
         {
-            if (carrier is null) 
+            if (carrier is null)
                 throw new Exception();
 
             int encodedBits = 0;
@@ -94,12 +82,12 @@
                 uint sample = carrier.GetSample(sampleIndex);
                 while (sampleBitsLeft > 0)
                 {
-                    sample = (byteValue % 2 == 1) ? SetBit(sample, BitIndex()) : ClearBit(sample, BitIndex());
+                    sample = byteValue % 2 == 1 ? SetBit(sample, BitIndex()) : ClearBit(sample, BitIndex());
                     byteValue /= 2;
 
                     sampleBitsLeft--;
                     encodedBits++;
-                    
+
                     if (encodedBits == 8)
                     {
                         carrier.SetSample(sampleIndex, sample);
@@ -110,8 +98,10 @@
                 NextSample();
             }
         }
-        private static uint SetBit(uint value, int bitIndex) { return value |= (uint)(1 << bitIndex); }
-        private static uint ClearBit(uint value, int bitIndex) { return value &= (uint)~(1 << bitIndex); }
+        private static uint SetBit(uint value, int bitIndex) =>
+            value |= (uint)(1 << bitIndex);
+        private static uint ClearBit(uint value, int bitIndex) =>
+            value &= (uint)~(1 << bitIndex);
     }
     public class AudioDecoder : AudioSteganography
     {
@@ -124,7 +114,7 @@
         }
         public byte[] Decode(int bytesToDecode)
         {
-            List<byte> decodedBytes = new List<byte>();
+            List<byte> decodedBytes = new();
             for (int i = 0; i < bytesToDecode; i++)
                 decodedBytes.Add(DecodeByte());
 
@@ -141,7 +131,7 @@
                 uint sample = carrier.GetSample(sampleIndex);
                 if (sampleBitsLeft > 0)
                 {
-                    decodedByte += BitSign(sample, BitIndex()) << (7 - decodedBits);
+                    decodedByte += BitSign(sample, BitIndex()) << 7 - decodedBits;
 
                     sampleBitsLeft--;
                     decodedBits++;
@@ -153,15 +143,17 @@
         }
         public static List<SampleParams> GenerateParams(int maxSampleBits)
         {
-            List<SampleParams> paramsToCheck = new List<SampleParams>();
+            List<SampleParams> paramsToCheck = new();
             for (int bits = 1; bits <= maxSampleBits; bits++)
                 paramsToCheck.Add(new SampleParams(SampleOrder.Sequential, bits));
             for (int bits = 1; bits <= maxSampleBits; bits++)
                 paramsToCheck.Add(new SampleParams(SampleOrder.Random, bits));
             return paramsToCheck;
         }
-        private static int BitSign(uint value, int bitIndex) { return ((value & (1 << bitIndex)) != 0) ? 1 : 0; }
-        private static int ReverseBits(int value)
+        private static int BitSign(uint value, int bitIndex) =>
+            (value & 1 << bitIndex) != 0 ? 1 : 0;
+
+        protected static int ReverseBits(int value)
         {
             int result = 0;
             for (int i = 0; i < 8; i++)

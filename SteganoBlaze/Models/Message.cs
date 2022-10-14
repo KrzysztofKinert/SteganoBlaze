@@ -1,5 +1,7 @@
 ﻿using System.Text;
-namespace SteganoBlaze.Shared.Classes
+using SteganoBlaze.Shared.Classes;
+
+namespace SteganoBlaze.Models
 {
     public class Message
     {
@@ -16,9 +18,9 @@ namespace SteganoBlaze.Shared.Classes
 
         public Message(File file)
         {
-            fileData = file.byteData;
-            contentType = file.contentType;
-            fileName = file.fileName;
+            fileData = file.ByteData;
+            contentType = file.ContentType;
+            fileName = file.FileName;
             isCompressed = false;
             UpdateHeader();
         }
@@ -50,30 +52,31 @@ namespace SteganoBlaze.Shared.Classes
 
             header = headerList.ToArray();
         }
-        public int GetMessageSize() { return header.Length + fileData.Length; }
-        //public string SizeToString() { return ByteSize.FromBytes(GetMessageSize()).ToString(); }
-        public string SizeToString() { return ReduceSize.ToString(GetMessageSize()); }
+        public int GetMessageSize() =>
+            header.Length + fileData.Length;
+        public string SizeToString() =>
+            ReduceSize.ToString(GetMessageSize());
         public static File ParseMetadata(byte[] header, ref bool isCompressed)
         {
-            File file = new File();
+            File file = new();
 
             int offset = 0;
             if (Encoding.UTF8.GetString(header, offset, 4) != "NAME")
                 throw new Exception();
             int fileNameSize = BitConverter.ToInt16(header, offset + 4);
-            file.fileName = Encoding.UTF8.GetString(header, offset + 6, fileNameSize);
+            file.FileName = Encoding.UTF8.GetString(header, offset + 6, fileNameSize);
 
             offset += fileNameSize + 6;
             var lol = Encoding.UTF8.GetString(header, offset, 4);
             if (Encoding.UTF8.GetString(header, offset, 4) != "TYPE")
                 throw new Exception();
             int contentTypeSize = BitConverter.ToInt16(header, offset + 4);
-            file.contentType = Encoding.UTF8.GetString(header, offset + 6, contentTypeSize);
+            file.ContentType = Encoding.UTF8.GetString(header, offset + 6, contentTypeSize);
 
             offset += contentTypeSize + 6;
             if (Encoding.UTF8.GetString(header, offset, 4) != "SIZE")
                 throw new Exception();
-            file.fileSize = BitConverter.ToInt32(header, offset + 4);
+            file.FileSize = BitConverter.ToInt32(header, offset + 4);
 
             offset += 8;
             if (Encoding.UTF8.GetString(header, offset, 4) != "CMPR")

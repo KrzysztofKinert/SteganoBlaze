@@ -1,5 +1,5 @@
 ﻿@page "/AudioEncodingPage"
-@using SteganoBlaze.Shared.Components.Audio;
+@using SteganoBlaze.Shared.Components.Audio
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
@@ -30,7 +30,7 @@
 	<MudItem xs="12" sm="6">
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
 			<EncodingInformation 
-				Capacity=@((carrier?.GetSampleCount() ?? 0) * options.bitsToEncode / 8.0)
+				Capacity=@((carrier?.GetSampleCount() ?? 0) * options.BitsToEncode / 8.0)
 				MessageSize=@(message?.GetMessageSize() ?? 0)
 				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
 			</EncodingInformation>
@@ -41,7 +41,7 @@
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
 			<EncodingOptions 
 					Disabled=@processing
-					OnOptionsChanged=@((Options o) => OptionsChanged(o))>
+					OnOptionsChanged=@((SteganographyOptions o) => OptionsChanged(o))>
 			</EncodingOptions>
         </MudPaper>
 	</MudItem>
@@ -85,7 +85,7 @@
 	bool validPassword = true;
 	bool processing = false;
 
-	AudioOptions options = new AudioOptions();
+	AudioSteganographyOptions options = new AudioSteganographyOptions();
 
 	protected override void OnInitialized()
 	{
@@ -114,20 +114,20 @@
 	{
 		messageDecompressed = null;
 		message = newMessage;
-		if(options.compressionEnabled is true)
+		if(options.CompressionEnabled is true)
 			await ChangeCompression(true);
 	}
-	async Task OptionsChanged(Options value)
+	async Task OptionsChanged(SteganographyOptions value)
 	{
-		if (options.compressionEnabled != value.compressionEnabled)
-			await ChangeCompression(value.compressionEnabled);
+		if (options.CompressionEnabled != value.CompressionEnabled)
+			await ChangeCompression(value.CompressionEnabled);
 
-		options.compressionEnabled = value.compressionEnabled;
-		options.encryptionEnabled = value.encryptionEnabled;
-		options.scatteredEncodingEnabled = value.scatteredEncodingEnabled;
-		options.password = value.password;
+		options.CompressionEnabled = value.CompressionEnabled;
+		options.EncryptionEnabled = value.EncryptionEnabled;
+		options.ScatteredEncodingEnabled = value.ScatteredEncodingEnabled;
+		options.Password = value.Password;
 
-		if (options.encryptionEnabled is false || (options.encryptionEnabled is true && options.password is not null))
+		if (options.EncryptionEnabled is false || (options.EncryptionEnabled is true && options.Password is not null))
 			validPassword = true;
 		else
 			validPassword = false;
@@ -160,7 +160,7 @@
 	}
 	void SampleBitsToEncodeChanged(int value)
 	{
-		options.bitsToEncode = value;
+		options.BitsToEncode = value;
 	}
 	public void Dispose()
 	{

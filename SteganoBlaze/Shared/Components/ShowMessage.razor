@@ -15,7 +15,7 @@
         </MudButton>
 	</MudListItem>
 	<MudListItem Class="py-0 my-0">
-		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(Message?.fileName ?? "")</MudText>
+		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(Message?.FileName ?? "")</MudText>
 		</MudListItem>
 		<MudListItem Class="py-0 my-0">
 			<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
@@ -26,7 +26,7 @@
 				<MudListItem DisableGutters="true" Class="py-0 my-0">
 					<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
 						<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Type"]:</MudText>
-						<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(Message?.contentType ?? "")</MudText>
+						<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(Message?.ContentType ?? "")</MudText>
 					</MudContainer>
 				</MudListItem>
 			</MudList>

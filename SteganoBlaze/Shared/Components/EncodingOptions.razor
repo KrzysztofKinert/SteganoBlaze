@@ -54,7 +54,7 @@
 @code {
 	[Parameter] public bool Disabled { get; set; } = false;
 
-	[Parameter] public EventCallback<Options> OnOptionsChanged { get; set; }
+	[Parameter] public EventCallback<SteganographyOptions> OnOptionsChanged { get; set; }
 
 	[Parameter] public EventCallback<bool> OnWebPEnabledChagned { get; set; }
 
@@ -63,7 +63,7 @@
 	bool encryptionEnabled = false;
 	bool scatteredEncodingEnabled = false;
 
-	Options options = new Options();
+	SteganographyOptions options = new SteganographyOptions();
 
 	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
 	public void Dispose() { AppState.OnChange -= StateHasChanged; }
@@ -76,24 +76,24 @@
 	async Task CompressionEnabledChanged(bool value)
 	{
 		compressionEnabled = value;
-		options.compressionEnabled = compressionEnabled;
+		options.CompressionEnabled = compressionEnabled;
 		await OnOptionsChanged.InvokeAsync(options);
 	}
 	async Task ScatteredEncodingEnabledChanged(bool value)
 	{
 		scatteredEncodingEnabled = value;
-		options.scatteredEncodingEnabled = scatteredEncodingEnabled;
+		options.ScatteredEncodingEnabled = scatteredEncodingEnabled;
 		await OnOptionsChanged.InvokeAsync(options); 
 	}
 	async Task EncryptionEnabledChanged(bool value)
 	{
 		encryptionEnabled = value;
-		options.encryptionEnabled = encryptionEnabled;
+		options.EncryptionEnabled = encryptionEnabled;
 		await OnOptionsChanged.InvokeAsync(options);
 	}
 	async Task PasswordChanged(string? value)
 	{
-		options.password = value;
+		options.Password = value;
 		await OnOptionsChanged.InvokeAsync(options);
 	}
 

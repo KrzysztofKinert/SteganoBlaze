@@ -1,5 +1,5 @@
 ﻿@using System.Diagnostics
-@using System.Text;
+@using System.Text
 @inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
 @inject AppState AppState
@@ -28,8 +28,6 @@
 	</MudListItem>
 </MudList>
 
-<div>@time2.ToString()</div>
-<div><br />@time3.ToString()</div>
 @code {
 	[Parameter] public bool CanEncode { get; set; } = false;
 
@@ -37,7 +35,7 @@
 
 	[Parameter] public Message? Message { get; set; }
 
-	[Parameter] public ImageOptions? Options { get; set; }
+	[Parameter] public ImageSteganographyOptions? Options { get; set; }
 
 	[Parameter] public EventCallback<bool> OnProcessingChanged { get; set; }
 
@@ -49,11 +47,6 @@
 	string? processingTask = "";
 
 	Stopwatch watch = new Stopwatch();
-
-	Stopwatch watch2 = new Stopwatch();
-	Stopwatch watch3 = new Stopwatch();
-	double time2 = 0;
-	double time3 = 0;
 
 	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
 	public void Dispose() { AppState.OnChange -= StateHasChanged; }
@@ -80,7 +73,7 @@
 		await UpdateProgress(Localize["ReadingImageData"], 0);
 		Carrier.pixelData = await JSInterop.ReadStream(js, "getImageData");
 
-		if (Options.password is not null)
+		if (Options.Password is not null)
 		{
 			try
 			{
@@ -96,17 +89,17 @@
 
 		try
 		{
-			PixelParams sampleParams = new PixelParams(Options.scatteredEncodingEnabled ? PixelOrder.Random : PixelOrder.Sequential, Options.bitsToEncode);
+			PixelParams sampleParams = new PixelParams(Options.ScatteredEncodingEnabled ? PixelOrder.Random : PixelOrder.Sequential, Options.BitsToEncode);
 			ImageEncoder encoder = new ImageEncoder(Carrier, sampleParams);
 			var encodedCarrierBytes = await EncodeFile(encoder);
 
 			await UpdateProgress(Localize["SavingImageData"], 80);
 
-			string encodedCarrierURL = ((IJSInProcessRuntime)js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.webPFormatEnabled ?? false) ? "image/webp" : "image/png");
+			string encodedCarrierURL = ((IJSInProcessRuntime)js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.WebPFormatEnabled ?? false) ? "image/webp" : "image/png");
 
 			encodedCarrier = new File { base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
-										contentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),
-										fileName = AddSuffix(Carrier.fileName) };
+										ContentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),
+										FileName = AddSuffix(Carrier.FileName) };
 		}
 		catch
 		{
@@ -147,10 +140,10 @@
 	}
 	async Task EncryptMessage()
 	{
-		if (Message is null || Options?.password is null)
+		if (Message is null || Options?.Password is null)
 			return;
 
-		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.password);
+		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.Password);
 		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
 		byte[] ivHeader = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
 		byte[] ivFile = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
@@ -165,6 +158,6 @@
 	string AddSuffix(string fileName)
 	{
 		string name = Path.GetFileNameWithoutExtension(fileName);
-		return (Options?.webPFormatEnabled ?? false) ? String.Concat(name, Localize["_encoded"], ".webp") : String.Concat(name, Localize["_encoded"], ".png");
+		return (Options?.WebPFormatEnabled ?? false) ? String.Concat(name, Localize["_encoded"], ".webp") : String.Concat(name, Localize["_encoded"], ".png");
 	}
 }

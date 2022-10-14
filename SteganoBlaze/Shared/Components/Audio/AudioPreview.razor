@@ -56,7 +56,7 @@
 	{
 		if (Carrier != previousCarrier)
 		{
-			source = Carrier is null ? null : "data:" + Carrier.contentType + ";base64," + Carrier.base64Data;
+			source = Carrier is null ? null : "data:" + Carrier.ContentType + ";base64," + Carrier.base64Data;
 			previousCarrier = Carrier;
 			shouldRender = true;
 		}

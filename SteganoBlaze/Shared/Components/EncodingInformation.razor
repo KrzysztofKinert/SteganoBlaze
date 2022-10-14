@@ -21,14 +21,11 @@
 </MudList>
 
 @code {
-	[Parameter]
-	public double Capacity { get; set; }
+	[Parameter] public double Capacity { get; set; }
 
-	[Parameter]
-	public long MessageSize { get; set; }
+	[Parameter] public long MessageSize { get; set; }
 
-	[Parameter]
-	public EventCallback<bool> OnMessageFitsChanged { get; set; }
+	[Parameter] public EventCallback<bool> OnMessageFitsChanged { get; set; }
 
 	string carrierCapacity = "-";
 	string carrierUsage = "-";

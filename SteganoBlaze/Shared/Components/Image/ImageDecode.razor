@@ -1,5 +1,5 @@
 ﻿@using System.Diagnostics
-@using System.Text;
+@using System.Text
 @inject IStringLocalizer<Resource> Localize
 @inject IJSRuntime js
 @inject AppState AppState
@@ -91,7 +91,7 @@
 				}
 
 				await UpdateProgress(Localize["SavingMessageData"], 90);
-				message = new File { base64Data = Convert.ToBase64String(file), contentType = contentType, fileName = fileName, fileSize = fileSize };
+				message = new File { base64Data = Convert.ToBase64String(file), ContentType = contentType, FileName = fileName, FileSize = fileSize };
 
 				await OnMessageChanged.InvokeAsync(message);
 				await OnProcessingChanged.InvokeAsync(false);
