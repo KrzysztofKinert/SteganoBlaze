@@ -1,10 +1,7 @@
-﻿namespace SteganoBlaze.Shared.Classes
+﻿using SteganoBlaze.Shared.Enums;
+
+namespace SteganoBlaze.Shared.Classes
 {
-    public enum SampleOrder
-    {
-        Sequential,
-        Random
-    }
     public readonly struct SampleParams
     {
         public readonly SampleOrder sampleOrder;

@@ -1,22 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
+using SteganoBlaze.Shared.Interfaces;
+
 namespace SteganoBlaze.Shared.Classes
 {
-    public enum FileType
-    {
-        Image,
-        EncodedImage,
-        Audio,
-        Message
-    }
-    public interface IFile
-    {
-        public byte[] byteData { get; set; }
-        public string base64Data { get; set; }
-        public string contentType { get; set; }
-        public string fileName { get; set; }
-        public int fileSize { get; set; }
-    }
-
     public class File : IFile
     {
         public byte[] byteData { get; set; } = Array.Empty<byte>();

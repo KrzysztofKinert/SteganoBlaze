@@ -1,10 +1,7 @@
-﻿namespace SteganoBlaze.Shared.Classes
+﻿using SteganoBlaze.Shared.Enums;
+
+namespace SteganoBlaze.Shared.Classes
 {
-    public enum PixelOrder
-    {
-        Sequential,
-        Random
-    }
     public readonly struct PixelParams
     {
         public readonly PixelOrder pixelOrder;

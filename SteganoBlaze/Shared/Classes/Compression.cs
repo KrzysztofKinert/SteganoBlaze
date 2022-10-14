@@ -8,6 +8,7 @@ namespace SteganoBlaze.Shared.Classes
             using MemoryStream output = new MemoryStream();
             using (DeflateStream dstream = new DeflateStream(output, CompressionLevel.SmallestSize))
                 await dstream.WriteAsync(data, 0, data.Length);
+
             return output.ToArray();
         }
         public async static Task<byte[]> Decompress(byte[] data)
