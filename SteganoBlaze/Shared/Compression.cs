@@ -1,8 +1,9 @@
 ﻿using System.IO.Compression;
-namespace SteganoBlaze.Shared.Classes
+
+namespace SteganoBlaze.Shared
 {
-	public static class Compression
-	{
+    public static class Compression
+    {
         public async static Task<byte[]> Compress(byte[] data)
         {
             using MemoryStream output = new MemoryStream();

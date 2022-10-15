@@ -14,7 +14,7 @@ namespace SteganoBlaze.Steganography
 
         protected byte[]? pixelData;
 
-        protected PixelParams parameters;
+        protected PixelParameters parameters;
         protected int pixelIndex;
         protected int[] channelBitsLeft = new int[3];
         protected Channel channel;
@@ -75,7 +75,7 @@ namespace SteganoBlaze.Steganography
     }
     public class ImageEncoder : ImageSteganography
     {
-        public ImageEncoder(Image carrier, PixelParams pixelParams)
+        public ImageEncoder(Image carrier, PixelParameters pixelParams)
         {
             if (carrier.pixelData is null)
                 throw new Exception();
@@ -126,7 +126,7 @@ namespace SteganoBlaze.Steganography
     }
     public class ImageDecoder : ImageSteganography
     {
-        public ImageDecoder(Image carrierToDecode, PixelParams pixelParams)
+        public ImageDecoder(Image carrierToDecode, PixelParameters pixelParams)
         {
             if (carrierToDecode.pixelData is null)
                 throw new Exception();
@@ -155,10 +155,7 @@ namespace SteganoBlaze.Steganography
             {
                 while (channelBitsLeft[(int)channel] > 0)
                 {
-                    //int bitSign = pixelData[ChannelIndex()] / (int)Math.Pow(2, BitIndex()) % 2;
-                    //decodedByte += (int)Math.Pow(2, 7 - decodedBits) * bitSign;
                     decodedByte += BitSign(pixelData[ChannelIndex()], BitIndex()) << 7 - decodedBits;
-
 
                     channelBitsLeft[(int)channel]--;
                     decodedBits++;
@@ -166,35 +163,12 @@ namespace SteganoBlaze.Steganography
                     if (decodedBits == 8)
                         return Convert.ToByte(ReverseBits(decodedByte));
                 }
-
                 if (channel == Channel.B)
                     NextPixel();
                 else
                     channel++;
             }
             return Convert.ToByte(ReverseBits(decodedByte));
-        }
-        public static List<PixelParams> GenerateParams()
-        {
-            List<PixelBits> bitsToCheck = new();
-            for (int r = 0; r < 9; r++)
-            {
-                for (int g = 0; g < 9; g++)
-                {
-                    for (int b = 0; b < 9; b++)
-                    {
-                        if (!(r == 0 && g == 0 && b == 0))
-                            bitsToCheck.Add(new PixelBits { R = r, G = g, B = b });
-                    }
-                }
-            }
-
-            List<PixelParams> paramsToCheck = new();
-            foreach (PixelBits pixelBits in bitsToCheck)
-                paramsToCheck.Add(new PixelParams(PixelOrder.Sequential, pixelBits));
-            foreach (PixelBits pixelBits in bitsToCheck)
-                paramsToCheck.Add(new PixelParams(PixelOrder.Random, pixelBits));
-            return paramsToCheck;
         }
         private static int BitSign(uint value, int bitIndex) =>
             (value & 1 << bitIndex) != 0 ? 1 : 0;

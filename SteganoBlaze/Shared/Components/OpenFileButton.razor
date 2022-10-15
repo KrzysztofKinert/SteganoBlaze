@@ -74,9 +74,9 @@
         if (e.File.Size > maxFileSize)
         {
             if (Type == FileType.Message) 
-                Snackbar.Add(Localize["MaxMessageSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
+                Snackbar.Add(Localize["MaxMessageSize"] + " " + ByteSize.Reduce(maxFileSize), Severity.Error);
             else 
-                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
+                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ByteSize.Reduce(maxFileSize), Severity.Error);
             return;
         }
 
@@ -91,9 +91,9 @@
         catch
         {
             if (Type == FileType.Message) 
-                Snackbar.Add(Localize["MaxMessageSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
+                Snackbar.Add(Localize["MaxMessageSize"] + " " + ByteSize.Reduce(maxFileSize), Severity.Error);
             else 
-                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ReduceSize.ToString(maxFileSize), Severity.Error);
+                Snackbar.Add(Localize["MaxCarrierSize"] + " " + ByteSize.Reduce(maxFileSize), Severity.Error);
             return;
         }
     }

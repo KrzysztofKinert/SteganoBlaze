@@ -7,7 +7,7 @@ namespace SteganoBlaze.Steganography
     {
         protected WAV? carrier;
 
-        protected SampleParams parameters;
+        protected SampleParameters parameters;
         protected int sampleIndex;
         protected int sampleBitsLeft;
 
@@ -56,7 +56,7 @@ namespace SteganoBlaze.Steganography
     }
     public class AudioEncoder : AudioSteganography
     {
-        public AudioEncoder(WAV audio, SampleParams sampleParams)
+        public AudioEncoder(WAV audio, SampleParameters sampleParams)
         {
             carrier = audio.Clone();
             randomSeed = carrier.GetSampleCount();
@@ -105,7 +105,7 @@ namespace SteganoBlaze.Steganography
     }
     public class AudioDecoder : AudioSteganography
     {
-        public AudioDecoder(WAV carrierToDecode, SampleParams sampleParams)
+        public AudioDecoder(WAV carrierToDecode, SampleParameters sampleParams)
         {
             carrier = carrierToDecode;
             randomSeed = carrier.GetSampleCount();
@@ -140,15 +140,6 @@ namespace SteganoBlaze.Steganography
                     NextSample();
             }
             return Convert.ToByte(ReverseBits(decodedByte));
-        }
-        public static List<SampleParams> GenerateParams(int maxSampleBits)
-        {
-            List<SampleParams> paramsToCheck = new();
-            for (int bits = 1; bits <= maxSampleBits; bits++)
-                paramsToCheck.Add(new SampleParams(SampleOrder.Sequential, bits));
-            for (int bits = 1; bits <= maxSampleBits; bits++)
-                paramsToCheck.Add(new SampleParams(SampleOrder.Random, bits));
-            return paramsToCheck;
         }
         private static int BitSign(uint value, int bitIndex) =>
             (value & 1 << bitIndex) != 0 ? 1 : 0;

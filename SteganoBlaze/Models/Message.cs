@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using SteganoBlaze.Shared.Classes;
+using SteganoBlaze.Shared;
 
 namespace SteganoBlaze.Models
 {
@@ -55,7 +55,7 @@ namespace SteganoBlaze.Models
         public int GetMessageSize() =>
             header.Length + fileData.Length;
         public string SizeToString() =>
-            ReduceSize.ToString(GetMessageSize());
+            ByteSize.Reduce(GetMessageSize());
         public static File ParseMetadata(byte[] header, ref bool isCompressed)
         {
             File file = new();

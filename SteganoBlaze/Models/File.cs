@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
-using SteganoBlaze.Shared.Classes;
 using SteganoBlaze.Interfaces;
+using SteganoBlaze.Shared;
 
 namespace SteganoBlaze.Models
 {
@@ -30,7 +30,7 @@ namespace SteganoBlaze.Models
         }
         public string SizeToString()
         {
-            return ReduceSize.ToString(FileSize);
+            return ByteSize.Reduce(FileSize);
         }
     }
 }

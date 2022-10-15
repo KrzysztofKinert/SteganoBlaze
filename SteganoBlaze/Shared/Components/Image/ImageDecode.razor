@@ -4,6 +4,7 @@
 @inject IJSRuntime js
 @inject AppState AppState
 @implements IDisposable
+@inject IJSInProcessRuntime JSInProcessRuntime
 
 <canvas hidden id="canvas" />
 <MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
@@ -72,7 +73,9 @@
 		await UpdateProgress(Localize["ReadingImageData"], 0);
 		EncodedCarrier.pixelData = await JSInterop.ReadStream(js, "getImageData");
 
-		foreach (PixelParams paramsToCheck in ImageDecoder.GenerateParams())
+		await UpdateProgress(Localize["CheckingCarrier"], 10);
+
+		foreach (PixelParameters paramsToCheck in PixelParameters.GenerateParameters())
 		{
 			try
 			{
@@ -82,7 +85,8 @@
 				if (headerSize < Message.MIN_HEADER_SIZE || headerSize > Message.MAX_HEADER_SIZE)
 					throw new Exception();
 
-				byte[] file = Password is null ? await DecodeMessage(decoder, headerSize) : await DecodeEncryptedMessage(decoder, headerSize);
+				byte[] file = Password is null ? await DecodeMessage(decoder, headerSize) 
+											   : await DecodeEncryptedMessage(decoder, headerSize);
 
 				if (isCompressed is true)
 				{
@@ -137,6 +141,7 @@
 
 		await UpdateProgress(Localize["DecryptingMessage"], 70);
 		aesInputs = new List<byte[]> { file, Encoding.UTF8.GetBytes(Password), salt, ivFile };
+
 		file = await JSInterop.ReadStream(js, "decryptData", aesInputs);
 		return file;
 	}

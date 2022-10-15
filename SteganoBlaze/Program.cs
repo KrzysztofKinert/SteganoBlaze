@@ -25,9 +25,11 @@ builder.Services.AddMudServices(config =>
 });
 builder.Services.AddLocalization();
 builder.Services.AddSingleton<AppState>();
+builder.Services.AddSingleton(serviceProvider => (IJSInProcessRuntime)serviceProvider.GetRequiredService<IJSRuntime>());
 
 var host = builder.Build();
 var js = host.Services.GetRequiredService<IJSRuntime>();
+
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pl-Pl");
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("pl-Pl");

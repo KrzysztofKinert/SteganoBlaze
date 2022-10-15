@@ -86,7 +86,7 @@
 
 		try
 		{
-			SampleParams sampleParams = new SampleParams(Options.ScatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.BitsToEncode);
+			SampleParameters sampleParams = new SampleParameters(Options.ScatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.BitsToEncode);
 			AudioEncoder encoder = new AudioEncoder(Carrier, sampleParams);
 
 			encodedCarrier = new File { base64Data = Convert.ToBase64String(await EncodeFile(encoder)), ContentType = Carrier.ContentType, FileName = AddSuffix(Carrier.FileName) };

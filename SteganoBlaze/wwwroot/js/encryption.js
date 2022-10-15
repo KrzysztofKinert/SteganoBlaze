@@ -44,7 +44,7 @@ async function decryptData(encryptedData, password, salt, iv) {
     try {
         const passwordKey = await getPasswordKey(password);
         const aesKey = await deriveKey(passwordKey, salt, ["decrypt"]);
-        const decryptedData = await window.crypto.subtle.decrypt(
+        return decryptedData = window.crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
                 iv: iv,
@@ -52,7 +52,6 @@ async function decryptData(encryptedData, password, salt, iv) {
             aesKey,
             encryptedData
         );
-        return decryptedData;
     } catch (e) {
         throw new Error();
         return "";

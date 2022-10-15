@@ -68,7 +68,7 @@
 		await OnProcessingChanged.InvokeAsync(true);
 		await UpdateProgress(Localize["CheckingCarrier"], 0);
 
-		foreach (SampleParams paramsToCheck in AudioDecoder.GenerateParams(EncodedCarrier.bitsPerSample))
+		foreach (SampleParameters paramsToCheck in SampleParameters.GenerateParameters(EncodedCarrier.bitsPerSample))
 		{
 			try
 			{

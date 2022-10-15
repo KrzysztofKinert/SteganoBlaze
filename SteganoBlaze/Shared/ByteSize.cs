@@ -1,8 +1,8 @@
-﻿namespace SteganoBlaze.Shared.Classes
+﻿namespace SteganoBlaze.Shared
 {
-    public static class ReduceSize
+    public static class ByteSize
     {
-        public static string ToString(int size)
+        public static string Reduce(int size)
         {
             if (size < 0)
                 return "";
@@ -15,7 +15,7 @@
 
             return (size / (1024.0 * 1024.0)).ToString("0.00") + " MB";
         }
-        public static string ToString(double size)
+        public static string Reduce(double size)
         {
             if (size < 0)
                 return "";

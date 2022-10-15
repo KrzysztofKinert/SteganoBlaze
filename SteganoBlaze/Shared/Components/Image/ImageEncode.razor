@@ -89,7 +89,7 @@
 
 		try
 		{
-			PixelParams sampleParams = new PixelParams(Options.ScatteredEncodingEnabled ? PixelOrder.Random : PixelOrder.Sequential, Options.BitsToEncode);
+			PixelParameters sampleParams = new PixelParameters(Options.ScatteredEncodingEnabled ? PixelOrder.Random : PixelOrder.Sequential, Options.BitsToEncode);
 			ImageEncoder encoder = new ImageEncoder(Carrier, sampleParams);
 			var encodedCarrierBytes = await EncodeFile(encoder);
 
