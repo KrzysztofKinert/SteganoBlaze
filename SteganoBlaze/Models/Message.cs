@@ -47,8 +47,8 @@ namespace SteganoBlaze.Models
         {
             List<byte> headerList = (metadata ?? GenerateMetadata()).ToList();
 
-            headerList.InsertRange(0, BitConverter.GetBytes((ushort)headerList.Count));
-            headerList.InsertRange(2, aesParams ?? new List<byte>());
+            headerList.InsertRange(0, BitConverter.GetBytes(headerList.Count));
+            headerList.InsertRange(sizeof(int), aesParams ?? new List<byte>());
 
             header = headerList.ToArray();
         }
@@ -56,34 +56,5 @@ namespace SteganoBlaze.Models
             header.Length + fileData.Length;
         public string SizeToString() =>
             ByteSize.Reduce(GetMessageSize());
-        public static File ParseMetadata(byte[] header, ref bool isCompressed)
-        {
-            File file = new();
-
-            int offset = 0;
-            if (Encoding.UTF8.GetString(header, offset, 4) != "NAME")
-                throw new Exception();
-            int fileNameSize = BitConverter.ToInt16(header, offset + 4);
-            file.FileName = Encoding.UTF8.GetString(header, offset + 6, fileNameSize);
-
-            offset += fileNameSize + 6;
-            var lol = Encoding.UTF8.GetString(header, offset, 4);
-            if (Encoding.UTF8.GetString(header, offset, 4) != "TYPE")
-                throw new Exception();
-            int contentTypeSize = BitConverter.ToInt16(header, offset + 4);
-            file.ContentType = Encoding.UTF8.GetString(header, offset + 6, contentTypeSize);
-
-            offset += contentTypeSize + 6;
-            if (Encoding.UTF8.GetString(header, offset, 4) != "SIZE")
-                throw new Exception();
-            file.FileSize = BitConverter.ToInt32(header, offset + 4);
-
-            offset += 8;
-            if (Encoding.UTF8.GetString(header, offset, 4) != "CMPR")
-                throw new Exception();
-            isCompressed = BitConverter.ToBoolean(header, offset + 4);
-
-            return file;
-        }
     }
 }

@@ -74,7 +74,7 @@
 			{
 				AudioDecoder decoder = new AudioDecoder(EncodedCarrier, paramsToCheck);
 
-				int headerSize = BitConverter.ToInt16(decoder.Decode(2));
+				int headerSize = BitConverter.ToInt32(decoder.Decode(sizeof(int)));
 				if (headerSize < Message.MIN_HEADER_SIZE || headerSize > Message.MAX_HEADER_SIZE)
 					throw new Exception();
 
