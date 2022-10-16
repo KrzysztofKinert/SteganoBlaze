@@ -4,9 +4,7 @@
 @inject IJSRuntime js
 @inject AppState AppState
 @implements IDisposable
-@inject IJSInProcessRuntime JSInProcessRuntime
 
-<canvas hidden id="canvas" />
 <MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
 	<MudListItem Class="pb-2 pt-3">
 		<ProgressBar Task="@processingTask" ProgressValue="@processingValue" />
@@ -22,14 +20,14 @@
 					   Style="width:100%">
 				<MudText Typo="Typo.button" Class="align-center">@Localize["Decode"]</MudText>
 			</MudButton>
-			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
-			<SaveButton fileToSave="@message"/>
+			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" />
+			<SaveButton fileToSave="@message" />
 		</MudList>
 	</MudListItem>
 </MudList>
 
-@code {
-	[Parameter] public Image? EncodedCarrier { get; set; }
+@code{
+	[Parameter] public WAV? EncodedCarrier { get; set; }
 
 	[Parameter] public string? Password { get; set; }
 
@@ -67,36 +65,29 @@
 
 		watch.Reset();
 		watch.Start();
-
 		await OnProcessingChanged.InvokeAsync(true);
+		await UpdateProgress(Localize["CheckingCarrier"], 0);
 
-		await UpdateProgress(Localize["ReadingImageData"], 0);
-		EncodedCarrier.pixelData = await JSInterop.ReadStream(js, "getImageData");
-
-		await UpdateProgress(Localize["CheckingCarrier"], 10);
-
-		await UpdateProgress(Localize["CheckingCarrier"], 10);
-		foreach (PixelParameters paramsToCheck in PixelParameters.GenerateParameters())
+		foreach (SampleParameters paramsToCheck in SampleParameters.GenerateParameters(EncodedCarrier.bitsPerSample))
 		{
 			try
 			{
-				ImageDecoder decoder = new ImageDecoder(EncodedCarrier, paramsToCheck);
+				AudioDecoder decoder = new AudioDecoder(EncodedCarrier, paramsToCheck);
 
 				int headerSize = BitConverter.ToInt32(decoder.Decode(sizeof(int)));
 				if (headerSize < Message.MIN_HEADER_SIZE || headerSize > Message.MAX_HEADER_SIZE)
 					throw new Exception();
 
-				byte[] file = Password is null ? await DecodeMessage(decoder, headerSize) 
-											   : await DecodeEncryptedMessage(decoder, headerSize);
+				byte[] file = Password is null ? await DecodeMessage(decoder, headerSize) : await DecodeEncryptedMessage(decoder, headerSize);
 
 				if (isCompressed is true)
 				{
-					await UpdateProgress(Localize["DecompressingMessage"], 80);
+					await UpdateProgress(Localize["DecompressingMessage"], 75);
 					file = await Compression.Decompress(file);
 				}
 
-				await UpdateProgress(Localize["SavingMessageData"], 90);
-				message = new File { base64Data = Convert.ToBase64String(file), ContentType = contentType, FileName = fileName, FileSize = fileSize };
+				await UpdateProgress(Localize["SavingMessageData"], 80);
+				message = new File { ByteData = file, ContentType = contentType, FileName = fileName, FileSize = fileSize };
 
 				await OnMessageChanged.InvokeAsync(message);
 				await OnProcessingChanged.InvokeAsync(false);
@@ -110,11 +101,10 @@
 			}
 		}
 		await OnProcessingChanged.InvokeAsync(false);
-		await UpdateProgress(Localize["ImageNotEncoded"], 0);
+		await UpdateProgress(Localize["AudioNotEncoded"], 0);
 		return;
 	}
-
-	async Task<byte[]> DecodeMessage(ImageDecoder decoder, int headerSize)
+	async Task<byte[]> DecodeMessage(AudioDecoder decoder, int headerSize)
 	{
 		byte[] header = decoder.Decode(headerSize);
 		ParseHeader(header);
@@ -123,7 +113,7 @@
 		byte[] file = await DecodeFile(decoder);
 		return file;
 	}
-	async Task<byte[]> DecodeEncryptedMessage(ImageDecoder decoder, int headerSize)
+	async Task<byte[]> DecodeEncryptedMessage(AudioDecoder decoder, int headerSize)
 	{
 		if (Password is null)
 			throw new Exception();
@@ -142,25 +132,24 @@
 
 		await UpdateProgress(Localize["DecryptingMessage"], 70);
 		aesInputs = new List<byte[]> { file, Encoding.UTF8.GetBytes(Password), salt, ivFile };
-
 		file = await JSInterop.ReadStream(js, "decryptData", aesInputs);
 		return file;
 	}
-	async Task<byte[]> DecodeFile(ImageDecoder decoder)
+	async Task<byte[]> DecodeFile(AudioDecoder decoder)
 	{
-		await UpdateProgress(Localize["DecodingMessage"], 25);
+		await UpdateProgress(Localize["DecodingMessage"], 20);
 
 		byte[] file = new byte[fileSize];
 		int updates = fileSize / 250000 + 1;
 		int updatesDone = 0;
 		int bytesLeft = fileSize;
 
-		while (bytesLeft > 250000)
+		while(bytesLeft > 250000)
 		{
 			Array.Copy(decoder.Decode(250000), 0, file, 250000 * updatesDone, 250000);
 			updatesDone++;
 			bytesLeft -= 250000;
-			await UpdateProgress(Localize["DecodingMessage"], 25 + updatesDone * 50 / updates);
+			await UpdateProgress(Localize["DecodingMessage"], 20 + updatesDone * 50 / updates);
 		}
 		Array.Copy(decoder.Decode(bytesLeft), 0, file, 250000 * updatesDone, bytesLeft);
 

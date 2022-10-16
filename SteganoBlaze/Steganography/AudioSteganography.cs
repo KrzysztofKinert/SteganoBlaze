@@ -79,23 +79,19 @@ namespace SteganoBlaze.Steganography
             int encodedBits = 0;
             while (encodedBits < 8)
             {
-                uint sample = carrier.GetSample(sampleIndex);
-                while (sampleBitsLeft > 0)
+                if (sampleBitsLeft > 0)
                 {
-                    sample = byteValue % 2 == 1 ? SetBit(sample, BitIndex()) : ClearBit(sample, BitIndex());
-                    byteValue /= 2;
+                    uint sample = carrier.GetSample(sampleIndex);
+                    sample = byteValue % 2 == 1 ? SetBit(sample, BitIndex()) 
+                                                : ClearBit(sample, BitIndex());
+                    carrier.SetSample(sampleIndex, sample);
 
+                    byteValue /= 2;
                     sampleBitsLeft--;
                     encodedBits++;
-
-                    if (encodedBits == 8)
-                    {
-                        carrier.SetSample(sampleIndex, sample);
-                        return;
-                    }
                 }
-                carrier.SetSample(sampleIndex, sample);
-                NextSample();
+                else
+                    NextSample();
             }
         }
         private static uint SetBit(uint value, int bitIndex) =>
@@ -122,7 +118,8 @@ namespace SteganoBlaze.Steganography
         }
         private byte DecodeByte()
         {
-            if (carrier is null) throw new Exception();
+            if (carrier is null) 
+                throw new Exception();
 
             int decodedByte = 0;
             int decodedBits = 0;
@@ -131,7 +128,7 @@ namespace SteganoBlaze.Steganography
                 uint sample = carrier.GetSample(sampleIndex);
                 if (sampleBitsLeft > 0)
                 {
-                    decodedByte += BitSign(sample, BitIndex()) << 7 - decodedBits;
+                    decodedByte += BitSign(sample, BitIndex()) << decodedBits;
 
                     sampleBitsLeft--;
                     decodedBits++;
@@ -139,20 +136,10 @@ namespace SteganoBlaze.Steganography
                 else
                     NextSample();
             }
-            return Convert.ToByte(ReverseBits(decodedByte));
+            return Convert.ToByte(decodedByte);
         }
         private static int BitSign(uint value, int bitIndex) =>
             (value & 1 << bitIndex) != 0 ? 1 : 0;
 
-        protected static int ReverseBits(int value)
-        {
-            int result = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                result = result * 2 + value % 2;
-                value /= 2;
-            }
-            return result;
-        }
     }
 }

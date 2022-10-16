@@ -101,7 +101,7 @@ namespace SteganoBlaze.Steganography
             int encodedBits = 0;
             while (encodedBits < 8)
             {
-                while (channelBitsLeft[(int)channel] > 0)
+                if (channelBitsLeft[(int)channel] > 0)
                 {
                     pixelData[ChannelIndex()] = byteValue % 2 == 1 ? SetBit(pixelData[ChannelIndex()], BitIndex())
                                                                    : ClearBit(pixelData[ChannelIndex()], BitIndex());
@@ -109,14 +109,14 @@ namespace SteganoBlaze.Steganography
                     byteValue /= 2;
                     channelBitsLeft[(int)channel]--;
                     encodedBits++;
-
-                    if (encodedBits == 8)
-                        return;
                 }
-                if (channel == Channel.B)
-                    NextPixel();
                 else
-                    channel++;
+                {
+                    if (channel == Channel.B)
+                        NextPixel();
+                    else
+                        channel++;
+                }
             }
         }
         private static byte SetBit(byte value, int bitIndex) =>
@@ -153,34 +153,24 @@ namespace SteganoBlaze.Steganography
             int decodedBits = 0;
             while (decodedBits < 8)
             {
-                while (channelBitsLeft[(int)channel] > 0)
+                if (channelBitsLeft[(int)channel] > 0)
                 {
-                    decodedByte += BitSign(pixelData[ChannelIndex()], BitIndex()) << 7 - decodedBits;
+                    decodedByte += BitSign(pixelData[ChannelIndex()], BitIndex()) << decodedBits;
 
                     channelBitsLeft[(int)channel]--;
                     decodedBits++;
-
-                    if (decodedBits == 8)
-                        return Convert.ToByte(ReverseBits(decodedByte));
                 }
-                if (channel == Channel.B)
-                    NextPixel();
                 else
-                    channel++;
+                {
+                    if (channel == Channel.B)
+                        NextPixel();
+                    else
+                        channel++;
+                }
             }
-            return Convert.ToByte(ReverseBits(decodedByte));
+            return Convert.ToByte(decodedByte);
         }
         private static int BitSign(uint value, int bitIndex) =>
             (value & 1 << bitIndex) != 0 ? 1 : 0;
-        protected static int ReverseBits(int value)
-        {
-            int result = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                result = result * 2 + value % 2;
-                value /= 2;
-            }
-            return result;
-        }
     }
 }

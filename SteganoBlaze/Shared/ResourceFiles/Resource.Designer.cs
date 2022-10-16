@@ -187,7 +187,16 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Choose carrier.
+        ///   Looks up a localized string similar to Checking carrier....
+        /// </summary>
+        public static string CheckingCarrier {
+            get {
+                return ResourceManager.GetString("CheckingCarrier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select carrier.
         /// </summary>
         public static string ChooseCarrier {
             get {
@@ -196,7 +205,7 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Choose message.
+        ///   Looks up a localized string similar to Select message.
         /// </summary>
         public static string ChooseMessage {
             get {

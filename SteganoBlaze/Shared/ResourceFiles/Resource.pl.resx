@@ -336,4 +336,7 @@
   <data name="CarrierAudioCorrupted" xml:space="preserve">
     <value>Audio uszkodzone</value>
   </data>
+  <data name="CheckingCarrier" xml:space="preserve">
+    <value>Sprawdzanie nośnika...</value>
+  </data>
 </root>

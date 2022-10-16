@@ -21,11 +21,17 @@
 	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
 	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
-	protected async Task SaveFile()
+	protected void SaveFile()
 	{
+		if (fileToSave is null)
+			throw new Exception();
+
 		try
 		{
-			await js.InvokeVoidAsync("saveFile", fileToSave);
+			if (fileToSave.base64Data == "" || fileToSave.base64Data is null)
+				((IJSInProcessRuntime)js).InvokeVoid("saveFileBlob", fileToSave);
+			else
+				((IJSInProcessRuntime)js).InvokeVoid("saveFileBase64", fileToSave);
 		}
 		catch
 		{

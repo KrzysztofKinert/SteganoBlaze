@@ -127,7 +127,7 @@
     <value>Audio Encoding</value>
   </data>
   <data name="ChooseCarrier" xml:space="preserve">
-    <value>Choose carrier</value>
+    <value>Select carrier</value>
   </data>
   <data name="Dimensions" xml:space="preserve">
     <value>Dimensions</value>
@@ -145,7 +145,7 @@
     <value>Size</value>
   </data>
   <data name="ChooseMessage" xml:space="preserve">
-    <value>Choose message</value>
+    <value>Select message</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Type</value>
@@ -335,5 +335,8 @@
   </data>
   <data name="CarrierAudioCorrupted" xml:space="preserve">
     <value>Audio corrupted</value>
+  </data>
+  <data name="CheckingCarrier" xml:space="preserve">
+    <value>Checking carrier...</value>
   </data>
 </root>

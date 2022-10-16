@@ -94,12 +94,12 @@
 			var encodedCarrierBytes = await EncodeFile(encoder);
 
 			await UpdateProgress(Localize["SavingImageData"], 80);
-
 			string encodedCarrierURL = ((IJSInProcessRuntime)js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.WebPFormatEnabled ?? false) ? "image/webp" : "image/png");
 
 			encodedCarrier = new File { base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
 										ContentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),
 										FileName = AddSuffix(Carrier.FileName) };
+
 		}
 		catch
 		{

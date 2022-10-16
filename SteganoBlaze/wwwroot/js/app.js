@@ -1,8 +1,20 @@
-﻿function saveFile(file) {
+﻿function saveFileBase64(file) {
     var saveLink = document.getElementById('saveLink');
     saveLink.download = file.fileName;
     saveLink.href = "data:" + file.contentType + ";base64," + file.base64Data;
     saveLink.click();
+}
+
+function saveFileBlob(file) {
+    const fileBlob = new File([file.byteData], file.fileName, { type: File.contentType });
+    const Url = URL.createObjectURL(fileBlob);
+
+    var saveLink = document.getElementById('saveLink');
+    saveLink.href = Url;
+    saveLink.download = file.fileName;
+    saveLink.click();
+
+    URL.revokeObjectURL(Url);
 }
 
 function getLanguage() {
