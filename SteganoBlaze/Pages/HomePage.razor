@@ -9,6 +9,99 @@
 
 <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
 
+<br />
+
+<MudExpansionPanels MultiExpansion="true">
+    <MudExpansionPanel Text=@Localize["EncodingInstructions"]>
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Text=@Localize["SelectingCarrier"]>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Select a carrier, an image or audio file, in which the message will be hidden.</MudText>
+                <br />
+                <h4>Accepted image formats:</h4>
+                <ul>
+                    <li style="margin-left:10px">PNG</li>
+                    <li style="margin-left:10px">JPEG</li>
+                    <li style="margin-left:10px">APNG</li>
+                    <li style="margin-left:10px">GIF</li>
+                    <li style="margin-left:10px">SVG</li>
+                    <li style="margin-left:10px">WebP</li>
+                    <li style="margin-left:10px">BMP</li>
+                    <li style="margin-left:10px">ICO</li>
+                </ul>
+                <br />
+                <h4>Accepted audio formats:</h4>
+                <ul>
+                    <li style="margin-left:10px">WAV</li>
+                </ul>
+                <br />
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">The maximum size of the carrier file is 10 MB.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text=@Localize["SelectingMessage"]>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Select a message which will be hidden inside the carrier.</MudText>
+                <br />
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">The message can be any file with a maximum size of 5 MB.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text=@Localize["EncodingOptions"]>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Select a the amount of bits in each image pixel or audio sample which will be used to hide the message data.</MudText>
+                <br />
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">In image carriers, from 0 to 8 bits can be chosen separelty for the Red, Green and Blue pixel channels.</MudText>
+                <br />
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">In audio carriers, the maximum number of sample bits to be used is determined by the resolution of the chosen audio file.</MudText>
+                <br />
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">The encoding information panel shows the capacity of the carrier using the currently chosen pixel/sample bit amount and the ratio of message size to that capacity.</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Encoding the message on many bits can significantly degrade the carrier quality.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text=@Localize["MoreOptions"]>
+                <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">Encoded carrier format:</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">In Chrome, Edge and Opera browers, the WebP image format can be used for the encoded carrier. Otherwise the carrier will be saved as PNG.</MudText>
+                <br />
+                <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">Compression:</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Message data can be additionaly compressed. The efficency of the compression depends on the message file format and the contents of the file.</MudText>
+                <br />
+                <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">Encryption:</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Message data can be additionaly encrypted with the fast and secure AES-GCM algorithm using an user provided password.</MudText>
+                <br/>
+                <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">Scattered encoding:</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">The message can be encoded in a normal mode in which pixels or samples are encoded sequentially from first to last, or in a scattered mode in which pixels or samples are encoded in a random order.</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Choosing the scattered mode can make the encoding less visible and harder to detect.</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">It's efficiency and performance decreases the larger the ratio of message size to carrier capacity.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text=@Localize["Encoding"]>
+                <MudText Typo="Typo.body2" Align="Align.Justify" Style="font-size: min(3vw, 14px);">If the message fits inside the carrier, click the "Encode" button to begin the encoding process.</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Justify" Style="font-size: min(3vw, 14px);">After the message has been encoded successfully, click the "Save" button to save the encoded carrier.</MudText>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudExpansionPanel>
+    <MudExpansionPanel Text=@Localize["DecodingInstructions"]>
+        <MudExpansionPanels MultiExpansion="true">
+            <MudExpansionPanel Text=@Localize["SelectingCarrier"]>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">Select a carrier, an image or audio file, in which the message is hidden.</MudText>
+                <br />
+                <h4>Accepted image formats:</h4>
+                <ul>
+                    <li style="margin-left:10px">PNG</li>
+                    <li style="margin-left:10px">WebP</li>
+                </ul>
+                <br />
+                <h4>Accepted audio formats:</h4>
+                <ul>
+                    <li style="margin-left:10px">WAV</li>
+                </ul>
+                <br />
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">The maximum size of the carrier file is 10 MB.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text=@Localize["EncryptionPassword"]>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">If the message was additionally encrypted, input the password. Otherwise leave the field empty.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text=@Localize["Decoding"]>
+                 <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Click the "Decode" button to begin the decoding process. If the message has been decoded successfully, it's details will be displayed in the "Recovered file" section.</MudText>
+                 <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">If the message has been recovered succefully, it's details will be displayed in the "Recovered file" section.</MudText>
+                 <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Click the "Save" button to save the recovered file.</MudText>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
 @code
 {
     protected override void OnInitialized()
