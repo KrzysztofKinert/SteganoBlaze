@@ -339,4 +339,22 @@
   <data name="CheckingCarrier" xml:space="preserve">
     <value>Checking carrier...</value>
   </data>
+  <data name="SelectingCarrier_1" xml:space="preserve">
+    <value>Select a carrier, an image or audio file, in which the message will be hidden.</value>
+  </data>
+  <data name="SelectingCarrier_2" xml:space="preserve">
+    <value>Accepted image formats:</value>
+  </data>
+  <data name="SelectingCarrier_3" xml:space="preserve">
+    <value>Accepted audio formats:</value>
+  </data>
+  <data name="SelectingCarrier_4" xml:space="preserve">
+    <value>The maximum size of the carrier file is 10 MB.</value>
+  </data>
+  <data name="SelectingMessage_1" xml:space="preserve">
+    <value>Select a message which will be hidden inside the carrier.</value>
+  </data>
+  <data name="SelectingMessage_2" xml:space="preserve">
+    <value>The message can be any file with a maximum size of 5 MB.</value>
+  </data>
 </root>

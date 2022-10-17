@@ -339,4 +339,22 @@
   <data name="CheckingCarrier" xml:space="preserve">
     <value>Sprawdzanie nośnika...</value>
   </data>
+  <data name="SelectingCarrier_1" xml:space="preserve">
+    <value>Wybierz nośnik, plik graficzny lub dźwiękowy, w którym zostanie ukryta wiadomość.</value>
+  </data>
+  <data name="SelectingCarrier_2" xml:space="preserve">
+    <value>Obsługiwane formaty graficzne:</value>
+  </data>
+  <data name="SelectingCarrier_3" xml:space="preserve">
+    <value>Obsługiwane formaty dźwiękowe:</value>
+  </data>
+  <data name="SelectingCarrier_4" xml:space="preserve">
+    <value>Maksymalny rozmiar pliku nośnika to 10 MB.</value>
+  </data>
+  <data name="SelectingMessage_1" xml:space="preserve">
+    <value>Wybierz wiadomość która zostanie ukryta w nośniku.</value>
+  </data>
+  <data name="SelectingMessage_2" xml:space="preserve">
+    <value>Wiadomością może być dowolny plik z maksymalnym rozmiarem 5 MB.</value>
+  </data>
 </root>
