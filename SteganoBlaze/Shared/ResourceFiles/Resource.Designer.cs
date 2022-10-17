@@ -682,6 +682,42 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select a carrier, an image or audio file, in which the message will be hidden..
+        /// </summary>
+        public static string SelectingCarrier_1 {
+            get {
+                return ResourceManager.GetString("SelectingCarrier_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Accepted image formats:.
+        /// </summary>
+        public static string SelectingCarrier_2 {
+            get {
+                return ResourceManager.GetString("SelectingCarrier_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Accepted audio formats:.
+        /// </summary>
+        public static string SelectingCarrier_3 {
+            get {
+                return ResourceManager.GetString("SelectingCarrier_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maximum size of the carrier file is 10 MB..
+        /// </summary>
+        public static string SelectingCarrier_4 {
+            get {
+                return ResourceManager.GetString("SelectingCarrier_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
         public static string Settings {

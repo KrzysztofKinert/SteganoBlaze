@@ -15,9 +15,9 @@
     <MudExpansionPanel Text=@Localize["EncodingInstructions"]>
         <MudExpansionPanels MultiExpansion="true">
             <MudExpansionPanel Text=@Localize["SelectingCarrier"]>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Select a carrier, an image or audio file, in which the message will be hidden.</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["SelectingCarrier_1"]</MudText>
                 <br />
-                <h4>Accepted image formats:</h4>
+                <h4>@Localize["SelectingCarrier_2"]</h4>
                 <ul>
                     <li style="margin-left:10px">PNG</li>
                     <li style="margin-left:10px">JPEG</li>
@@ -29,12 +29,12 @@
                     <li style="margin-left:10px">ICO</li>
                 </ul>
                 <br />
-                <h4>Accepted audio formats:</h4>
+                <h4>@Localize["SelectingCarrier_3"]</h4>
                 <ul>
                     <li style="margin-left:10px">WAV</li>
                 </ul>
                 <br />
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">The maximum size of the carrier file is 10 MB.</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["SelectingCarrier_4"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["SelectingMessage"]>
                 <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">Select a message which will be hidden inside the carrier.</MudText>
