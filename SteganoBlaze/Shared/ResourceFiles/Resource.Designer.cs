@@ -223,11 +223,47 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decoded file.
+        ///   Looks up a localized string similar to Recovered file.
         /// </summary>
         public static string DecodedFile {
             get {
                 return ResourceManager.GetString("DecodedFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decoding.
+        /// </summary>
+        public static string Decoding {
+            get {
+                return ResourceManager.GetString("Decoding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click the &quot;Decode&quot; button to begin the decoding process..
+        /// </summary>
+        public static string Decoding_1 {
+            get {
+                return ResourceManager.GetString("Decoding_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If the message has been decoded successfully, it&apos;s details will be displayed in the &quot;Recovered file&quot; section..
+        /// </summary>
+        public static string Decoding_2 {
+            get {
+                return ResourceManager.GetString("Decoding_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click the &quot;Save&quot; button to save the recovered file..
+        /// </summary>
+        public static string Decoding_3 {
+            get {
+                return ResourceManager.GetString("Decoding_3", resourceCulture);
             }
         }
         
@@ -237,6 +273,15 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string DecodingDoneIn {
             get {
                 return ResourceManager.GetString("DecodingDoneIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decoding instructions.
+        /// </summary>
+        public static string DecodingInstructions {
+            get {
+                return ResourceManager.GetString("DecodingInstructions", resourceCulture);
             }
         }
         
@@ -313,6 +358,33 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Encoding.
+        /// </summary>
+        public static string Encoding {
+            get {
+                return ResourceManager.GetString("Encoding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If the message fits inside the carrier, click the &quot;Encode&quot; button to begin the encoding process..
+        /// </summary>
+        public static string Encoding_1 {
+            get {
+                return ResourceManager.GetString("Encoding_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After the message has been encoded successfully, click the &quot;Save&quot; button to save the encoded carrier..
+        /// </summary>
+        public static string Encoding_2 {
+            get {
+                return ResourceManager.GetString("Encoding_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Encoding many bits will distort the carrier.
         /// </summary>
         public static string EncodingBitsWarning {
@@ -340,11 +412,74 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Encoding instructions.
+        /// </summary>
+        public static string EncodingInstructions {
+            get {
+                return ResourceManager.GetString("EncodingInstructions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Encoding message....
         /// </summary>
         public static string EncodingMessage {
             get {
                 return ResourceManager.GetString("EncodingMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encoding options.
+        /// </summary>
+        public static string EncodingOptions {
+            get {
+                return ResourceManager.GetString("EncodingOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a the amount of bits of image pixel channels or audio samples which will be used to hide the message data..
+        /// </summary>
+        public static string EncodingOptions_1 {
+            get {
+                return ResourceManager.GetString("EncodingOptions_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In image carriers, from 0 to 8 bits can be chosen separately for the Red, Green and Blue pixel channels..
+        /// </summary>
+        public static string EncodingOptions_2 {
+            get {
+                return ResourceManager.GetString("EncodingOptions_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In audio carriers, the maximum number of sample bits to be used is determined by the resolution of the chosen audio file..
+        /// </summary>
+        public static string EncodingOptions_3 {
+            get {
+                return ResourceManager.GetString("EncodingOptions_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The encoding information panel shows the capacity of the carrier using the currently chosen pixel/sample bit amount and the ratio of message size to that capacity..
+        /// </summary>
+        public static string EncodingOptions_4 {
+            get {
+                return ResourceManager.GetString("EncodingOptions_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encoding the message on many bits can significantly degrade the carrier quality..
+        /// </summary>
+        public static string EncodingOptions_5 {
+            get {
+                return ResourceManager.GetString("EncodingOptions_5", resourceCulture);
             }
         }
         
@@ -363,6 +498,15 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string EncryptionPassword {
             get {
                 return ResourceManager.GetString("EncryptionPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If the message was additionally encrypted, input the password. Otherwise leave the field empty..
+        /// </summary>
+        public static string EncryptionPassword_1 {
+            get {
+                return ResourceManager.GetString("EncryptionPassword_1", resourceCulture);
             }
         }
         
@@ -547,6 +691,96 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Encoded carrier format:.
+        /// </summary>
+        public static string MoreOptions_1 {
+            get {
+                return ResourceManager.GetString("MoreOptions_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It&apos;s efficiency and performance decreases the larger the ratio of message size to carrier capacity..
+        /// </summary>
+        public static string MoreOptions_10 {
+            get {
+                return ResourceManager.GetString("MoreOptions_10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In Chrome, Edge and Opera browsers, the WebP image format can be used for the encoded carrier. Otherwise the carrier will be saved as PNG..
+        /// </summary>
+        public static string MoreOptions_2 {
+            get {
+                return ResourceManager.GetString("MoreOptions_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compression:.
+        /// </summary>
+        public static string MoreOptions_3 {
+            get {
+                return ResourceManager.GetString("MoreOptions_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message data can be additionally compressed. The efficiency of the compression depends on the message file format and the contents of the file..
+        /// </summary>
+        public static string MoreOptions_4 {
+            get {
+                return ResourceManager.GetString("MoreOptions_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encryption:.
+        /// </summary>
+        public static string MoreOptions_5 {
+            get {
+                return ResourceManager.GetString("MoreOptions_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message data can be additionally encrypted with the fast and secure AES-GCM algorithm using an user provided password..
+        /// </summary>
+        public static string MoreOptions_6 {
+            get {
+                return ResourceManager.GetString("MoreOptions_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scattered encoding:.
+        /// </summary>
+        public static string MoreOptions_7 {
+            get {
+                return ResourceManager.GetString("MoreOptions_7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The message can be encoded in a normal mode in which pixels or samples are encoded sequentially from first to last, or in a scattered mode in which pixels or samples are encoded in a random order..
+        /// </summary>
+        public static string MoreOptions_8 {
+            get {
+                return ResourceManager.GetString("MoreOptions_8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choosing the scattered mode can make the encoding less visible and harder to detect..
+        /// </summary>
+        public static string MoreOptions_9 {
+            get {
+                return ResourceManager.GetString("MoreOptions_9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
         public static string Name {
@@ -682,6 +916,15 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selecting carrier.
+        /// </summary>
+        public static string SelectingCarrier {
+            get {
+                return ResourceManager.GetString("SelectingCarrier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select a carrier, an image or audio file, in which the message will be hidden..
         /// </summary>
         public static string SelectingCarrier_1 {
@@ -714,6 +957,24 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string SelectingCarrier_4 {
             get {
                 return ResourceManager.GetString("SelectingCarrier_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a carrier, an image or audio file, in which the message is hidden..
+        /// </summary>
+        public static string SelectingCarrier_6 {
+            get {
+                return ResourceManager.GetString("SelectingCarrier_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selecting message.
+        /// </summary>
+        public static string SelectingMessage {
+            get {
+                return ResourceManager.GetString("SelectingMessage", resourceCulture);
             }
         }
         

@@ -2,9 +2,9 @@
 @inject AppState AppState
 @implements IDisposable
 
-<MudText Typo="Typo.body1" Align="Align.Center">@Localize["EncodingInformation"]</MudText>
+<MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: min(5vw, 18px);">@Localize["EncodingInformation"]</MudText>
 <MudDivider />
-<MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" style="height:100%" Class="d-flex flex-row align-content-center">
+<MudList Clickable="false" style="height:100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
 	<MudListItem>
 		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
 			<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["CarrierCapacity"]</MudText>

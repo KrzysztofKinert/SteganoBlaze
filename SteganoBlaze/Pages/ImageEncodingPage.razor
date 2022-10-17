@@ -34,6 +34,9 @@
 				MessageSize=@(message?.GetMessageSize() ?? 0)
 				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
 			</EncodingInformation>
+			<PixelValueInformation
+				PixelBits=@options.BitsToEncode>
+			</PixelValueInformation>
         </MudPaper>
 	</MudItem>
 

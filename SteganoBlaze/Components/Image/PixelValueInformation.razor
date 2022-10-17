@@ -1,0 +1,102 @@
+﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
+
+<MudDivider />
+<MudText Typo="Typo.body1" Align="Align.Center" Class="py-1" Style="font-size: min(4vw, 16px);">@Localize["MaxPixelValueChange"]</MudText>
+<MudDivider />
+<MudList Clickable="false" style="height:100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
+	<MudListItem>
+		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+			<MudText Typo="Typo.body2" Color="@rChannelMaxChangeColor" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["RChannel"]</MudText>
+			<MudText Typo="Typo.body1" Color="@rChannelMaxChangeColor" Align="Align.Center">@rChannelMaxChange</MudText>
+		</MudContainer>
+	</MudListItem>
+	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
+	<MudListItem>
+		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+			<MudText Typo="Typo.body2" Color="@gChannelMaxChangeColor" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["GChannel"]</MudText>
+			<MudText Typo="Typo.body1" Color="@gChannelMaxChangeColor" Align="Align.Center">@gChannelMaxChange</MudText>
+		</MudContainer>
+	</MudListItem>
+	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
+	<MudListItem>
+		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+			<MudText Typo="Typo.body2" Color="@bChannelMaxChangeColor" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BChannel"]</MudText>
+			<MudText Typo="Typo.body1" Color="@bChannelMaxChangeColor" Align="Align.Center">@bChannelMaxChange</MudText>
+		</MudContainer>
+	</MudListItem>
+</MudList>
+
+@code {
+	[Parameter] public PixelBits? PixelBits { get; set; }
+
+	string rChannelMaxChange = "-";
+	string gChannelMaxChange = "-";
+	string bChannelMaxChange = "-";
+	MudBlazor.Color rChannelMaxChangeColor = Color.Default;
+	MudBlazor.Color gChannelMaxChangeColor = Color.Default;
+	MudBlazor.Color bChannelMaxChangeColor = Color.Default;
+
+	PixelBits? previousPixelBits;
+	bool shouldRender;
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.OnChange += SetShouldRender;
+	}
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+		AppState.OnChange -= SetShouldRender;
+	}
+	protected override void OnParametersSet()
+	{
+		if (PixelBits != previousPixelBits)
+		{
+			shouldRender = true;
+			previousPixelBits = PixelBits;
+			CheckValueChange();
+		}
+		else
+			shouldRender = false;
+	}
+	protected override bool ShouldRender() => shouldRender;
+	void SetShouldRender()
+	{
+		shouldRender = true; 
+		StateHasChanged();
+	}
+	public void CheckValueChange()
+	{
+		var r = (((Math.Pow(2, PixelBits?.R ?? 1) - 1 ) * 2) / 256 * 100);
+		var g = (Math.Pow(2, PixelBits?.G ?? 1) / 256 * 100);
+		var b = (Math.Pow(2, PixelBits?.B ?? 1) / 256 * 100);
+
+		rChannelMaxChange = r.ToString("0.0") + " %";
+		gChannelMaxChange = g.ToString("0.0") + " %";
+		bChannelMaxChange = b.ToString("0.0") + " %";
+
+		if (r > 20)
+			rChannelMaxChangeColor = Color.Warning;
+		else if (r > 2)
+			rChannelMaxChangeColor = Color.Default;
+		else
+			rChannelMaxChangeColor = Color.Success;
+
+		if (g > 20)
+			gChannelMaxChangeColor = Color.Warning;
+		else if (g > 2)
+			gChannelMaxChangeColor = Color.Default;
+		else
+			gChannelMaxChangeColor = Color.Success;
+
+		if (b > 20)
+			bChannelMaxChangeColor = Color.Warning;
+		else if (b > 2)
+			bChannelMaxChangeColor = Color.Default;
+		else
+			bChannelMaxChangeColor = Color.Success;
+	}
+}

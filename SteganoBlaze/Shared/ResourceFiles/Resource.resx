@@ -208,7 +208,7 @@
     <value>Language</value>
   </data>
   <data name="DecodedFile" xml:space="preserve">
-    <value>Decoded file</value>
+    <value>Recovered file</value>
   </data>
   <data name="Decode" xml:space="preserve">
     <value>Decode</value>
@@ -356,5 +356,92 @@
   </data>
   <data name="SelectingMessage_2" xml:space="preserve">
     <value>The message can be any file with a maximum size of 5 MB.</value>
+  </data>
+  <data name="EncodingOptions_1" xml:space="preserve">
+    <value>Select a the amount of bits of image pixel channels or audio samples which will be used to hide the message data.</value>
+  </data>
+  <data name="EncodingOptions_2" xml:space="preserve">
+    <value>In image carriers, from 0 to 8 bits can be chosen separately for the Red, Green and Blue pixel channels.</value>
+  </data>
+  <data name="EncodingOptions_3" xml:space="preserve">
+    <value>In audio carriers, the maximum number of sample bits to be used is determined by the resolution of the chosen audio file.</value>
+  </data>
+  <data name="EncodingOptions_4" xml:space="preserve">
+    <value>The encoding information panel shows the capacity of the carrier using the currently chosen pixel/sample bit amount and the ratio of message size to that capacity.</value>
+  </data>
+  <data name="EncodingOptions_5" xml:space="preserve">
+    <value>Encoding the message on many bits can significantly degrade the carrier quality.</value>
+  </data>
+  <data name="MoreOptions_1" xml:space="preserve">
+    <value>Encoded carrier format:</value>
+  </data>
+  <data name="MoreOptions_2" xml:space="preserve">
+    <value>In Chrome, Edge and Opera browsers, the WebP image format can be used for the encoded carrier. Otherwise the carrier will be saved as PNG.</value>
+  </data>
+  <data name="MoreOptions_3" xml:space="preserve">
+    <value>Compression:</value>
+  </data>
+  <data name="MoreOptions_4" xml:space="preserve">
+    <value>Message data can be additionally compressed. The efficiency of the compression depends on the message file format and the contents of the file.</value>
+  </data>
+  <data name="MoreOptions_5" xml:space="preserve">
+    <value>Encryption:</value>
+  </data>
+  <data name="MoreOptions_6" xml:space="preserve">
+    <value>Message data can be additionally encrypted with the fast and secure AES-GCM algorithm using an user provided password.</value>
+  </data>
+  <data name="MoreOptions_7" xml:space="preserve">
+    <value>Scattered encoding:</value>
+  </data>
+  <data name="MoreOptions_8" xml:space="preserve">
+    <value>The message can be encoded in a normal mode in which pixels or samples are encoded sequentially from first to last, or in a scattered mode in which pixels or samples are encoded in a random order.</value>
+  </data>
+  <data name="MoreOptions_9" xml:space="preserve">
+    <value>Choosing the scattered mode can make the encoding less visible and harder to detect.</value>
+  </data>
+  <data name="MoreOptions_10" xml:space="preserve">
+    <value>It's efficiency and performance decreases the larger the ratio of message size to carrier capacity.</value>
+  </data>
+  <data name="SelectingCarrier_6" xml:space="preserve">
+    <value>Select a carrier, an image or audio file, in which the message is hidden.</value>
+  </data>
+  <data name="Encoding_1" xml:space="preserve">
+    <value>If the message fits inside the carrier, click the "Encode" button to begin the encoding process.</value>
+  </data>
+  <data name="Encoding_2" xml:space="preserve">
+    <value>After the message has been encoded successfully, click the "Save" button to save the encoded carrier.</value>
+  </data>
+  <data name="EncryptionPassword_1" xml:space="preserve">
+    <value>If the message was additionally encrypted, input the password. Otherwise leave the field empty.</value>
+  </data>
+  <data name="Decoding_1" xml:space="preserve">
+    <value>Click the "Decode" button to begin the decoding process.</value>
+  </data>
+  <data name="Decoding_2" xml:space="preserve">
+    <value>If the message has been decoded successfully, it's details will be displayed in the "Recovered file" section.</value>
+  </data>
+  <data name="Decoding_3" xml:space="preserve">
+    <value>Click the "Save" button to save the recovered file.</value>
+  </data>
+  <data name="SelectingCarrier" xml:space="preserve">
+    <value>Selecting carrier</value>
+  </data>
+  <data name="SelectingMessage" xml:space="preserve">
+    <value>Selecting message</value>
+  </data>
+  <data name="EncodingOptions" xml:space="preserve">
+    <value>Encoding options</value>
+  </data>
+  <data name="Encoding" xml:space="preserve">
+    <value>Encoding</value>
+  </data>
+  <data name="Decoding" xml:space="preserve">
+    <value>Decoding</value>
+  </data>
+  <data name="EncodingInstructions" xml:space="preserve">
+    <value>Encoding instructions</value>
+  </data>
+  <data name="DecodingInstructions" xml:space="preserve">
+    <value>Decoding instructions</value>
   </data>
 </root>

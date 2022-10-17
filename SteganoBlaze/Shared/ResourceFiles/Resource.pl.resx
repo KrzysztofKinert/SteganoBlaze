@@ -208,7 +208,7 @@
     <value>Język</value>
   </data>
   <data name="DecodedFile" xml:space="preserve">
-    <value>Odkodowany plik</value>
+    <value>Odzyskany plik</value>
   </data>
   <data name="Decode" xml:space="preserve">
     <value>Dekoduj</value>
@@ -356,5 +356,92 @@
   </data>
   <data name="SelectingMessage_2" xml:space="preserve">
     <value>Wiadomością może być dowolny plik z maksymalnym rozmiarem 5 MB.</value>
+  </data>
+  <data name="EncodingOptions_1" xml:space="preserve">
+    <value>Wybierz liczbę bitów kanałów pikseli obrazu lub próbek audio które zostaną użyte do ukrycia danych wiadomości.</value>
+  </data>
+  <data name="EncodingOptions_2" xml:space="preserve">
+    <value>W nośnikach graficznych, od 0 do 8 bitów może zostać wybranych osobno dla kanałów Czerwonego, Zielonego i Niebieskiego pikseli.</value>
+  </data>
+  <data name="EncodingOptions_3" xml:space="preserve">
+    <value>W nośnikach dźwiękowych, maksymalna liczba bitów próbek zależy od rozdzielczości wybranego pliku audio.</value>
+  </data>
+  <data name="EncodingOptions_4" xml:space="preserve">
+    <value>Panel informacji kodowania pokazuje pojemność nośnika używając obecnie wybraną liczbę bitów pikseli/próbek oraz stosunek rozmiaru wiadomości do pojemności.</value>
+  </data>
+  <data name="EncodingOptions_5" xml:space="preserve">
+    <value>Kodowanie wiadomości na wielu bitach może znacznie obniżyć jakość nośnika.</value>
+  </data>
+  <data name="MoreOptions_1" xml:space="preserve">
+    <value>Format zakodowanego nośnika:</value>
+  </data>
+  <data name="MoreOptions_2" xml:space="preserve">
+    <value>W przeglądarkach Chrome, Edge i Opera do zapisu zakodowanego nośnika może zostać użyty format graficzny WebP. W przeciwnym wypadku nośnik zostanie zapisany jako PNG.</value>
+  </data>
+  <data name="MoreOptions_3" xml:space="preserve">
+    <value>Kompresja:</value>
+  </data>
+  <data name="MoreOptions_4" xml:space="preserve">
+    <value>Dane wiadomości mogą zostać dodatkowo skompresowane. Skuteczność kompresji zależy od formatu pliku wiadomości oraz zawartości pliku.</value>
+  </data>
+  <data name="MoreOptions_5" xml:space="preserve">
+    <value>Enkrypcja:</value>
+  </data>
+  <data name="MoreOptions_6" xml:space="preserve">
+    <value>Dane wiadomości mogą zostać dodatkowo zaszyfrowane szybkim i bezpiecznym algorytmem AES-GCM używając podanego przez użytkownika hasła.</value>
+  </data>
+  <data name="MoreOptions_7" xml:space="preserve">
+    <value>Kodowanie rozproszone:</value>
+  </data>
+  <data name="MoreOptions_8" xml:space="preserve">
+    <value>Wiadomość może zostać zakodowana w trybie zwykłym w którym piksele lub próbki są kodowane sekwencyjnie od pierwszego do ostatniego, lub w trybie rozproszonym w którym piksele lub próbki wybierane są kolejności losowej.</value>
+  </data>
+  <data name="MoreOptions_9" xml:space="preserve">
+    <value>Wybór trybu rozproszonego może uczynić kodowanie mniej widoczne i trudniejsze do wykrycia.</value>
+  </data>
+  <data name="MoreOptions_10" xml:space="preserve">
+    <value>Jego skuteczność oraz wydajność spada wraz z wzrostem stosunku rozmiaru wiadomości do pojemności nośnika.</value>
+  </data>
+  <data name="SelectingCarrier_6" xml:space="preserve">
+    <value>Wybierz nośnik, plik graficzny lub dźwiękowy, w którym ukryta jest wiadomość.</value>
+  </data>
+  <data name="Encoding_1" xml:space="preserve">
+    <value>Jeśli wiadomość mieści się w nośniku, naciśnij przycisk "Zakoduj" aby rozpocząć proces kodowania.</value>
+  </data>
+  <data name="Encoding_2" xml:space="preserve">
+    <value>Po pomyślnym zakodowaniu wiadomości, naciśnij przycisk "Zapisz" aby zapisać zakodowany nośnik.</value>
+  </data>
+  <data name="EncryptionPassword_1" xml:space="preserve">
+    <value>Jeśli wiadomość została dodatkowo zaszyfrowana, wprowadź hasło. W przeciwnym wypadku zostaw pole puste.</value>
+  </data>
+  <data name="Decoding_1" xml:space="preserve">
+    <value>Naciśnij przycisk "Dekoduj" aby rozpocząć proces dekodowania.</value>
+  </data>
+  <data name="Decoding_2" xml:space="preserve">
+    <value>Po pomyślnym dekodowania wiadomości, jej szczegóły zostaną wyświetlone w sekcji "Odzyskany plik".</value>
+  </data>
+  <data name="Decoding_3" xml:space="preserve">
+    <value>Naciśnij przycisk "Zapisz" aby zapisać odzyskany plik.</value>
+  </data>
+  <data name="SelectingCarrier" xml:space="preserve">
+    <value>Wybór nośnika</value>
+  </data>
+  <data name="SelectingMessage" xml:space="preserve">
+    <value>Wybór wiadomości</value>
+  </data>
+  <data name="EncodingOptions" xml:space="preserve">
+    <value>Opcje kodowania</value>
+  </data>
+  <data name="Encoding" xml:space="preserve">
+    <value>Kodowanie</value>
+  </data>
+  <data name="Decoding" xml:space="preserve">
+    <value>Dekodowanie</value>
+  </data>
+  <data name="EncodingInstructions" xml:space="preserve">
+    <value>Instrukcje kodowania</value>
+  </data>
+  <data name="DecodingInstructions" xml:space="preserve">
+    <value>Instrukcje dekodowania</value>
   </data>
 </root>
