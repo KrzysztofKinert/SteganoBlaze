@@ -5,13 +5,6 @@ namespace SteganoBlaze.Steganography
 {
     public abstract class ImageSteganography
     {
-        protected enum Channel
-        {
-            R,
-            G,
-            B
-        }
-
         protected byte[]? pixelData;
 
         protected PixelParameters parameters;

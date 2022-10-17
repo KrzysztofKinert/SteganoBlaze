@@ -1,0 +1,86 @@
+﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
+
+<MudDivider />
+<MudText Typo="Typo.body1" Align="Align.Center" Class="py-1" Style="font-size: min(4vw, 16px);">@Localize["MaxPixelValueChange"]</MudText>
+<MudDivider />
+<MudList Clickable="false" style="height:100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
+	<MudListItem>
+		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+			<MudText Typo="Typo.body2" Color="@channelMaxValueChangeColor[(int)Channel.R]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["RChannel"]</MudText>
+			<MudText Typo="Typo.body1" Color="@channelMaxValueChangeColor[(int)Channel.R]" Align="Align.Center">@channelMaxValueChange[(int)Channel.R]</MudText>
+		</MudContainer>
+	</MudListItem>
+	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
+	<MudListItem>
+		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+			<MudText Typo="Typo.body2" Color="@channelMaxValueChangeColor[(int)Channel.G]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["GChannel"]</MudText>
+			<MudText Typo="Typo.body1" Color="@channelMaxValueChangeColor[(int)Channel.G]" Align="Align.Center">@channelMaxValueChange[(int)Channel.G]</MudText>
+		</MudContainer>
+	</MudListItem>
+	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
+	<MudListItem>
+		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+			<MudText Typo="Typo.body2" Color="@channelMaxValueChangeColor[(int)Channel.B]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BChannel"]</MudText>
+			<MudText Typo="Typo.body1" Color="@channelMaxValueChangeColor[(int)Channel.B]" Align="Align.Center">@channelMaxValueChange[(int)Channel.B]</MudText>
+		</MudContainer>
+	</MudListItem>
+</MudList>
+
+@code {
+	[Parameter] public PixelBits? PixelBits { get; set; }
+
+	string[] channelMaxValueChange = new string[] { "", "", "" };
+	MudBlazor.Color[] channelMaxValueChangeColor = new MudBlazor.Color[] { Color.Default, Color.Default, Color.Default };
+
+	PixelBits? previousPixelBits;
+	bool shouldRender;
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.OnChange += SetShouldRender;
+	}
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+		AppState.OnChange -= SetShouldRender;
+	}
+	protected override void OnParametersSet()
+	{
+		if (PixelBits != previousPixelBits)
+		{
+			shouldRender = true;
+			previousPixelBits = PixelBits;
+			CheckValueChange();
+		}
+		else
+			shouldRender = false;
+	}
+	protected override bool ShouldRender() => shouldRender;
+	void SetShouldRender()
+	{
+		shouldRender = true; 
+		StateHasChanged();
+	}
+	public void CheckValueChange()
+	{
+		double[] maxValueChange = new double[3];
+		maxValueChange[(int)Channel.R] = ((Math.Pow(2, PixelBits?.R ?? 1) - 1) / 255 * 100);
+		maxValueChange[(int)Channel.G] = ((Math.Pow(2, PixelBits?.G ?? 1) - 1) / 255 * 100);
+		maxValueChange[(int)Channel.B] = ((Math.Pow(2, PixelBits?.B ?? 1) - 1) / 255 * 100);
+
+		for (int i = 0; i < maxValueChange.Length; i++)
+		{
+			channelMaxValueChange[i] = maxValueChange[i].ToString("0.0") + " %";
+
+			if (maxValueChange[i] > 20)
+				channelMaxValueChangeColor[i] = Color.Warning;
+			else if (maxValueChange[i] > 2)
+				channelMaxValueChangeColor[i] = Color.Default;
+			else
+				channelMaxValueChangeColor[i] = Color.Success;
+		}
+	}
+}
