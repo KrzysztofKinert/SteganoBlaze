@@ -1,0 +1,64 @@
+﻿@inject IStringLocalizer<Resource> Localize
+@inject AppState AppState
+@implements IDisposable
+
+<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+	<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["MaxSampleValueChange"]</MudText>
+	<MudText Typo="Typo.body1" Color=@sampleMaxValueChangeColor Align="Align.Center">@sampleMaxValueChange</MudText>
+</MudContainer>
+
+@code {
+	[Parameter] public int? SampleBits { get; set; }
+
+	[Parameter] public int? BitsPerSample { get; set; }
+
+	string sampleMaxValueChange = "";
+	MudBlazor.Color sampleMaxValueChangeColor = Color.Default;
+
+	int? previousSampleBits;
+	int? previousBitsPerSample;
+	bool shouldRender;
+
+	protected override void OnInitialized()
+	{
+		AppState.OnChange += StateHasChanged;
+		AppState.OnChange += SetShouldRender;
+	}
+	public void Dispose()
+	{
+		AppState.OnChange -= StateHasChanged;
+		AppState.OnChange -= SetShouldRender;
+	}
+	protected override void OnParametersSet()
+	{
+		if (SampleBits != previousSampleBits || BitsPerSample != previousBitsPerSample)
+		{
+			shouldRender = true;
+			previousSampleBits = SampleBits;
+			previousBitsPerSample = BitsPerSample;
+			CheckValueChange();
+		}
+		else
+			shouldRender = false;
+	}
+	protected override bool ShouldRender() => shouldRender;
+	void SetShouldRender()
+	{
+		shouldRender = true;
+		StateHasChanged();
+	}
+	public void CheckValueChange()
+	{
+		double maxValueChange = BitsPerSample != 32 ? ((Math.Pow(2, SampleBits ?? 1) - 1) / (Math.Pow(255, BitsPerSample ?? 1 / 8)) * 100)
+													: 1.0;
+
+		sampleMaxValueChange = maxValueChange.ToString("0.0") + " %";
+
+		if (maxValueChange > 20)
+			sampleMaxValueChangeColor = Color.Warning;
+		else if (maxValueChange > 2)
+			sampleMaxValueChangeColor = Color.Default;
+		else
+			sampleMaxValueChangeColor = Color.Success;
+	}
+}
