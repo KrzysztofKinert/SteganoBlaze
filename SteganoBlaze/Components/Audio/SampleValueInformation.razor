@@ -49,8 +49,8 @@
 	}
 	public void CheckValueChange()
 	{
-		double maxValueChange = BitsPerSample != 32 ? ((Math.Pow(2, SampleBits ?? 1) - 1) / (Math.Pow(255, BitsPerSample ?? 1 / 8)) * 100)
-													: 1.0;
+		double maxValueChange = BitsPerSample == 32 ? MaxValueChange.FloatingPoint(SampleBits ?? 1)
+													: MaxValueChange.FixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
 
 		sampleMaxValueChange = maxValueChange.ToString("0.0") + " %";
 
@@ -61,4 +61,5 @@
 		else
 			sampleMaxValueChangeColor = Color.Success;
 	}
+
 }

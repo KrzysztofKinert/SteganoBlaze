@@ -7,7 +7,7 @@
 <MudDivider />
 <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
 	<MudListItem>
-		<MudNumericField Class="px-4" Value="@sampleBitsToEncode" ValueChanged=@((int b) => SampleBitsToEncodeChanged(b)) Label="@Localize["Bits"]" Variant="Variant.Text" Min="1" Max=@(BitsPerSample ?? 32) />
+		<MudNumericField Class="px-4" Value="@sampleBitsToEncode" ValueChanged=@((int b) => SampleBitsToEncodeChanged(b)) Label="@Localize["Bits"]" Variant="Variant.Text" Min="1" Max=@(BitsPerSample ?? 16) />
 	</MudListItem>
 	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
 	<MudListItem>

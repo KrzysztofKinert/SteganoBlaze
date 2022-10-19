@@ -8,16 +8,15 @@ namespace SteganoBlaze.Shared
 
         public event Action? OnChange;
 
-        public MudTheme Theme = new MudTheme();
+        public MudTheme Theme = new();
 
         public static readonly int MAX_CARRIER_SIZE = 10 * 1024 * 1024;
         public static readonly int MAX_MESSAGE_SIZE = 5 * 1024 * 1024;
         public static readonly int MAX_CARRIER_PIXELS = 25000000;
 
-        public void StateChanged()
-        {
+        public void StateChanged() => 
             NotifyStateChanged();
-        }
+
         public void SetPageTheme(Color color, string name)
         {
             pageName = name;
@@ -60,7 +59,8 @@ namespace SteganoBlaze.Shared
             }
             NotifyStateChanged();
         }
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        private void NotifyStateChanged() => 
+            OnChange?.Invoke();
 
         internal static Palette ConvertToDarkTheme(Palette palette, string primaryColor, string tertiaryColor)
         {

@@ -67,9 +67,9 @@
 	public void CheckValueChange()
 	{
 		double[] maxValueChange = new double[3];
-		maxValueChange[(int)Channel.R] = ((Math.Pow(2, PixelBits?.R ?? 1) - 1) / 255 * 100);
-		maxValueChange[(int)Channel.G] = ((Math.Pow(2, PixelBits?.G ?? 1) - 1) / 255 * 100);
-		maxValueChange[(int)Channel.B] = ((Math.Pow(2, PixelBits?.B ?? 1) - 1) / 255 * 100);
+		maxValueChange[(int)Channel.R] = MaxValueChange.FixedPoint(PixelBits?.R ?? 1, 8);
+		maxValueChange[(int)Channel.G] = MaxValueChange.FixedPoint(PixelBits?.G ?? 1, 8);
+		maxValueChange[(int)Channel.B] = MaxValueChange.FixedPoint(PixelBits?.B ?? 1, 8);
 
 		for (int i = 0; i < maxValueChange.Length; i++)
 		{
