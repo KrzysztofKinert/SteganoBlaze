@@ -73,13 +73,13 @@
 
 		for (int i = 0; i < maxValueChange.Length; i++)
 		{
-			channelMaxValueChange[i] = maxValueChange[i].ToString("0.0") + " %";
+			channelMaxValueChange[i] = maxValueChange[i].ToString("0.00") + " %";
 
-			if (maxValueChange[i] > 20)
+			if (maxValueChange[i] > 10)
 				channelMaxValueChangeColor[i] = Color.Warning;
 			else if (maxValueChange[i] > 2)
 				channelMaxValueChangeColor[i] = Color.Default;
-		else
+			else
 				channelMaxValueChangeColor[i] = Color.Success;
 		}
 	}

@@ -6,21 +6,21 @@
 <MudText Typo="Typo.body1" Align="Align.Center">@Localize["SampleBitsToEncode"]</MudText>
 <MudDivider />
 <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
-	<MudListItem>
+	<MudListItem Style="width:50%">
 		<MudNumericField Class="px-4" Value="@sampleBitsToEncode" ValueChanged=@((int b) => SampleBitsToEncodeChanged(b)) Label="@Localize["Bits"]" Variant="Variant.Text" Min="1" Max=@(BitsPerSample ?? 16) />
 	</MudListItem>
 	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
-	<MudListItem>
+	<MudListItem Style="width:50%">
 		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
 			<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BitsPerSample"]</MudText>
 			<MudText Typo="Typo.body1" Align="Align.Center">@(BitsPerSample?.ToString() ?? "-")</MudText>
+			<MudDivider />
+			<SampleValueInformation
+				SampleBits=@sampleBitsToEncode
+				BitsPerSample=@BitsPerSample>
+			</SampleValueInformation>
 		</MudContainer>
 	</MudListItem>
-	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
-	<SampleValueInformation
-		SampleBits=@sampleBitsToEncode
-		BitsPerSample=@BitsPerSample>
-	</SampleValueInformation>
 </MudList>
 
 	@code {
