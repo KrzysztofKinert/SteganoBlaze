@@ -5,6 +5,7 @@
 <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
 	<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["MaxSampleValueChange"]</MudText>
 	<MudText Typo="Typo.body1" Color=@sampleMaxValueChangeColor Align="Align.Center">@sampleMaxValueChange</MudText>
+	<div>@lol.ToString()</div>
 </MudContainer>
 
 @code {
@@ -19,6 +20,7 @@
 	int? previousBitsPerSample;
 	bool shouldRender;
 
+	double lol = 0;
 	protected override void OnInitialized()
 	{
 		AppState.OnChange += StateHasChanged;
@@ -51,15 +53,24 @@
 	{
 		double maxValueChange = BitsPerSample == 32 ? MaxValueChange.FloatingPoint(SampleBits ?? 1)
 													: MaxValueChange.FixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
-
+		lol = maxValueChange;
 		sampleMaxValueChange = maxValueChange.ToString("0.0") + " %";
 
-		if (maxValueChange > 20)
+		if (maxValueChange > 99.99 && maxValueChange < 100)
+		{
+			sampleMaxValueChangeColor = Color.Warning;
+			sampleMaxValueChange = "~" + maxValueChange.ToString("0.0") + " %";
+		}
+		else if (maxValueChange > 10)
 			sampleMaxValueChangeColor = Color.Warning;
 		else if (maxValueChange > 2)
 			sampleMaxValueChangeColor = Color.Default;
 		else
+		{
 			sampleMaxValueChangeColor = Color.Success;
+			if (maxValueChange < 0.09 && maxValueChange > 0)
+				sampleMaxValueChange = "~" + maxValueChange.ToString("0.0") + " %";
+		}
 	}
 
 }
