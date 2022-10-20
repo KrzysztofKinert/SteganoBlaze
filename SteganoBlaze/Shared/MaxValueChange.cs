@@ -14,6 +14,8 @@
                 binVal += "0";
             for (int i = 0; i < selectedBits; i++)
                 binVal += "1";
+            for (int i = 0; i < selectedBits; i++)
+                binVal += "0";
 
             var byteValue = BitConverter.GetBytes(Convert.ToInt32(binVal, 2));
             var floatValue = BitConverter.ToSingle(byteValue, 0);

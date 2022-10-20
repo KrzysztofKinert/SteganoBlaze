@@ -5,6 +5,7 @@
 <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
 	<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["MaxSampleValueChange"]</MudText>
 	<MudText Typo="Typo.body1" Color=@sampleMaxValueChangeColor Align="Align.Center">@sampleMaxValueChange</MudText>
+	<div>@lol.ToString()</div>
 </MudContainer>
 
 @code {
@@ -19,6 +20,7 @@
 	int? previousBitsPerSample;
 	bool shouldRender;
 
+	double lol = 0;
 	protected override void OnInitialized()
 	{
 		AppState.OnChange += StateHasChanged;
