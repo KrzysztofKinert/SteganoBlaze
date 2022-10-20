@@ -444,4 +444,10 @@
   <data name="DecodingInstructions" xml:space="preserve">
     <value>Decoding instructions</value>
   </data>
+  <data name="ChannelValueChange" xml:space="preserve">
+    <value>Possible channel value change</value>
+  </data>
+  <data name="SampleValueChange" xml:space="preserve">
+    <value>Possible sample value change</value>
+  </data>
 </root>

@@ -2,10 +2,8 @@
 @inject AppState AppState
 @implements IDisposable
 
-<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-	<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["MaxSampleValueChange"]</MudText>
-	<MudText Typo="Typo.body1" Color=@sampleMaxValueChangeColor Align="Align.Center">@sampleMaxValueChange</MudText>
-</MudContainer>
+<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["SampleValueChange"]</MudText>
+<MudText Typo="Typo.body1" Color=@sampleMaxValueChangeColor Align="Align.Center">@sampleMaxValueChange</MudText>
 
 @code {
 	[Parameter] public int? SampleBits { get; set; }
@@ -53,6 +51,7 @@
 													: MaxValueChange.FixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
 
 		sampleMaxValueChange = maxValueChange.ToString("0.00") + " %";
+		sampleMaxValueChangeColor = Color.Warning;
 
 		if (maxValueChange > 99.99 && maxValueChange < 100)
 		{
@@ -66,9 +65,8 @@
 		else
 		{
 			sampleMaxValueChangeColor = Color.Success;
-			if (maxValueChange < 0.005 && maxValueChange > 0)
+			if (maxValueChange < 0.005)
 				sampleMaxValueChange = "~" + maxValueChange.ToString("0.00") + " %";
 		}
 	}
-
 }

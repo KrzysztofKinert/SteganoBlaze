@@ -178,6 +178,15 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Possible channel value change.
+        /// </summary>
+        public static string ChannelValueChange {
+            get {
+                return ResourceManager.GetString("ChannelValueChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Checking....
         /// </summary>
         public static string Checking {
@@ -876,6 +885,15 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string SampleBitsToEncode {
             get {
                 return ResourceManager.GetString("SampleBitsToEncode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Possible sample value change.
+        /// </summary>
+        public static string SampleValueChange {
+            get {
+                return ResourceManager.GetString("SampleValueChange", resourceCulture);
             }
         }
         

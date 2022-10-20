@@ -4,23 +4,19 @@
     {
         public static double FloatingPoint(int selectedBits)
         {
-            if (selectedBits > 29)
+            if (selectedBits > 30)
                 return 100.0;
 
-            float maxValue = float.MaxValue;
-
-            string binVal = "01";
+            string binaryValue = "01";
             for (int i = 0; i < 30 - selectedBits; i++)
-                binVal += "0";
+                binaryValue += "0";
             for (int i = 0; i < selectedBits; i++)
-                binVal += "1";
-            for (int i = 0; i < selectedBits; i++)
-                binVal += "0";
+                binaryValue += "1";
 
-            var byteValue = BitConverter.GetBytes(Convert.ToInt32(binVal, 2));
+            var byteValue = BitConverter.GetBytes(Convert.ToInt32(binaryValue, 2));
             var floatValue = BitConverter.ToSingle(byteValue, 0);
 
-            return Math.Log2(floatValue - 1.0) / Math.Log2(maxValue) * 100;
+            return Math.Log2(floatValue - 1.0) / Math.Log2(float.MaxValue) * 100;
         }
 
         public static double FixedPoint(int selectedBits, int intLength)

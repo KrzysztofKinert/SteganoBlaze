@@ -3,7 +3,7 @@
 @inject AppState AppState
 @implements IDisposable
 
-<MudText Typo="Typo.body1" Align="Align.Center">@Localize["SampleBitsToEncode"]</MudText>
+<MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: min(5vw, 18px);">@Localize["SampleBitsToEncode"]</MudText>
 <MudDivider />
 <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
 	<MudListItem Style="width:50%">
@@ -14,7 +14,7 @@
 		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
 			<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BitsPerSample"]</MudText>
 			<MudText Typo="Typo.body1" Align="Align.Center">@(BitsPerSample?.ToString() ?? "-")</MudText>
-			<MudDivider />
+			<MudDivider Class="mb-2"/>
 			<SampleValueInformation
 				SampleBits=@sampleBitsToEncode
 				BitsPerSample=@BitsPerSample>
