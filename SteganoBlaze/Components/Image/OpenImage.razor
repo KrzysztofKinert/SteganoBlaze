@@ -6,7 +6,7 @@
 
 @if (carrier is not null)
 {
-	<img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@carrier.ContentType;base64,@carrier.base64Data" />
+	<img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@carrier.ContentType;base64,@carrier.Base64Data" />
 }
 
 <MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
@@ -75,8 +75,8 @@
 				throw new Exception();
 
 			carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
-			carrier.height = imageHeight;
-			carrier.width = imageWidth;
+			carrier.Height = imageHeight;
+			carrier.Width = imageWidth;
 		}
 		catch
 		{

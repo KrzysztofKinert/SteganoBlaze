@@ -1,5 +1,4 @@
 ﻿@inject IStringLocalizer<Resource> Localize
-@inject ISnackbar Snackbar
 @inject AppState AppState
 @implements IDisposable
 
@@ -36,10 +35,6 @@
 	async Task SampleBitsToEncodeChanged(int value)
 	{
 		sampleBitsToEncode = value;
-
-		if (value > 3)
-			Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
-
 		await OnSampleBitsToEncodeChanged.InvokeAsync(sampleBitsToEncode);
 	}
 }

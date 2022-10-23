@@ -71,7 +71,7 @@
 		encodedCarrier = null;
 
 		await UpdateProgress(Localize["ReadingImageData"], 0);
-		Carrier.pixelData = await JSInterop.ReadStream(js, "getImageData");
+		Carrier.PixelData = await JSInterop.ReadStream(js, "getImageData");
 
 		if (Options.Password is not null)
 		{
@@ -96,7 +96,7 @@
 			await UpdateProgress(Localize["SavingImageData"], 80);
 			string encodedCarrierURL = ((IJSInProcessRuntime)js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.WebPFormatEnabled ?? false) ? "image/webp" : "image/png");
 
-			encodedCarrier = new File { base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
+			encodedCarrier = new File { Base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
 										ContentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),
 										FileName = AddSuffix(Carrier.FileName) };
 
@@ -120,21 +120,21 @@
 
 		await UpdateProgress(Localize["EncodingMessage"], 30);
 
-		encoder.Encode(Message.header);
+		encoder.Encode(Message.Header);
 
-		int updates = Message.fileData.Length / 250000 + 1;
+		int updates = Message.ByteData.Length / 250000 + 1;
 		int updatesDone = 0;
-		int bytesLeft = Message.fileData.Length;
+		int bytesLeft = Message.ByteData.Length;
 
 		while (bytesLeft > 250000)
 		{
-			encoder.Encode(Message.fileData[(250000 * updatesDone)..(250000 * (updatesDone + 1))]);
+			encoder.Encode(Message.ByteData[(250000 * updatesDone)..(250000 * (updatesDone + 1))]);
 			updatesDone++;
 			bytesLeft -= 250000;
 			await UpdateProgress(Localize["EncodingMessage"], 25 + updatesDone * 50 / updates);
 		}
 
-		encoder.Encode(Message.fileData[(250000 * updatesDone)..]);
+		encoder.Encode(Message.ByteData[(250000 * updatesDone)..]);
 
 		return encoder.GetEncodedCarrier();
 	}
@@ -148,8 +148,8 @@
 		byte[] ivHeader = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
 		byte[] ivFile = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
 
-		List<byte[]> aesInputs = new List<byte[]> { Message.fileData, passwordBytes, salt, ivFile };
-		Message.fileData = await JSInterop.ReadStream(js, "encryptData", aesInputs);
+		List<byte[]> aesInputs = new List<byte[]> { Message.ByteData, passwordBytes, salt, ivFile };
+		Message.ByteData = await JSInterop.ReadStream(js, "encryptData", aesInputs);
 		Message.UpdateHeader();
 
 		aesInputs = new List<byte[]> { Message.GenerateMetadata(), passwordBytes, salt, ivHeader };

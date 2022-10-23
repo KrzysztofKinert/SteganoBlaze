@@ -91,7 +91,7 @@
 	}
 	public void ShowOriginalImage()
 	{
-		source = "data:" + (Carrier?.ContentType ?? "") + ";base64," + (Carrier?.base64Data ?? "");
+		source = "data:" + (Carrier?.ContentType ?? "") + ";base64," + (Carrier?.Base64Data ?? "");
 		alt = Localize["OriginalImage"];
 		originalButtonVariant = Variant.Filled;
 		encodedButtonVariant = Variant.Outlined;
@@ -100,7 +100,7 @@
 	}
 	public void ShowEncodedImage()
 	{
-		source = "data:" + (EncodedCarrier?.ContentType ?? "") + ";base64," + (EncodedCarrier?.base64Data ?? "");
+		source = "data:" + (EncodedCarrier?.ContentType ?? "") + ";base64," + (EncodedCarrier?.Base64Data ?? "");
 		alt = Localize["EncodedImage"];
 		originalButtonVariant = Variant.Outlined;
 		encodedButtonVariant = Variant.Filled;

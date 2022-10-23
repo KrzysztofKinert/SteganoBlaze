@@ -1,5 +1,4 @@
 ﻿@inject IStringLocalizer<Resource> Localize
-@inject ISnackbar Snackbar
 @inject AppState AppState
 @implements IDisposable
 
@@ -16,6 +15,7 @@
 		<MudNumericField Value="@blue" ValueChanged="@((int b) => BlueBitsToEncodeChanged(b))" Class="px-4" Label="@Localize["BChannel"]" Variant="Variant.Text" Min="0" Max="8" />
 	</MudListItem>
 </MudList>
+
 @code {
 	[Parameter] public EventCallback<PixelBits> OnPixelBitsChanged { get; set; }
 
@@ -29,22 +29,16 @@
 	async Task RedBitsToEncodeChanged(int value)
 	{
 		red = value;
-		if(value > 3)
-			Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
 		await OnPixelBitsChanged.InvokeAsync(new PixelBits { R = red, G = green, B = blue });
 	}
 	async Task GreenBitsToEncodeChanged(int value)
 	{
 		green = value;
-		if(value > 3)
-			Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
 		await OnPixelBitsChanged.InvokeAsync(new PixelBits { R = red, G = green, B = blue });
 	}
 	async Task BlueBitsToEncodeChanged(int value)
 	{
 		blue = value;
-		if(value > 3)
-			Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
 		await OnPixelBitsChanged.InvokeAsync(new PixelBits { R = red, G = green, B = blue });
 	}
 }

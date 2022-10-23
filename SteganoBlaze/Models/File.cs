@@ -7,7 +7,7 @@ namespace SteganoBlaze.Models
     public class File : IFile
     {
         public byte[] ByteData { get; set; } = Array.Empty<byte>();
-        public string base64Data { get; set; } = "";
+        public string Base64Data { get; set; } = "";
         public string ContentType { get; set; } = "";
         public string FileName { get; set; } = "";
         public int FileSize { get; set; }
@@ -19,7 +19,7 @@ namespace SteganoBlaze.Models
         public File(byte[] fileBytes, IBrowserFile fileInfo)
         {
             ByteData = fileBytes;
-            base64Data = Convert.ToBase64String(fileBytes);
+            Base64Data = Convert.ToBase64String(fileBytes);
 
             var cT = fileInfo.ContentType;
             if (cT == "") cT = "application/octet-stream";

@@ -23,7 +23,7 @@
 
 	<MudItem xs="12" sm="6">
         <MudPaper Elevation="3" Style="height:100%">
-			<SampleBitsPicker BitsPerSample=@carrier?.bitsPerSample OnSampleBitsToEncodeChanged=@((int s) => SampleBitsToEncodeChanged(s))/>
+			<SampleBitsPicker BitsPerSample=@carrier?.BitsPerSample OnSampleBitsToEncodeChanged=@((int s) => SampleBitsToEncodeChanged(s))/>
         </MudPaper>
 	</MudItem>
 
@@ -141,9 +141,9 @@
 		{
 			try
 			{
-				messageDecompressed = message.fileData;
-				message.fileData = await Compression.Compress(message.fileData);
-				message.isCompressed = true;
+				messageDecompressed = message.ByteData;
+				message.ByteData = await Compression.Compress(message.ByteData);
+				message.IsCompressed = true;
 			}
 			catch
 			{
@@ -152,9 +152,9 @@
 		}
 		else
 		{
-			message.fileData = messageDecompressed!;
+			message.ByteData = messageDecompressed!;
 			messageDecompressed = null;
-			message.isCompressed = false;
+			message.IsCompressed = false;
 		}
 		message.UpdateHeader();
 	}

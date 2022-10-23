@@ -3,8 +3,8 @@ namespace SteganoBlaze.Shared
 {
     public class AppState
     {
-        public string pageName { get; private set; } = "AboutSteganography";
-        public bool webPUnavailable { get; set; } = false;
+        public string PageName { get; private set; } = "AboutSteganography";
+        public bool WebPUnavailable { get; set; } = false;
 
         public event Action? OnChange;
 
@@ -19,7 +19,7 @@ namespace SteganoBlaze.Shared
 
         public void SetPageTheme(Color color, string name)
         {
-            pageName = name;
+            PageName = name;
 
             switch(color)
             {

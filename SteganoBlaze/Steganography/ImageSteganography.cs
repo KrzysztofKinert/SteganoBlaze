@@ -55,8 +55,10 @@ namespace SteganoBlaze.Steganography
                     pixelIndex += 4;
                     break;
                 case PixelOrder.Random:
-                    while (usedPixels!.Contains(pixelIndex))
-                        pixelIndex = generator!.Next(pixelData.Length / 4) * 4;
+                    if (usedPixels is null || generator is null)
+                        throw new Exception();
+                    while (usedPixels.Contains(pixelIndex))
+                        pixelIndex = generator.Next(pixelData.Length / 4) * 4;
                     usedPixels.Add(pixelIndex);
                     break;
             }
@@ -70,11 +72,11 @@ namespace SteganoBlaze.Steganography
     {
         public ImageEncoder(Image carrier, PixelParameters pixelParams)
         {
-            if (carrier.pixelData is null)
+            if (carrier.PixelData is null)
                 throw new Exception();
 
-            pixelData = carrier.pixelData;
-            randomSeed = carrier.height * carrier.width;
+            pixelData = carrier.PixelData;
+            randomSeed = carrier.Height * carrier.Width;
             parameters = pixelParams;
             FirstPixel();
         }
@@ -121,11 +123,11 @@ namespace SteganoBlaze.Steganography
     {
         public ImageDecoder(Image carrierToDecode, PixelParameters pixelParams)
         {
-            if (carrierToDecode.pixelData is null)
+            if (carrierToDecode.PixelData is null)
                 throw new Exception();
 
-            pixelData = carrierToDecode.pixelData;
-            randomSeed = carrierToDecode.height * carrierToDecode.width;
+            pixelData = carrierToDecode.PixelData;
+            randomSeed = carrierToDecode.Height * carrierToDecode.Width;
             parameters = pixelParams;
             FirstPixel();
         }

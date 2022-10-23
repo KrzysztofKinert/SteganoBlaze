@@ -1,15 +1,11 @@
 ﻿using System.Text;
 using SteganoBlaze.Shared;
-
 namespace SteganoBlaze.Models
 {
-    public class Message
+    public class Message : File
     {
-        public byte[] header { get; set; } = Array.Empty<byte>();
-        public byte[] fileData { get; set; } = Array.Empty<byte>();
-        public string contentType { get; set; }
-        public string fileName { get; set; }
-        public bool isCompressed { get; set; }
+        public byte[] Header { get; set; } = Array.Empty<byte>();
+        public bool IsCompressed { get; set; }
 
         //4 4-byte markers + 2-byte filename size + 2-byte type size + 4-byte file size + 1-byte bool = 25 bytes 
         public static readonly int MIN_HEADER_SIZE = 4 * 4 + 2 * 2 + 4 + 1;
@@ -18,31 +14,32 @@ namespace SteganoBlaze.Models
 
         public Message(File file)
         {
-            fileData = file.ByteData;
-            contentType = file.ContentType;
-            fileName = file.FileName;
-            isCompressed = false;
+            ByteData = file.ByteData;
+            ContentType = file.ContentType;
+            FileName = file.FileName;
+            IsCompressed = false;
             UpdateHeader();
         }
 
         public byte[] GenerateMetadata()
         {
-            List<byte> metadata = new List<byte>();
+            List<byte> metadata = new();
             metadata.AddRange(Encoding.UTF8.GetBytes("NAME"));
-            metadata.AddRange(BitConverter.GetBytes((ushort)Encoding.UTF8.GetByteCount(fileName)));
-            metadata.AddRange(Encoding.UTF8.GetBytes(fileName));
+            metadata.AddRange(BitConverter.GetBytes((ushort)Encoding.UTF8.GetByteCount(FileName)));
+            metadata.AddRange(Encoding.UTF8.GetBytes(FileName));
 
             metadata.AddRange(Encoding.UTF8.GetBytes("TYPE"));
-            metadata.AddRange(BitConverter.GetBytes((ushort)contentType.Length));
-            metadata.AddRange(Encoding.UTF8.GetBytes(contentType));
+            metadata.AddRange(BitConverter.GetBytes((ushort)ContentType.Length));
+            metadata.AddRange(Encoding.UTF8.GetBytes(ContentType));
 
             metadata.AddRange(Encoding.UTF8.GetBytes("SIZE"));
-            metadata.AddRange(BitConverter.GetBytes(fileData.Length));
+            metadata.AddRange(BitConverter.GetBytes(ByteData.Length));
 
             metadata.AddRange(Encoding.UTF8.GetBytes("CMPR"));
-            metadata.AddRange(BitConverter.GetBytes(isCompressed));
+            metadata.AddRange(BitConverter.GetBytes(IsCompressed));
             return metadata.ToArray();
         }
+
         public void UpdateHeader(byte[]? metadata = null, List<byte>? aesParams = null)
         {
             List<byte> headerList = (metadata ?? GenerateMetadata()).ToList();
@@ -50,11 +47,13 @@ namespace SteganoBlaze.Models
             headerList.InsertRange(0, BitConverter.GetBytes(headerList.Count));
             headerList.InsertRange(sizeof(int), aesParams ?? new List<byte>());
 
-            header = headerList.ToArray();
+            Header = headerList.ToArray();
         }
+
         public int GetMessageSize() =>
-            header.Length + fileData.Length;
-        public string SizeToString() =>
+            Header.Length + ByteData.Length;
+
+        public new string SizeToString() =>
             ByteSize.Reduce(GetMessageSize());
     }
 }

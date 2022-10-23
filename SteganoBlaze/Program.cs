@@ -34,6 +34,6 @@ CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("pl-Pl");
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("pl-Pl");
 
 var appState = host.Services.GetRequiredService<AppState>();
-appState.webPUnavailable = await js.InvokeAsync<bool>("disableWebP");
+appState.WebPUnavailable = await js.InvokeAsync<bool>("disableWebP");
 
 await host.RunAsync();

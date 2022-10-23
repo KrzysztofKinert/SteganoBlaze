@@ -14,6 +14,7 @@ namespace SteganoBlaze.Steganography
         protected int randomSeed;
         protected Random? generator;
         protected HashSet<int>? usedSamples;
+
         protected void FirstSample()
         {
             if (carrier is null) 
@@ -45,8 +46,10 @@ namespace SteganoBlaze.Steganography
                     sampleIndex++;
                     break;
                 case SampleOrder.Random:
-                    while (usedSamples!.Contains(sampleIndex))
-                        sampleIndex = generator!.Next(carrier!.GetSampleCount());
+                    if (usedSamples is null || generator is null)
+                        throw new Exception();
+                    while (usedSamples.Contains(sampleIndex))
+                        sampleIndex = generator.Next(carrier.GetSampleCount());
                     usedSamples.Add(sampleIndex);
                     break;
             }

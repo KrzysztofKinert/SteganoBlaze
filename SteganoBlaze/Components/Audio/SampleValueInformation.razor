@@ -1,5 +1,6 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject AppState AppState
+@inject ISnackbar Snackbar
 @implements IDisposable
 
 <MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["SampleValueChange"]</MudText>
@@ -51,22 +52,22 @@
 													: MaxValueChange.FixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
 
 		sampleMaxValueChange = maxValueChange.ToString("0.00") + " %";
-		sampleMaxValueChangeColor = Color.Warning;
-
-		if (maxValueChange > 99.99 && maxValueChange < 100)
+		switch (maxValueChange)
 		{
-			sampleMaxValueChangeColor = Color.Warning;
-			sampleMaxValueChange = "~" + maxValueChange.ToString("0.00") + " %";
-		}
-		else if (maxValueChange > 10)
-			sampleMaxValueChangeColor = Color.Warning;
-		else if (maxValueChange > 2)
-			sampleMaxValueChangeColor = Color.Default;
-		else
-		{
-			sampleMaxValueChangeColor = Color.Success;
-			if (maxValueChange < 0.005)
+			case > 10:
+				sampleMaxValueChangeColor = Color.Warning;
+				Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
+				break;
+			case < 10 and > 2:
+				sampleMaxValueChangeColor = Color.Default;
+				break;
+			case < 2 and > 0.005:
+				sampleMaxValueChangeColor = Color.Success;
+				break;
+			case < 0.005:
 				sampleMaxValueChange = "~" + maxValueChange.ToString("0.00") + " %";
+				sampleMaxValueChangeColor = Color.Success;
+				break;
 		}
 	}
 }

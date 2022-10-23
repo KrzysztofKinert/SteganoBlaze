@@ -2,13 +2,13 @@
 {
     public class Image : File
     {
-        public byte[]? pixelData;
-        public int height;
-        public int width;
+        public byte[]? PixelData;
+        public int Height;
+        public int Width;
 
         public Image(File file)
         {
-            base64Data = file.base64Data;
+            Base64Data = file.Base64Data;
             ContentType = file.ContentType;
             FileName = file.FileName;
             FileSize = file.FileSize;

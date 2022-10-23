@@ -1,6 +1,5 @@
 ﻿@page "/ImageEncodingPage"
 @using SteganoBlaze.Components.Image
-@using SteganoBlaze.Models
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
@@ -30,7 +29,7 @@
 	<MudItem xs="12" sm="6">
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
 			<EncodingInformation 
-				Capacity=@((carrier?.width ?? 0) * (carrier?.height ?? 0) * options.BitsToEncode.GetBitSum() / 8.0)
+				Capacity=@((carrier?.Width ?? 0) * (carrier?.Height ?? 0) * options.BitsToEncode.GetBitSum() / 8.0)
 				MessageSize=@(message?.GetMessageSize() ?? 0)
 				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
 			</EncodingInformation>
@@ -42,7 +41,7 @@
 
 	<MudItem xs="12">
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
-			@if(AppState.webPUnavailable)
+			@if(AppState.WebPUnavailable)
 			{
 				<EncodingOptions 
 						Disabled=@processing
@@ -137,9 +136,9 @@
 		{
 			try
 			{
-				messageDecompressed = message.fileData;
-				message.fileData = await Compression.Compress(message.fileData);
-				message.isCompressed = true;
+				messageDecompressed = message.ByteData;
+				message.ByteData = await Compression.Compress(message.ByteData);
+				message.IsCompressed = true;
 			}
 			catch
 			{
@@ -148,9 +147,9 @@
 		}
 		else
 		{
-			message.fileData = messageDecompressed!;
+			message.ByteData = messageDecompressed!;
 			messageDecompressed = null;
-			message.isCompressed = false;
+			message.IsCompressed = false;
 		}
 		message.UpdateHeader();
 	}

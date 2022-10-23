@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AboutSteganography" xml:space="preserve">
-    <value>O Steganografii</value>
+  <data name="AboutSteganoBlaze" xml:space="preserve">
+    <value>O SteganoBlaze</value>
   </data>
   <data name="AudioDecoding" xml:space="preserve">
     <value>Dekodowanie Audio</value>

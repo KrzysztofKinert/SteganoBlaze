@@ -70,11 +70,11 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to About Steganography.
+        ///   Looks up a localized string similar to About SteganoBlaze.
         /// </summary>
-        public static string AboutSteganography {
+        public static string AboutSteganoBlaze {
             get {
-                return ResourceManager.GetString("AboutSteganography", resourceCulture);
+                return ResourceManager.GetString("AboutSteganoBlaze", resourceCulture);
             }
         }
         

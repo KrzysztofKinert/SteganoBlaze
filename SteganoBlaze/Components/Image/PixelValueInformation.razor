@@ -1,5 +1,6 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject AppState AppState
+@inject ISnackbar Snackbar
 @implements IDisposable
 
 <MudDivider />
@@ -75,12 +76,19 @@
 		{
 			channelMaxValueChange[i] = maxValueChange[i].ToString("0.00") + " %";
 
-			if (maxValueChange[i] > 10)
-				channelMaxValueChangeColor[i] = Color.Warning;
-			else if (maxValueChange[i] > 2)
-				channelMaxValueChangeColor[i] = Color.Default;
-			else
-				channelMaxValueChangeColor[i] = Color.Success;
+			switch (maxValueChange[i])
+			{
+				case > 10:
+					channelMaxValueChangeColor[i] = Color.Warning;
+					Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
+					break;
+				case < 10 and > 2:
+					channelMaxValueChangeColor[i] = Color.Default;
+					break;
+				case < 2:
+					channelMaxValueChangeColor[i] = Color.Success;
+					break;
+			}
 		}
 	}
 }

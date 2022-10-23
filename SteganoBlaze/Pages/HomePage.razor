@@ -3,72 +3,90 @@
 @inject IStringLocalizer<Resource> Localize
 @implements IDisposable
 
-<PageTitle>@Localize["AboutSteganography"]</PageTitle>
+<PageTitle>@Localize["AboutSteganoBlaze"]</PageTitle>
 
 <h2>SteganoBlaze</h2>
-
-<div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
-
+<div> 
+    SteganoBlaze is a steganography app that enables the user to hide any type of file (the message) inside an image or an audio file (the carrier) and recover it.
+    <br />
+    Hidden files can be additionally protected with a password using the secure AES encryption algorithm.
+    <br />
+    All processing is done locally on the browser, neither the carrier nor the message is transmitted over the web.
+    <br />
+    App created with the
+    <a href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor" target="_blank">Blazor WebAssembly</a>
+    framework and the
+    <a href="https://mudblazor.com/" target="_blank">Mudblazor</a>
+    library.
+    <br />
+</div>
 <br />
+
 <h2>Steganography</h2>
-<div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+<div>
+    Steganography is the practice of hiding secret information inside a cover file (such as a picture) where nobody would suspect it contains hidden information inside of it. 
+    The secret information itself can be a message or even another file (picture, video or audio file). 
+    This hidden data is usually encrypted with a password. 
+    Steganography is beneficial for watermarking images, securely storing sensitive data, such as hiding system passwords or keys within other files.
+</div>
 <br />
+
 <MudExpansionPanels MultiExpansion="true">
     <MudExpansionPanel Text=@Localize["EncodingInstructions"]>
         <MudExpansionPanels MultiExpansion="true">
             <MudExpansionPanel Text=@Localize["SelectingCarrier"] Class="mud-theme-primary">
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["SelectingCarrier_1"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["SelectingCarrier_1"]</MudText>
                 <br />
                 <h4>@Localize["SelectingCarrier_2"]</h4>
                 <ul>
-                    <li style="margin-left:10px">PNG</li>
-                    <li style="margin-left:10px">JPEG</li>
-                    <li style="margin-left:10px">APNG</li>
-                    <li style="margin-left:10px">GIF</li>
-                    <li style="margin-left:10px">SVG</li>
-                    <li style="margin-left:10px">WebP</li>
-                    <li style="margin-left:10px">BMP</li>
-                    <li style="margin-left:10px">ICO</li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">PNG</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">JPEG</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">APNG</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">GIF</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">SVG</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">WebP</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">BMP</MudText></li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">ICO</MudText></li>
                 </ul>
                 <br />
                 <h4>@Localize["SelectingCarrier_3"]</h4>
                 <ul>
-                    <li style="margin-left:10px">WAV</li>
+                    <li style="margin-left:10px"><MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">WAV</MudText></li>
                 </ul>
                 <br />
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["SelectingCarrier_4"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["SelectingCarrier_4"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["SelectingMessage"] Class="mud-theme-primary">
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["SelectingMessage_1"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["SelectingMessage_2"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["SelectingMessage_1"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["SelectingMessage_2"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["EncodingOptions"] Class="mud-theme-primary">
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["EncodingOptions_1"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["EncodingOptions_1"]</MudText>
                 <br />
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["EncodingOptions_2"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["EncodingOptions_3"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["EncodingOptions_2"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["EncodingOptions_3"]</MudText>
                 <br />
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["EncodingOptions_4"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["EncodingOptions_5"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["EncodingOptions_4"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["EncodingOptions_5"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["MoreOptions"] Class="mud-theme-primary">
                 <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">@Localize["MoreOptions_1"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["MoreOptions_2"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["MoreOptions_2"]</MudText>
                 <br />
                 <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">@Localize["MoreOptions_3"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["MoreOptions_4"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["MoreOptions_4"]</MudText>
                 <br />
                 <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">@Localize["MoreOptions_5"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["MoreOptions_6"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["MoreOptions_6"]</MudText>
                 <br/>
                 <MudText Typo="Typo.h3" Style="font-size: min(5vw, 18px);">@Localize["MoreOptions_7"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["MoreOptions_8"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["MoreOptions_9"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["MoreOptions_10"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["MoreOptions_8"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["MoreOptions_9"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["MoreOptions_10"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["Encoding"] Class="mud-theme-primary">
-                <MudText Typo="Typo.body2" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["Encoding_1"]</MudText>
-                <MudText Typo="Typo.body2" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["Encoding_2"]</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["Encoding_1"]</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["Encoding_2"]</MudText>
             </MudExpansionPanel>
         </MudExpansionPanels>
     </MudExpansionPanel>
@@ -94,12 +112,12 @@
                 <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["SelectingCarrier_4"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["EncryptionPassword"] Class="mud-theme-primary">
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["EncryptionPassword_1"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["EncryptionPassword_1"]</MudText>
             </MudExpansionPanel>
             <MudExpansionPanel Text=@Localize["Decoding"] Class="mud-theme-primary">
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["Decoding_1"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["Decoding_2"]</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(3vw, 14px);">@Localize["Decoding_3"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["Decoding_1"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["Decoding_2"]</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Justify" Style="font-size: min(4vw, 14px);">@Localize["Decoding_3"]</MudText>
             </MudExpansionPanel>
         </MudExpansionPanels>
     </MudExpansionPanel>
@@ -110,7 +128,7 @@
     protected override void OnInitialized()
     {
         AppState.OnChange += StateHasChanged;
-        AppState.SetPageTheme(Color.Info, "AboutSteganography");
+        AppState.SetPageTheme(Color.Info, "AboutSteganoBlaze");
     }
     public void Dispose()
 	{

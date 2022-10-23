@@ -4,7 +4,7 @@
     {
         public static double FloatingPoint(int selectedBits)
         {
-            if (selectedBits > 30)
+            if (selectedBits > 29)
                 return 100.0;
 
             string binaryValue = "01";

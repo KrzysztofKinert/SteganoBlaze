@@ -28,7 +28,7 @@
 
 		try
 		{
-			if (fileToSave.base64Data == "" || fileToSave.base64Data is null)
+			if (fileToSave.Base64Data == "" || fileToSave.Base64Data is null)
 				((IJSInProcessRuntime)js).InvokeVoid("saveFileBlob", fileToSave);
 			else
 				((IJSInProcessRuntime)js).InvokeVoid("saveFileBase64", fileToSave);

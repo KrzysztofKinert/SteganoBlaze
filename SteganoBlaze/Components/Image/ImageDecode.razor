@@ -71,7 +71,7 @@
 		await OnProcessingChanged.InvokeAsync(true);
 
 		await UpdateProgress(Localize["ReadingImageData"], 0);
-		EncodedCarrier.pixelData = await JSInterop.ReadStream(js, "getImageData");
+		EncodedCarrier.PixelData = await JSInterop.ReadStream(js, "getImageData");
 
 		await UpdateProgress(Localize["CheckingCarrier"], 10);
 

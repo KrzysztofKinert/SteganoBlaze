@@ -4,7 +4,7 @@ namespace SteganoBlaze.Models
 {
     public class WAV : File
     {
-        public int bitsPerSample { get; private set; }
+        public int BitsPerSample { get; private set; }
 
         int fmtChunkIndex;
         int dataChunkIndex;
@@ -16,7 +16,7 @@ namespace SteganoBlaze.Models
         public WAV(File file)
         {
             ByteData = file.ByteData;
-            base64Data = file.base64Data;
+            Base64Data = file.Base64Data;
             ContentType = file.ContentType;
             FileName = file.FileName;
             FileSize = file.FileSize;
@@ -40,8 +40,8 @@ namespace SteganoBlaze.Models
         public uint GetSample(int n)
         {
             uint sample;
-            int sampleIndex = n * bitsPerSample / 8;
-            switch (bitsPerSample)
+            int sampleIndex = n * BitsPerSample / 8;
+            switch (BitsPerSample)
             {
                 case 8:
                     sample = ByteData[dataChunkIndex + sampleIndex];
@@ -67,8 +67,8 @@ namespace SteganoBlaze.Models
         }
         public void SetSample(int n, uint sample)
         {
-            int sampleIndex = n * bitsPerSample / 8;
-            switch (bitsPerSample)
+            int sampleIndex = n * BitsPerSample / 8;
+            switch (BitsPerSample)
             {
                 case 8:
                     ByteData[dataChunkIndex + sampleIndex] = (byte)sample;
@@ -104,13 +104,13 @@ namespace SteganoBlaze.Models
 
             channels = BitConverter.ToInt16(ByteData, fmtChunkIndex + 2);
             sampleRate = BitConverter.ToInt32(ByteData, fmtChunkIndex + 4);
-            bitsPerSample = BitConverter.ToInt16(ByteData, fmtChunkIndex + 14);
+            BitsPerSample = BitConverter.ToInt16(ByteData, fmtChunkIndex + 14);
 
             dataChunkIndex = FindChunkIndex("data");
 
-            samples = BitConverter.ToInt32(ByteData, dataChunkIndex - 4) / (channels * bitsPerSample / 8);
+            samples = BitConverter.ToInt32(ByteData, dataChunkIndex - 4) / (channels * BitsPerSample / 8);
 
-            bool validBitsPerSample = new List<int> { 8, 16, 24, 32 }.Contains(bitsPerSample);
+            bool validBitsPerSample = new List<int> { 8, 16, 24, 32 }.Contains(BitsPerSample);
             bool validChannels = new List<int> { 1, 2 }.Contains(channels);
 
             if (validBitsPerSample is false || validChannels is false)
