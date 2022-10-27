@@ -1,5 +1,7 @@
 ﻿using Microsoft.JSInterop;
-namespace SteganoBlaze.Shared
+using SteganoBlaze.Shared;
+
+namespace SteganoBlaze.Utils
 {
     public static class JSInterop
     {

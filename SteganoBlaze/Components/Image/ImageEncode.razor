@@ -99,7 +99,6 @@
 			encodedCarrier = new File { Base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
 										ContentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),
 										FileName = AddSuffix(Carrier.FileName) };
-
 		}
 		catch
 		{
@@ -158,6 +157,7 @@
 	string AddSuffix(string fileName)
 	{
 		string name = Path.GetFileNameWithoutExtension(fileName);
-		return (Options?.WebPFormatEnabled ?? false) ? String.Concat(name, Localize["_encoded"], ".webp") : String.Concat(name, Localize["_encoded"], ".png");
+		return (Options?.WebPFormatEnabled ?? false) ? String.Concat(name, Localize["_encoded"], ".webp") 
+													 : String.Concat(name, Localize["_encoded"], ".png");
 	}
 }

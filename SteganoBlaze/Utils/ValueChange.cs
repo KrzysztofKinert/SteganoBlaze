@@ -1,8 +1,8 @@
-﻿namespace SteganoBlaze.Shared
+﻿namespace SteganoBlaze.Utils
 {
-    public static class MaxValueChange
+    public static class ValueChange
     {
-        public static double FloatingPoint(int selectedBits)
+        public static double FromFloatingPoint(int selectedBits)
         {
             if (selectedBits > 29)
                 return 100.0;
@@ -19,7 +19,7 @@
             return Math.Log2(floatValue - 1.0) / Math.Log2(float.MaxValue) * 100;
         }
 
-        public static double FixedPoint(int selectedBits, int intLength)
+        public static double FromFixedPoint(int selectedBits, int intLength)
         {
             var maxSelectedValue = Math.Pow(2, selectedBits) - 1;
             var maxIntValue = Math.Pow(2, intLength) - 1;

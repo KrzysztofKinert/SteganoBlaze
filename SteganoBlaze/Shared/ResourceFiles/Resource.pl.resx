@@ -450,4 +450,42 @@
   <data name="SampleValueChange" xml:space="preserve">
     <value>Możliwa zmiana wartości próbki</value>
   </data>
+  <data name="AboutSteganoBlaze_1" xml:space="preserve">
+    <value>SteganoBlaze to aplikacja steganograficzna umożliwiająca użytkownikowi ukrycie dowolnego typu pliku (wiadomości) w pliku graficznym lub dźwiękowym (nośniku) oraz jego późniejsze odzyskanie.</value>
+  </data>
+  <data name="AboutSteganoBlaze_2" xml:space="preserve">
+    <value>Użyta zostaje steganografia LSB gdzie najmniej znaczące bity bajtów zawierających wartości pikseli lub próbek nośnika nadpisywane są bitami wiadomości. Użytkownik decyduje ile bitów jest uznanych za nieznaczące.</value>
+  </data>
+  <data name="AboutSteganoBlaze_3" xml:space="preserve">
+    <value>Ukryte pliki mogą zostać dodatkowo zabezpieczone hasłem za użyciem bezpiecznego algorytmu szyfrowania AES.</value>
+  </data>
+  <data name="AboutSteganoBlaze_4" xml:space="preserve">
+    <value>Cały proces odbywa się lokalnie na maszynie użytkownika, ani nośnik ani wiadomość nie są przesyłane przez sieć.</value>
+  </data>
+  <data name="AboutSteganoBlaze_5" xml:space="preserve">
+    <value>Stworzono używając technologii</value>
+  </data>
+  <data name="AboutSteganoBlaze_6" xml:space="preserve">
+    <value>oraz biblioteki</value>
+    
+  </data>
+  <data name="AboutSteganoBlaze_7" xml:space="preserve">
+    <value>.</value>
+    
+  </data>
+  <data name="Steganography_1" xml:space="preserve">
+    <value>Steganografia to praktyka ukrywania wiadomości wewnątrz innej wiadomości lub obiektu fizycznego.</value>
+  </data>
+  <data name="Steganography_2" xml:space="preserve">
+    <value>Przewaga steganografii nad samą kryptografią polega na tym, że zamierzona tajna wiadomość nie zwraca na siebie uwagi jako obiekt analizy.</value>
+  </data>
+  <data name="Steganography_3" xml:space="preserve">
+    <value>Widoczne na pierwszy rzut oka zaszyfrowane wiadomości, niezależnie od tego, jak bardzo są trudne do złamania, wzbudzają zainteresowanie i same w sobie mogą być obciążające w krajach, w których szyfrowanie jest nielegalne.</value>
+  </data>
+  <data name="Steganography_4" xml:space="preserve">
+    <value>Podczas gdy kryptografia jest praktyką ochrony samej treści wiadomości, steganografia zajmuje się ukrywaniem faktu przesyłania tajnej wiadomości i jej treści.</value>
+  </data>
+  <data name="Steganography_5" xml:space="preserve">
+    <value>Więcej o steganografii.</value>
+  </data>
 </root>

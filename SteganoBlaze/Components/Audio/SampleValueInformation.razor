@@ -48,8 +48,8 @@
 	}
 	public void CheckValueChange()
 	{
-		double maxValueChange = BitsPerSample == 32 ? MaxValueChange.FloatingPoint(SampleBits ?? 1)
-													: MaxValueChange.FixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
+		double maxValueChange = BitsPerSample == 32 ? ValueChange.FromFloatingPoint(SampleBits ?? 1)
+													: ValueChange.FromFixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
 
 		sampleMaxValueChange = maxValueChange.ToString("0.00") + " %";
 		switch (maxValueChange)

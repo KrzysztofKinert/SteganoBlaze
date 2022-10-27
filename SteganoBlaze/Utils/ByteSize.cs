@@ -1,4 +1,4 @@
-﻿namespace SteganoBlaze.Shared
+﻿namespace SteganoBlaze.Utils
 {
     public static class ByteSize
     {

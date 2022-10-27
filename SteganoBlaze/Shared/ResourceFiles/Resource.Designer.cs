@@ -79,6 +79,69 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SteganoBlaze is a steganography app that enables the user to hide any type of file (the message) inside an image or an audio file (the carrier) and later recover it..
+        /// </summary>
+        public static string AboutSteganoBlaze_1 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LSB steganography is used where the least significant bits of bytes containing the values of pixels or samples of the carrier are overwritten with bits of the message. The user decides how many bits are considered insignificant..
+        /// </summary>
+        public static string AboutSteganoBlaze_2 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hidden files can be additionally protected with a password using the secure AES encryption algorithm..
+        /// </summary>
+        public static string AboutSteganoBlaze_3 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All processing is done locally on the user&apos;s machine, neither the carrier nor the message is transmitted over the web..
+        /// </summary>
+        public static string AboutSteganoBlaze_4 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Made using the.
+        /// </summary>
+        public static string AboutSteganoBlaze_5 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to technology and the.
+        /// </summary>
+        public static string AboutSteganoBlaze_6 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to library..
+        /// </summary>
+        public static string AboutSteganoBlaze_7 {
+            get {
+                return ResourceManager.GetString("AboutSteganoBlaze_7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Audio Decoding.
         /// </summary>
         public static string AudioDecoding {
@@ -1038,6 +1101,51 @@ namespace SteganoBlaze.Shared.ResourceFiles {
         public static string Steganography {
             get {
                 return ResourceManager.GetString("Steganography", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Steganography is the practice of concealing a message within another message or a physical object..
+        /// </summary>
+        public static string Steganography_1 {
+            get {
+                return ResourceManager.GetString("Steganography_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The advantage of steganography over cryptography alone is that the intended secret message does not attract attention to itself as an object of scrutiny..
+        /// </summary>
+        public static string Steganography_2 {
+            get {
+                return ResourceManager.GetString("Steganography_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plainly visible encrypted messages, no matter how unbreakable they are, arouse interest and may in themselves be incriminating in countries in which encryption is illegal..
+        /// </summary>
+        public static string Steganography_3 {
+            get {
+                return ResourceManager.GetString("Steganography_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Whereas cryptography is the practice of protecting the contents of a message alone, steganography is concerned with concealing the fact that a secret message is being sent and its contents..
+        /// </summary>
+        public static string Steganography_4 {
+            get {
+                return ResourceManager.GetString("Steganography_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More about steganography..
+        /// </summary>
+        public static string Steganography_5 {
+            get {
+                return ResourceManager.GetString("Steganography_5", resourceCulture);
             }
         }
         

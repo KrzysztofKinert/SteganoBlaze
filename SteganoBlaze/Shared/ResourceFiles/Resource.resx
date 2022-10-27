@@ -450,4 +450,42 @@
   <data name="SampleValueChange" xml:space="preserve">
     <value>Possible sample value change</value>
   </data>
+  <data name="AboutSteganoBlaze_1" xml:space="preserve">
+    <value>SteganoBlaze is a steganography app that enables the user to hide any type of file (the message) inside an image or an audio file (the carrier) and later recover it.</value>
+  </data>
+  <data name="AboutSteganoBlaze_2" xml:space="preserve">
+    <value>LSB steganography is used where the least significant bits of bytes containing the values of pixels or samples of the carrier are overwritten with bits of the message. The user decides how many bits are considered insignificant.</value>
+  </data>
+  <data name="AboutSteganoBlaze_3" xml:space="preserve">
+    <value>Hidden files can be additionally protected with a password using the secure AES encryption algorithm.</value>
+  </data>
+  <data name="AboutSteganoBlaze_4" xml:space="preserve">
+    <value>All processing is done locally on the user's machine, neither the carrier nor the message is transmitted over the web.</value>
+  </data>
+  <data name="AboutSteganoBlaze_5" xml:space="preserve">
+    <value>Made using the</value>
+  </data>
+  <data name="AboutSteganoBlaze_6" xml:space="preserve">
+    <value>technology and the</value>
+    
+  </data>
+  <data name="AboutSteganoBlaze_7" xml:space="preserve">
+    <value>library.</value>
+    <comment>@MutedRule(PunctuationLead)</comment>
+  </data>
+  <data name="Steganography_1" xml:space="preserve">
+    <value>Steganography is the practice of concealing a message within another message or a physical object.</value>
+  </data>
+  <data name="Steganography_2" xml:space="preserve">
+    <value>The advantage of steganography over cryptography alone is that the intended secret message does not attract attention to itself as an object of scrutiny.</value>
+  </data>
+  <data name="Steganography_3" xml:space="preserve">
+    <value>Plainly visible encrypted messages, no matter how unbreakable they are, arouse interest and may in themselves be incriminating in countries in which encryption is illegal.</value>
+  </data>
+  <data name="Steganography_4" xml:space="preserve">
+    <value>Whereas cryptography is the practice of protecting the contents of a message alone, steganography is concerned with concealing the fact that a secret message is being sent and its contents.</value>
+  </data>
+  <data name="Steganography_5" xml:space="preserve">
+    <value>More about steganography.</value>
+  </data>
 </root>

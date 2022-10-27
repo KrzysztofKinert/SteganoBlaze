@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using SteganoBlaze.Interfaces;
-using SteganoBlaze.Shared;
+using SteganoBlaze.Utils;
 
 namespace SteganoBlaze.Models
 {

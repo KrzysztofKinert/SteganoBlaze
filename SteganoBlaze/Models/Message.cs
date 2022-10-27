@@ -1,5 +1,6 @@
 ﻿using System.Text;
-using SteganoBlaze.Shared;
+using SteganoBlaze.Utils;
+
 namespace SteganoBlaze.Models
 {
     public class Message : File
