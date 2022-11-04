@@ -27,7 +27,7 @@
 					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["LeaveEmptyIfNot"]</MudText>
 				</MudItem>
 				<MudItem sm="4" xs="12" Class="pa-1">
-					<MudTextField @bind-Value="password" Immediate="true" T="string" Class="pt-0 mt-0 mb-2 mx-3" Label="@Localize["EnterPassword"]"/>
+					<PasswordInput OnPasswordChanged="@((string p) => PasswordChanged(p))"/>
 				</MudItem>
 			</MudGrid>
         </MudPaper>
@@ -72,6 +72,10 @@
 	void MessageChanged(File value)
 	{
 		message = value;
+	}
+	void PasswordChanged(string? value)
+	{
+		password = value;
 	}
 	void ProcessingChanged(bool value) { processing = value; }
 	public void Dispose()

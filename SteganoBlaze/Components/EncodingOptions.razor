@@ -44,7 +44,9 @@
 					</MudContainer>
 				</MudItem>
 				<MudItem xs="12" hidden="@(!encryptionEnabled)">
-					<PasswordInput OnPasswordChanged="@((string p) => PasswordChanged(p))"/>
+					<MudDivider />
+					<MudText Typo="Typo.body1" Class="pt-4" Align="Align.Center">@Localize["EncryptionPassword"]</MudText>
+					<PasswordInput RepeatPassword="true" OnPasswordChanged="@((string p) => PasswordChanged(p))"/>
 				</MudItem>
 			</MudGrid>
 		</ChildContent>
@@ -96,5 +98,4 @@
 		options.Password = value;
 		await OnOptionsChanged.InvokeAsync(options);
 	}
-
 }
