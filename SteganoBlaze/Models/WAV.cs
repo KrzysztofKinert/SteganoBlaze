@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("SteganoBlaze.Tests")]
 
 namespace SteganoBlaze.Models
-{
+{ 
     public class WAV : File
     {
         public int BitsPerSample { get; private set; }
@@ -116,7 +118,7 @@ namespace SteganoBlaze.Models
             if (validBitsPerSample is false || validChannels is false)
                 throw new Exception();
         }
-        int FindChunkIndex(string chunkID)
+        internal int FindChunkIndex(string chunkID)
         {
             byte[] chunkHeader = new byte[4];
             int i = 0;
