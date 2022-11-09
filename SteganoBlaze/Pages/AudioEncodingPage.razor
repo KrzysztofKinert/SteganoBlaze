@@ -30,7 +30,7 @@
 	<MudItem xs="12" sm="6">
         <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
 			<EncodingInformation 
-				Capacity=@((carrier?.GetSampleCount() ?? 0) * options.BitsToEncode / 8.0)
+				Capacity=@((carrier?.GetTotalSampleCount() ?? 0) * options.BitsToEncode / 8.0)
 				MessageSize=@(message?.GetMessageSize() ?? 0)
 				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
 			</EncodingInformation>

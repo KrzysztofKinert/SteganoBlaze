@@ -29,7 +29,7 @@ namespace SteganoBlaze.Steganography
                 case SampleOrder.Random:
                     generator = new Random(randomSeed);
                     usedSamples = new HashSet<int>();
-                    sampleIndex = generator.Next(carrier.GetSampleCount());
+                    sampleIndex = generator.Next(carrier.GetTotalSampleCount());
                     usedSamples.Add(sampleIndex);
                     break;
             }
@@ -49,7 +49,7 @@ namespace SteganoBlaze.Steganography
                     if (usedSamples is null || generator is null)
                         throw new Exception();
                     while (usedSamples.Contains(sampleIndex))
-                        sampleIndex = generator.Next(carrier.GetSampleCount());
+                        sampleIndex = generator.Next(carrier.GetTotalSampleCount());
                     usedSamples.Add(sampleIndex);
                     break;
             }
@@ -62,7 +62,7 @@ namespace SteganoBlaze.Steganography
         public AudioEncoder(WAV audio, SampleParameters sampleParams)
         {
             carrier = audio.Clone();
-            randomSeed = carrier.GetSampleCount();
+            randomSeed = carrier.GetTotalSampleCount();
             parameters = sampleParams;
             FirstSample();
         }
@@ -107,7 +107,7 @@ namespace SteganoBlaze.Steganography
         public AudioDecoder(WAV carrierToDecode, SampleParameters sampleParams)
         {
             carrier = carrierToDecode;
-            randomSeed = carrier.GetSampleCount();
+            randomSeed = carrier.GetTotalSampleCount();
             parameters = sampleParams;
             FirstSample();
         }

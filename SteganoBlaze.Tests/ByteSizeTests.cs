@@ -9,108 +9,36 @@ namespace SteganoBlaze.Tests
 {
     public class ByteSizeTests
     {
-        [Fact]
-        public void Reduce_IntNegativeBytesShouldReturnEmptyString()
+        [Theory]
+        [InlineData(-512, "")]
+        [InlineData(512, "512.00 B")]
+        [InlineData(512 * 1024, "512.00 KB")]
+        [InlineData(512 * 1024 * 1024, "512.00 MB")]
+        public void Reduce_IntByteSizeShouldReturnReducedByteSizeString(int bytes, string expected)
         {
             //Arrange
-            string expected = "";
 
             //Act
-            string actual = ByteSize.Reduce(-512);
+            string actual = ByteSize.Reduce(bytes); ;
 
             //Assert
-            Assert.Equal(expected, actual);
+            Assert.True(expected == actual || expected == actual.Replace(",", "."));
         }
 
-        [Fact]
-        public void Reduce_IntBytesShouldReturnByteString()
+        [Theory]
+        [InlineData(-512.0, "")]
+        [InlineData(512.0, "512.00 B")]
+        [InlineData(512.0 * 1024, "512.00 KB")]
+        [InlineData(512.0 * 1024 * 1024, "512.00 MB")]
+        public void Reduce_DoubleByteSizeShouldReturnReducedByteSizeString(double bytes, string expected)
         {
             //Arrange
-            string expected = "512.00 B";
 
             //Act
-            string actual = ByteSize.Reduce(512);
+            string actual = ByteSize.Reduce(bytes); ;
 
             //Assert
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Reduce_IntThousandBytesShouldReturnKiloByteString()
-        {
-            //Arrange
-            string expected = "512.00 KB";
-
-            //Act
-            string actual = ByteSize.Reduce(512 * 1024);
-
-            //Assert
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Reduce_IntMilionBytesShouldReturnMegaByteString()
-        {
-            //Arrange
-            string expected = "512.00 MB";
-
-            //Act
-            string actual = ByteSize.Reduce(512 * 1024 * 1024);
-
-            //Assert
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Reduce_DoubleNegativeBytesShouldReturnEmptyString()
-        {
-            //Arrange
-            string expected = "";
-
-            //Act
-            string actual = ByteSize.Reduce(-512.0);
-
-            //Assert
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Reduce_DoubleBytesShouldReturnByteString()
-        {
-            //Arrange
-            string expected = "512.00 B";
-
-            //Act
-            string actual = ByteSize.Reduce(512.0);
-
-            //Assert
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Reduce_DoubleThousandBytesShouldReturnKiloByteString()
-        {
-            //Arrange
-            string expected = "512.00 KB";
-
-            //Act
-            string actual = ByteSize.Reduce(512.0 * 1024);
-
-            //Assert
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void Reduce_DoubleMilionBytesShouldReturnMegaByteString()
-        {
-            //Arrange
-            string expected = "512.00 MB";
-
-            //Act
-            string actual = ByteSize.Reduce(512.0 * 1024 * 1024);
-
-            //Assert
-            Assert.Equal(expected, actual);
+            Assert.True(expected == actual || expected == actual.Replace(",", "."));
         }
     }
 }

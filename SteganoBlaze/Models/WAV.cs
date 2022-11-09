@@ -11,9 +11,9 @@ namespace SteganoBlaze.Models
         int fmtChunkIndex;
         int dataChunkIndex;
 
-        int channels;
-        int sampleRate;
-        int samples;
+        internal int channels;
+        internal int sampleRate;
+        internal int sampleCount;
 
         public WAV(File file)
         {
@@ -29,13 +29,13 @@ namespace SteganoBlaze.Models
         {
             return ByteData;
         }
-        public int GetSampleCount()
+        public int GetTotalSampleCount()
         {
-            return samples * channels;
+            return sampleCount * channels;
         }
         public string GetDuration()
         {
-            double durationInSeconds = (double)samples / sampleRate;
+            double durationInSeconds = (double)sampleCount / sampleRate;
             TimeSpan duration = TimeSpan.FromSeconds(durationInSeconds);
             return string.Format("{0}:{1:00}", (int)duration.TotalMinutes, duration.Seconds);
         }
@@ -100,7 +100,7 @@ namespace SteganoBlaze.Models
             clone.ByteData = (byte[])ByteData.Clone();
             return clone;
         }
-        void ParseWAV()
+        internal void ParseWAV()
         {
             fmtChunkIndex = FindChunkIndex("fmt ");
 
@@ -110,7 +110,7 @@ namespace SteganoBlaze.Models
 
             dataChunkIndex = FindChunkIndex("data");
 
-            samples = BitConverter.ToInt32(ByteData, dataChunkIndex - 4) / (channels * BitsPerSample / 8);
+            sampleCount = BitConverter.ToInt32(ByteData, dataChunkIndex - 4) / (channels * BitsPerSample / 8);
 
             bool validBitsPerSample = new List<int> { 8, 16, 24, 32 }.Contains(BitsPerSample);
             bool validChannels = new List<int> { 1, 2 }.Contains(channels);
