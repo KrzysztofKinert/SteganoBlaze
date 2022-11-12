@@ -16,7 +16,7 @@ namespace SteganoBlaze.Steganography
         {
             List<PixelBits> bitsToCheck = new();
             for (int i = 1; i < 9; i++)
-                bitsToCheck.Add(new PixelBits { R = i, G = i, B = i });
+                bitsToCheck.Add(new PixelBits(i, i, i));
 
             for (int r = 0; r < 9; r++)
             {
@@ -25,7 +25,7 @@ namespace SteganoBlaze.Steganography
                     for (int b = 0; b < 9; b++)
                     {
                         if (!(r == g && g == b))
-                            bitsToCheck.Add(new PixelBits { R = r, G = g, B = b });
+                            bitsToCheck.Add(new PixelBits(r, g, b));
                     }
                 }
             }

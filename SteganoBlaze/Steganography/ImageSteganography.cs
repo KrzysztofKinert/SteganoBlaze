@@ -21,10 +21,7 @@ namespace SteganoBlaze.Steganography
             if (pixelData is null)
                 throw new Exception();
 
-            channel = Channel.R;
-            channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
-            channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
-            channelBitsLeft[(int)Channel.B] = parameters.pixelBitsToUse.B;
+            ResetChannels();
 
             switch (parameters.pixelOrder)
             {
@@ -44,10 +41,7 @@ namespace SteganoBlaze.Steganography
             if (pixelData is null)
                 throw new Exception();
 
-            channel = Channel.R;
-            channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
-            channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
-            channelBitsLeft[(int)Channel.B] = parameters.pixelBitsToUse.B;
+            ResetChannels();
 
             switch (parameters.pixelOrder)
             {
@@ -63,6 +57,15 @@ namespace SteganoBlaze.Steganography
                     break;
             }
         }
+
+        protected void ResetChannels()
+        {
+            channel = Channel.R;
+            channelBitsLeft[(int)Channel.R] = parameters.pixelBitsToUse.R;
+            channelBitsLeft[(int)Channel.G] = parameters.pixelBitsToUse.G;
+            channelBitsLeft[(int)Channel.B] = parameters.pixelBitsToUse.B;
+        }
+
         protected int BitIndex() =>
             channelBitsLeft[(int)channel] - 1;
         protected int ChannelIndex() =>
