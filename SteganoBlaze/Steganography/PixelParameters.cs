@@ -5,12 +5,12 @@ namespace SteganoBlaze.Steganography
 {
 	public readonly struct PixelParameters
     {
-        public readonly PixelOrder pixelOrder;
-        public readonly PixelBits pixelBitsToUse;
+        public readonly PixelOrder PixelOrder;
+        public readonly PixelBits PixelBitsToUse;
         public PixelParameters(PixelOrder order, PixelBits bits)
         {
-            pixelOrder = order;
-            pixelBitsToUse = bits;
+            PixelOrder = order;
+            PixelBitsToUse = bits;
         }
         public static List<PixelParameters> GenerateParameters()
         {

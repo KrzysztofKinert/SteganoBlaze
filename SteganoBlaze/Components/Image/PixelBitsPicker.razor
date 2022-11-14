@@ -4,41 +4,53 @@
 
 <MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: min(5vw, 18px);">@Localize["PixelBitsToEncode"]</MudText>
 <MudDivider/>
-<MudList Clickable="false" Dense="true" DisableGutters="true"  Style="height:75%" Class="d-flex flex-column align-stretch">
+<MudList Clickable="false" Dense="true" DisableGutters="true" Style="height: 75%" Class="d-flex flex-column align-stretch">
     <MudListItem>
-		<MudNumericField Value="@R" ValueChanged="@((int r) => RedBitsToEncodeChanged(r))" Class="px-4" Label="@Localize["RChannel"]" Variant="Variant.Text" Min="0" Max= "8"/>
-	</MudListItem>
-    <MudListItem>
-		<MudNumericField Value="@G" ValueChanged="@((int g) => GreenBitsToEncodeChanged(g))" Class="px-4" Label="@Localize["GChannel"]" Variant="Variant.Text" Min="0" Max="8" />
+        <MudNumericField Value="@R" ValueChanged="@((int r) => RedBitsToEncodeChanged(r))" Class="px-4" Label="@Localize["RChannel"]" Variant="Variant.Text" Min="0" Max="8"/>
     </MudListItem>
     <MudListItem>
-		<MudNumericField Value="@B" ValueChanged="@((int b) => BlueBitsToEncodeChanged(b))" Class="px-4" Label="@Localize["BChannel"]" Variant="Variant.Text" Min="0" Max="8" />
-	</MudListItem>
+        <MudNumericField Value="@G" ValueChanged="@((int g) => GreenBitsToEncodeChanged(g))" Class="px-4" Label="@Localize["GChannel"]" Variant="Variant.Text" Min="0" Max="8"/>
+    </MudListItem>
+    <MudListItem>
+        <MudNumericField Value="@B" ValueChanged="@((int b) => BlueBitsToEncodeChanged(b))" Class="px-4" Label="@Localize["BChannel"]" Variant="Variant.Text" Min="0" Max="8"/>
+    </MudListItem>
 </MudList>
 
 @code {
-	[Parameter] public EventCallback<PixelBits> OnPixelBitsChanged { get; set; }
 
-	int R { get; set; } = 1;
-	int G { get; set; } = 1;
-	int B { get; set; } = 1;
+    [Parameter]
+    public EventCallback<PixelBits> OnPixelBitsChanged { get; set; }
 
-	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
-	public void Dispose() { AppState.OnChange -= StateHasChanged; }
+    int R { get; set; } = 1;
+    int G { get; set; } = 1;
+    int B { get; set; } = 1;
 
-	async Task RedBitsToEncodeChanged(int value)
-	{
-		R = value;
-		await OnPixelBitsChanged.InvokeAsync(new PixelBits(R, G ,B));
-	}
-	async Task GreenBitsToEncodeChanged(int value)
-	{
-		G = value;
-	    await OnPixelBitsChanged.InvokeAsync(new PixelBits(R, G ,B));
-	}
-	async Task BlueBitsToEncodeChanged(int value)
-	{
-		B = value;
-	    await OnPixelBitsChanged.InvokeAsync(new PixelBits(R, G ,B));
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+
+    async Task RedBitsToEncodeChanged(int value)
+    {
+        R = value;
+        await OnPixelBitsChanged.InvokeAsync(new PixelBits(R, G, B));
+    }
+
+    async Task GreenBitsToEncodeChanged(int value)
+    {
+        G = value;
+        await OnPixelBitsChanged.InvokeAsync(new PixelBits(R, G, B));
+    }
+
+    async Task BlueBitsToEncodeChanged(int value)
+    {
+        B = value;
+        await OnPixelBitsChanged.InvokeAsync(new PixelBits(R, G, B));
+    }
+
 }

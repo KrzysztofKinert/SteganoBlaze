@@ -2,7 +2,7 @@
 
 namespace SteganoBlaze.Tests
 {
-    public class WAVTests
+    public class WavTests
     {
         [Theory]
         [InlineData("./Resources/24_bit_fixed.WAV", "fmt ", 6120)]
@@ -20,7 +20,7 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
             var actual = wav.FindChunkIndex(chunkName);
@@ -40,10 +40,10 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
-            var actual = wav.channels;
+            var actual = wav.Channels;
 
             //Assert
             Assert.Equal(expected, actual);
@@ -60,10 +60,10 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
-            var actual = wav.sampleRate;
+            var actual = wav.SampleRate;
 
             //Assert
             Assert.Equal(expected, actual);
@@ -80,7 +80,7 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
             var actual = wav.BitsPerSample;
@@ -100,10 +100,10 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
-            var actual = wav.sampleCount;
+            var actual = wav.SampleCount;
 
             //Assert
             Assert.Equal(expected, actual);
@@ -120,7 +120,7 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
             var actual = wav.GetTotalSampleCount();
@@ -140,7 +140,7 @@ namespace SteganoBlaze.Tests
             //Arrange
             var fileBytes = System.IO.File.ReadAllBytes(fileName);
             var file = new Models.File() { ByteData = fileBytes };
-            var wav = new WAV(file);
+            var wav = new Wav(file);
 
             //Act
             var actual = wav.GetDuration();

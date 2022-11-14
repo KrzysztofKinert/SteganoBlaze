@@ -1,7 +1,7 @@
-﻿@inject IStringLocalizer<Resource> Localize
+﻿@using System.Globalization
+@inject IStringLocalizer<Resource> Localize
 @inject AppState AppState
-@inject IJSRuntime js
-@using System.Globalization
+@inject IJSRuntime Js
 
 <MudDrawerHeader>
     <MudText Typo="Typo.h6" Align="Align.Center">@Localize["Settings"]</MudText>
@@ -9,14 +9,14 @@
 <MudText Align="Align.Center" Typo="Typo.h6">@Localize["Theme"]</MudText>
 <MudContainer Class="d-flex flex-row align-center justify-center ma-0 pa-0" Style="width:100%">
     <MudIcon Icon="@Icons.Material.Outlined.LightMode" Title="Light Mode" />
-    <MudSwitch Checked="isDarkMode" CheckedChanged="@((e) => ToggleDarkMode())" Color="Color.Primary" Class="ma-4" T="bool" />
+    <MudSwitch Checked="_isDarkMode" CheckedChanged="@(_ => ToggleDarkMode())" Color="Color.Primary" Class="ma-4" T="bool" />
     <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Title="Dark Mode" />
 </MudContainer>
 <MudDivider Class="mb-2"/>
 <MudText Align="Align.Center" Typo="Typo.h6">@Localize["Language"]</MudText>
 <MudContainer Class="d-flex flex-row align-center justify-center py-0 pr-4 pl-8" Style="width:100%">
     <MudIcon Icon="@Icons.Material.Outlined.Translate" Title="Dark Mode" />
-    <MudSelect Value="@cultureValue" ValueChanged="@((CultureInfo ci) => CultureChanged(ci))" HelperText="@Localize["Language"]" ToStringFunc="@convertFunc" AnchorOrigin="Origin.BottomCenter" Class="mx-4">
+    <MudSelect Value="@CultureValue" ValueChanged="@((CultureInfo ci) => CultureChanged(ci))" HelperText="@Localize["Language"]" ToStringFunc="@_convertFunc" AnchorOrigin="Origin.BottomCenter" Class="mx-4">
         <MudSelectItem Value="@(CultureInfo.GetCultureInfo("en-US"))">English</MudSelectItem>
         <MudSelectItem Value="@(CultureInfo.GetCultureInfo("pl-PL"))">Polski</MudSelectItem>
     </MudSelect>
@@ -25,31 +25,31 @@
 @code{
     [Parameter] public EventCallback<bool> OnDarkModeChanged { get; set; }
 
-    private bool isDarkMode = false;
-    private CultureInfo? cultureValue { get; set; } = CultureInfo.CurrentCulture;
-    private Func<CultureInfo?, string> convertFunc = ci => ci!.DisplayName;
+    private bool _isDarkMode = false;
+    private CultureInfo? CultureValue { get; set; } = CultureInfo.CurrentCulture;
+    private Func<CultureInfo?, string> _convertFunc = ci => ci!.DisplayName;
 
     protected override async Task OnInitializedAsync()
     {
-        var browserLanguage = await js.InvokeAsync<string>("getLanguage");
-        cultureValue = (browserLanguage == "pl" || browserLanguage == "pl-PL") ? CultureInfo.GetCultureInfo("pl-Pl") : CultureInfo.GetCultureInfo("en-US");
-        CultureInfo.DefaultThreadCurrentCulture = cultureValue;
-        CultureInfo.DefaultThreadCurrentUICulture = cultureValue;
+        var browserLanguage = await Js.InvokeAsync<string>("getLanguage");
+        CultureValue = (browserLanguage == "pl" || browserLanguage == "pl-PL") ? CultureInfo.GetCultureInfo("pl-Pl") : CultureInfo.GetCultureInfo("en-US");
+        CultureInfo.DefaultThreadCurrentCulture = CultureValue;
+        CultureInfo.DefaultThreadCurrentUICulture = CultureValue;
         AppState.StateChanged();
 
-        if (await js.InvokeAsync<bool>("isDarkMode"))
+        if (await Js.InvokeAsync<bool>("isDarkMode"))
             await ToggleDarkMode();
     }
     async Task ToggleDarkMode()
     {
-        isDarkMode = !isDarkMode;
-        await OnDarkModeChanged.InvokeAsync(isDarkMode);
+        _isDarkMode = !_isDarkMode;
+        await OnDarkModeChanged.InvokeAsync(_isDarkMode);
     }
     void CultureChanged(CultureInfo value)
     {
-        cultureValue = value;
-        CultureInfo.DefaultThreadCurrentCulture = cultureValue;
-        CultureInfo.DefaultThreadCurrentUICulture = cultureValue;
+        CultureValue = value;
+        CultureInfo.DefaultThreadCurrentCulture = CultureValue;
+        CultureInfo.DefaultThreadCurrentUICulture = CultureValue;
         AppState.StateChanged();
     }
 }

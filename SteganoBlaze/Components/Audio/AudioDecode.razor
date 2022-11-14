@@ -1,183 +1,198 @@
-﻿@using System.Diagnostics
-@using System.Text
-@inject IStringLocalizer<Resource> Localize
-@inject IJSRuntime js
+﻿@inject IStringLocalizer<Resource> Localize
+@inject IJSRuntime Js
 @inject AppState AppState
+@using System.Diagnostics
+@using System.Text
 @implements IDisposable
 
-<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
-	<MudListItem Class="pb-2 pt-3">
-		<ProgressBar Task="@processingTask" ProgressValue="@processingValue" />
-	</MudListItem>
-	<MudListItem Class="pt-0">
-		<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
-			<MudButton HtmlTag="label"
-					   Variant="Variant.Filled"
-					   Color="Color.Primary"
-					   StartIcon="@Icons.Filled.FilePresent"
-					   OnClick="Decode"
-					   Disabled=@(EncodedCarrier is null)
-					   Style="width:100%">
-				<MudText Typo="Typo.button" Class="align-center">@Localize["Decode"]</MudText>
-			</MudButton>
-			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" />
-			<SaveButton fileToSave="@message" />
-		</MudList>
-	</MudListItem>
+<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width: 100%" Class="d-flex flex-column pa-0">
+    <MudListItem Class="pb-2 pt-3">
+        <ProgressBar Task="@_processingTask" ProgressValue="@_processingValue"/>
+    </MudListItem>
+    <MudListItem Class="pt-0">
+        <MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width: 100%" Class="d-flex justify-space-around flex-row">
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Filled.FilePresent"
+                       OnClick="Decode"
+                       Disabled="@(EncodedCarrier is null)"
+                       Style="width: 100%">
+                <MudText Typo="Typo.button" Class="align-center">@Localize["Decode"]</MudText>
+            </MudButton>
+            <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
+            <SaveButton FileToSave="@_message"/>
+        </MudList>
+    </MudListItem>
 </MudList>
 
 @code{
-	[Parameter] public WAV? EncodedCarrier { get; set; }
 
-	[Parameter] public string? Password { get; set; }
+    [Parameter]
+    public Wav? EncodedCarrier { get; set; }
 
-	[Parameter] public EventCallback<bool> OnProcessingChanged { get; set; }
+    [Parameter]
+    public string? Password { get; set; }
 
-	[Parameter] public EventCallback<File> OnMessageChanged { get; set; }
+    [Parameter]
+    public EventCallback<bool> OnProcessingChanged { get; set; }
 
-	File? message;
+    [Parameter]
+    public EventCallback<File> OnMessageChanged { get; set; }
 
-	int processingValue = 0;
-	string? processingTask = "";
+    File? _message;
 
-	Stopwatch watch = new Stopwatch();
+    int _processingValue = 0;
+    string? _processingTask = "";
 
-	string fileName = "";
-	string contentType = "";
-	int fileSize;
-	bool isCompressed;
+    Stopwatch _watch = new();
 
-	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
-	public void Dispose() { AppState.OnChange -= StateHasChanged; }
+    string _fileName = "";
+    string _contentType = "";
+    int _fileSize;
+    bool _isCompressed;
 
-	async Task UpdateProgress(string progressBarText, int progressBarValue)
-	{
-		processingTask = progressBarText;
-		processingValue = progressBarValue;
-		StateHasChanged();
-		await Task.Delay(100);
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
 
-	async Task Decode()
-	{
-		if (EncodedCarrier is null)
-			throw new Exception();
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
 
-		watch.Reset();
-		watch.Start();
-		await OnProcessingChanged.InvokeAsync(true);
-		await UpdateProgress(Localize["CheckingCarrier"], 0);
+    async Task UpdateProgress(string progressBarText, int progressBarValue)
+    {
+        _processingTask = progressBarText;
+        _processingValue = progressBarValue;
+        StateHasChanged();
+        await Task.Delay(100);
+    }
 
-		foreach (SampleParameters paramsToCheck in SampleParameters.GenerateParameters(EncodedCarrier.BitsPerSample))
-		{
-			try
-			{
-				AudioDecoder decoder = new AudioDecoder(EncodedCarrier, paramsToCheck);
+    async Task Decode()
+    {
+        if (EncodedCarrier is null)
+            throw new Exception();
 
-				int headerSize = BitConverter.ToInt32(decoder.Decode(sizeof(int)));
-				if (headerSize < Message.MIN_HEADER_SIZE || headerSize > Message.MAX_HEADER_SIZE)
-					throw new Exception();
+        _watch.Reset();
+        _watch.Start();
+        await OnProcessingChanged.InvokeAsync(true);
+        await UpdateProgress(Localize["CheckingCarrier"], 0);
 
-				byte[] file = Password is null ? await DecodeMessage(decoder, headerSize) : await DecodeEncryptedMessage(decoder, headerSize);
+        foreach (var paramsToCheck in SampleParameters.GenerateParameters(EncodedCarrier.BitsPerSample))
+        {
+            try
+            {
+                var decoder = new AudioDecoder(EncodedCarrier, paramsToCheck);
 
-				if (isCompressed is true)
-				{
-					await UpdateProgress(Localize["DecompressingMessage"], 75);
-					file = await Compression.Decompress(file);
-				}
+                var headerSize = BitConverter.ToInt32(decoder.Decode(sizeof(int)));
+                if (headerSize < Message.MinHeaderSize || headerSize > Message.MaxHeaderSize)
+                    throw new Exception();
 
-				await UpdateProgress(Localize["SavingMessageData"], 80);
-				message = new File { ByteData = file, ContentType = contentType, FileName = fileName, FileSize = fileSize };
+                var file = Password is null ? await DecodeMessage(decoder, headerSize) : await DecodeEncryptedMessage(decoder, headerSize);
 
-				await OnMessageChanged.InvokeAsync(message);
-				await OnProcessingChanged.InvokeAsync(false);
-				watch.Stop();
-				await UpdateProgress(Localize["DecodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
-				return;
-			}
-			catch
-			{
-				continue;
-			}
-		}
-		await OnProcessingChanged.InvokeAsync(false);
-		await UpdateProgress(Localize["AudioNotEncoded"], 0);
-		return;
-	}
-	async Task<byte[]> DecodeMessage(AudioDecoder decoder, int headerSize)
-	{
-		byte[] header = decoder.Decode(headerSize);
-		ParseHeader(header);
+                if (_isCompressed is true)
+                {
+                    await UpdateProgress(Localize["DecompressingMessage"], 75);
+                    file = await Compression.Decompress(file);
+                }
 
-		await UpdateProgress(Localize["DecodingMessage"], 20);
-		byte[] file = await DecodeFile(decoder);
-		return file;
-	}
-	async Task<byte[]> DecodeEncryptedMessage(AudioDecoder decoder, int headerSize)
-	{
-		if (Password is null)
-			throw new Exception();
+                await UpdateProgress(Localize["SavingMessageData"], 80);
+                _message = new File { ByteData = file, ContentType = _contentType, FileName = _fileName, FileSize = _fileSize };
 
-		byte[] salt = decoder.Decode(16);
-		byte[] ivHeader = decoder.Decode(12);
-		byte[] ivFile = decoder.Decode(12);
+                await OnMessageChanged.InvokeAsync(_message);
+                await OnProcessingChanged.InvokeAsync(false);
+                _watch.Stop();
+                await UpdateProgress(Localize["DecodingDoneIn"] + " " + _watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
+                return;
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+        await OnProcessingChanged.InvokeAsync(false);
+        await UpdateProgress(Localize["AudioNotEncoded"], 0);
+    }
 
-		byte[] header = decoder.Decode(headerSize);
-		List<byte[]> aesInputs = new List<byte[]> { header, Encoding.UTF8.GetBytes(Password), salt, ivHeader };
-		header = await JSInterop.ReadStream(js, "decryptData", aesInputs);
-		ParseHeader(header);
+    async Task<byte[]> DecodeMessage(AudioDecoder decoder, int headerSize)
+    {
+        var header = decoder.Decode(headerSize);
+        ParseHeader(header);
 
-		await UpdateProgress(Localize["DecodingMessage"], 20);
-		byte[] file = await DecodeFile(decoder);
+        await UpdateProgress(Localize["DecodingMessage"], 20);
+        var file = await DecodeFile(decoder);
+        return file;
+    }
 
-		await UpdateProgress(Localize["DecryptingMessage"], 70);
-		aesInputs = new List<byte[]> { file, Encoding.UTF8.GetBytes(Password), salt, ivFile };
-		file = await JSInterop.ReadStream(js, "decryptData", aesInputs);
-		return file;
-	}
-	async Task<byte[]> DecodeFile(AudioDecoder decoder)
-	{
-		await UpdateProgress(Localize["DecodingMessage"], 20);
+    async Task<byte[]> DecodeEncryptedMessage(AudioDecoder decoder, int headerSize)
+    {
+        if (Password is null)
+            throw new Exception();
 
-		byte[] file = new byte[fileSize];
-		int updates = fileSize / 250000 + 1;
-		int updatesDone = 0;
-		int bytesLeft = fileSize;
+        var salt = decoder.Decode(16);
+        var ivHeader = decoder.Decode(12);
+        var ivFile = decoder.Decode(12);
 
-		while(bytesLeft > 250000)
-		{
-			Array.Copy(decoder.Decode(250000), 0, file, 250000 * updatesDone, 250000);
-			updatesDone++;
-			bytesLeft -= 250000;
-			await UpdateProgress(Localize["DecodingMessage"], 20 + updatesDone * 50 / updates);
-		}
-		Array.Copy(decoder.Decode(bytesLeft), 0, file, 250000 * updatesDone, bytesLeft);
+        var header = decoder.Decode(headerSize);
+        var aesInputs = new List<byte[]> { header, Encoding.UTF8.GetBytes(Password), salt, ivHeader };
+        header = await JsInterop.ReadStream(Js, "decryptData", aesInputs);
+        ParseHeader(header);
 
-		return file;
-	}
-	void ParseHeader(byte[] header)
-	{
-		int offset = 0;
-		if (Encoding.UTF8.GetString(header, offset, 4) != "NAME")
-			throw new Exception();
-		int fileNameSize = BitConverter.ToInt16(header, offset + 4);
-		fileName = Encoding.UTF8.GetString(header, offset + 6, fileNameSize);
+        await UpdateProgress(Localize["DecodingMessage"], 20);
+        var file = await DecodeFile(decoder);
 
-		offset += fileNameSize + 6;
-		var lol = Encoding.UTF8.GetString(header, offset, 4);
-		if (Encoding.UTF8.GetString(header, offset, 4) != "TYPE")
-			throw new Exception();
-		int contentTypeSize = BitConverter.ToInt16(header, offset + 4);
-		contentType = Encoding.UTF8.GetString(header, offset + 6, contentTypeSize);
+        await UpdateProgress(Localize["DecryptingMessage"], 70);
+        aesInputs = new List<byte[]> { file, Encoding.UTF8.GetBytes(Password), salt, ivFile };
+        file = await JsInterop.ReadStream(Js, "decryptData", aesInputs);
+        return file;
+    }
 
-		offset += contentTypeSize + 6;
-		if (Encoding.UTF8.GetString(header, offset, 4) != "SIZE")
-			throw new Exception();
-		fileSize = BitConverter.ToInt32(header, offset + 4);
+    async Task<byte[]> DecodeFile(AudioDecoder decoder)
+    {
+        await UpdateProgress(Localize["DecodingMessage"], 20);
 
-		offset += 8;
-		if (Encoding.UTF8.GetString(header, offset, 4) != "CMPR")
-			throw new Exception();
-		isCompressed = BitConverter.ToBoolean(header, offset + 4);
-	}
+        var file = new byte[_fileSize];
+        var updates = _fileSize / 250000 + 1;
+        var updatesDone = 0;
+        var bytesLeft = _fileSize;
+
+        while (bytesLeft > 250000)
+        {
+            Array.Copy(decoder.Decode(250000), 0, file, 250000 * updatesDone, 250000);
+            updatesDone++;
+            bytesLeft -= 250000;
+            await UpdateProgress(Localize["DecodingMessage"], 20 + updatesDone * 50 / updates);
+        }
+        Array.Copy(decoder.Decode(bytesLeft), 0, file, 250000 * updatesDone, bytesLeft);
+
+        return file;
+    }
+
+    void ParseHeader(byte[] header)
+    {
+        var offset = 0;
+        if (Encoding.UTF8.GetString(header, offset, 4) != "NAME")
+            throw new Exception();
+        int fileNameSize = BitConverter.ToInt16(header, offset + 4);
+        _fileName = Encoding.UTF8.GetString(header, offset + 6, fileNameSize);
+
+        offset += fileNameSize + 6;
+        if (Encoding.UTF8.GetString(header, offset, 4) != "TYPE")
+            throw new Exception();
+        int contentTypeSize = BitConverter.ToInt16(header, offset + 4);
+        _contentType = Encoding.UTF8.GetString(header, offset + 6, contentTypeSize);
+
+        offset += contentTypeSize + 6;
+        if (Encoding.UTF8.GetString(header, offset, 4) != "SIZE")
+            throw new Exception();
+        _fileSize = BitConverter.ToInt32(header, offset + 4);
+
+        offset += 8;
+        if (Encoding.UTF8.GetString(header, offset, 4) != "CMPR")
+            throw new Exception();
+        _isCompressed = BitConverter.ToBoolean(header, offset + 4);
+    }
+
 }

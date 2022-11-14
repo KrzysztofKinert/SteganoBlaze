@@ -3,23 +3,23 @@
 @inject IStringLocalizer<Resource> Localize
 @implements IDisposable
 
-<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme=@AppState.Theme/>
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="@AppState.Theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="0" Class="d-flex justify-space-between" Color="Color.Primary">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => ToggleNavDrawer())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(_ => ToggleNavDrawer())" />
         <MudSpacer />
-        <MudText Align="Align.Center" Typo="Typo.h6">@pageName</MudText>
+        <MudText Align="Align.Center" Typo="Typo.h6">@_pageName</MudText>
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => ToggleSettingsDrawer())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(_ => ToggleSettingsDrawer())" />
     </MudAppBar>
-    <MudDrawer @bind-Open="navDrawerOpen" Elevation="1">
+    <MudDrawer @bind-Open="_navDrawerOpen" Elevation="1">
         <NavMenu/>
     </MudDrawer>
-    <MudDrawer @bind-Open="settingsDrawerOpen" Anchor="Anchor.End" Elevation="1" Width="200px">
-        <SettingsMenu OnDarkModeChanged=@((bool d) => DarkModeChanged(d))/>
+    <MudDrawer @bind-Open="_settingsDrawerOpen" Anchor="Anchor.End" Elevation="1" Width="200px">
+        <SettingsMenu OnDarkModeChanged="@(DarkModeChanged)"/>
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
@@ -32,10 +32,10 @@
 </MudLayout>
 
 @code {
-    bool navDrawerOpen = true;
-    bool settingsDrawerOpen = false;
-    private bool isDarkMode = false;
-    string? pageName;
+    bool _navDrawerOpen = true;
+    bool _settingsDrawerOpen;
+    private bool _isDarkMode;
+    string? _pageName;
 
     protected override void OnInitialized()
     {
@@ -44,19 +44,19 @@
     }
     void DarkModeChanged(bool value)
     {
-        isDarkMode = value;
+        _isDarkMode = value;
     }
     void ToggleNavDrawer()
     {
-        navDrawerOpen = !navDrawerOpen;
+        _navDrawerOpen = !_navDrawerOpen;
     }
     void ToggleSettingsDrawer()
     {
-        settingsDrawerOpen = !settingsDrawerOpen;
+        _settingsDrawerOpen = !_settingsDrawerOpen;
     }
     void LocalizePageName()
     {
-        pageName = Localize[AppState.PageName];
+        _pageName = Localize[AppState.PageName];
     }
     public void Dispose()
     {

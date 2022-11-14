@@ -1,85 +1,93 @@
 ﻿@page "/ImageDecodingPage"
-@using SteganoBlaze.Components.Image;
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
+@using SteganoBlaze.Components.Image
 @implements IDisposable
 
 <PageTitle>@Localize["ImageDecoding"]</PageTitle>
 
-<MudGrid Spacing="1">          
-	<MudItem sm="12" md="6" xs="12">
-        <MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
-			<OpenImage Disabled=@processing EncodedImage="true" OnImageChanged=@((Image i) => CarrierChanged(i))/>
+<MudGrid Spacing="1">
+    <MudItem sm="12" md="6" xs="12">
+        <MudPaper Elevation="3" Class="py-0 my-0" Style="height: 100%">
+            <OpenImage Disabled="@_processing" EncodedImage="true" OnImageChanged="@(CarrierChanged)"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem sm="12" md="6" xs="12"> 
-		<MudPaper Elevation="3" Style="height:100%">
-			<ShowMessage Message=@message/>
-		</MudPaper>
-	</MudItem>
-
-	<MudItem xs="12">
-        <MudPaper Elevation="3" Style="height:100%" Class="d-flex mud-width-full">
-			<MudGrid Class="align-center justify-space-evenly" Spacing="0">
-				<MudItem sm="4" xs="12" Class="pa-1">
-					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["EnterPasswordIfEncrypted"]</MudText>
-					<MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["LeaveEmptyIfNot"]</MudText>
-				</MudItem>
-				<MudItem sm="4" xs="12" Class="pa-1">
-					<PasswordInput OnPasswordChanged="@((string p) => PasswordChanged(p))"/>
-				</MudItem>
-			</MudGrid>
+    <MudItem sm="12" md="6" xs="12">
+        <MudPaper Elevation="3" Style="height: 100%">
+            <ShowMessage Message="@_message"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem xs="12">
+    <MudItem xs="12">
+        <MudPaper Elevation="3" Style="height: 100%" Class="d-flex mud-width-full">
+            <MudGrid Class="align-center justify-space-evenly" Spacing="0">
+                <MudItem sm="4" xs="12" Class="pa-1">
+                    <MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["EnterPasswordIfEncrypted"]</MudText>
+                    <MudText Typo="Typo.body1" Style="font-size: min(3vw, 16px);" Align="Align.Center">@Localize["LeaveEmptyIfNot"]</MudText>
+                </MudItem>
+                <MudItem sm="4" xs="12" Class="pa-1">
+                    <PasswordInput OnPasswordChanged="@(PasswordChanged)"/>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12">
         <MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
-			<ImageDecode  
-				EncodedCarrier=@encodedCarrier
-				Password=@password
-				OnProcessingChanged=@((bool p) => ProcessingChanged(p))
-				OnMessageChanged=@((File m) => MessageChanged(m))>
-			</ImageDecode>
+            <ImageDecode
+                EncodedCarrier="@_encodedCarrier"
+                Password="@_password"
+                OnProcessingChanged="@(ProcessingChanged)"
+                OnMessageChanged="@(MessageChanged)">
+            </ImageDecode>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem xs="12" hidden="@(encodedCarrier is null)">
-		<MudPaper Elevation="3">
-			<DecodingImagePreview EncodedCarrier=@encodedCarrier/>
+    <MudItem xs="12" hidden="@(_encodedCarrier is null)">
+        <MudPaper Elevation="3">
+            <DecodingImagePreview EncodedCarrier="@_encodedCarrier"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 </MudGrid>
 
 @code {
-	Image? encodedCarrier;
-	File? message;
+    Image? _encodedCarrier;
+    File? _message;
 
-	bool processing = false;
-	string? password;
+    bool _processing;
+    string? _password;
 
-	protected override void OnInitialized()
-	{
-		AppState.OnChange += StateHasChanged;
-		AppState.SetPageTheme(Color.Primary, "ImageDecoding");
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.SetPageTheme(Color.Primary, "ImageDecoding");
+    }
 
-	void CarrierChanged(Image value)
-	{
-		encodedCarrier = value;
-		message = null;
-	}
-	void MessageChanged(File value)
-	{
-		message = value;
-	}
-	void PasswordChanged(string? value)
-	{
-		password = value;
-	}
-	void ProcessingChanged(bool value) { processing = value; }
-	public void Dispose()
-	{
-		AppState.OnChange -= StateHasChanged;
-	}
+    void CarrierChanged(Image value)
+    {
+        _encodedCarrier = value;
+        _message = null;
+    }
+
+    void MessageChanged(File value)
+    {
+        _message = value;
+    }
+
+    void PasswordChanged(string? value)
+    {
+        _password = value;
+    }
+
+    void ProcessingChanged(bool value)
+    {
+        _processing = value;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+
 }

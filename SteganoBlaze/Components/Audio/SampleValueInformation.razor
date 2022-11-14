@@ -4,70 +4,82 @@
 @implements IDisposable
 
 <MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["SampleValueChange"]</MudText>
-<MudText Typo="Typo.body1" Color=@sampleMaxValueChangeColor Align="Align.Center">@sampleMaxValueChange</MudText>
+<MudText Typo="Typo.body1" Color="@_sampleMaxValueChangeColor" Align="Align.Center">@_sampleMaxValueChange</MudText>
 
 @code {
-	[Parameter] public int? SampleBits { get; set; }
 
-	[Parameter] public int? BitsPerSample { get; set; }
+    [Parameter]
+    public int? SampleBits { get; set; }
 
-	string sampleMaxValueChange = "";
-	MudBlazor.Color sampleMaxValueChangeColor = Color.Default;
+    [Parameter]
+    public int? BitsPerSample { get; set; }
 
-	int? previousSampleBits;
-	int? previousBitsPerSample;
-	bool shouldRender;
+    string _sampleMaxValueChange = "";
+    Color _sampleMaxValueChangeColor = Color.Default;
 
-	protected override void OnInitialized()
-	{
-		AppState.OnChange += StateHasChanged;
-		AppState.OnChange += SetShouldRender;
-	}
-	public void Dispose()
-	{
-		AppState.OnChange -= StateHasChanged;
-		AppState.OnChange -= SetShouldRender;
-	}
-	protected override void OnParametersSet()
-	{
-		if (SampleBits != previousSampleBits || BitsPerSample != previousBitsPerSample)
-		{
-			shouldRender = true;
-			previousSampleBits = SampleBits;
-			previousBitsPerSample = BitsPerSample;
-			CheckValueChange();
-		}
-		else
-			shouldRender = false;
-	}
-	protected override bool ShouldRender() => shouldRender;
-	void SetShouldRender()
-	{
-		shouldRender = true;
-		StateHasChanged();
-	}
-	public void CheckValueChange()
-	{
-		double maxValueChange = BitsPerSample == 32 ? PossibleValueChange.FromFloatingPoint(SampleBits ?? 1)
-													: PossibleValueChange.FromFixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
+    int? _previousSampleBits;
+    int? _previousBitsPerSample;
+    bool _shouldRender;
 
-		sampleMaxValueChange = maxValueChange.ToString("0.00") + " %";
-		switch (maxValueChange)
-		{
-			case > 10:
-				sampleMaxValueChangeColor = Color.Warning;
-				Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
-				break;
-			case < 10 and > 2:
-				sampleMaxValueChangeColor = Color.Default;
-				break;
-			case < 2 and > 0.005:
-				sampleMaxValueChangeColor = Color.Success;
-				break;
-			case < 0.005:
-				sampleMaxValueChange = "~" + maxValueChange.ToString("0.00") + " %";
-				sampleMaxValueChangeColor = Color.Success;
-				break;
-		}
-	}
-}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.OnChange += SetShouldRender;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+        AppState.OnChange -= SetShouldRender;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (SampleBits != _previousSampleBits || BitsPerSample != _previousBitsPerSample)
+        {
+            _shouldRender = true;
+            _previousSampleBits = SampleBits;
+            _previousBitsPerSample = BitsPerSample;
+            CheckValueChange();
+        }
+        else
+            _shouldRender = false;
+    }
+
+    protected override bool ShouldRender()
+    {
+        return _shouldRender;
+    }
+
+    void SetShouldRender()
+    {
+        _shouldRender = true;
+        StateHasChanged();
+    }
+
+    private void CheckValueChange()
+    {
+        var maxValueChange = BitsPerSample == 32 ? PossibleValueChange.FromFloatingPoint(SampleBits ?? 1)
+            : PossibleValueChange.FromFixedPoint(SampleBits ?? 1, BitsPerSample ?? 16);
+
+        _sampleMaxValueChange = maxValueChange.ToString("0.00") + " %";
+        switch (maxValueChange)
+        {
+            case > 10:
+                _sampleMaxValueChangeColor = Color.Warning;
+                Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
+                break;
+            case < 10 and > 2:
+                _sampleMaxValueChangeColor = Color.Default;
+                break;
+            case < 2 and > 0.005:
+                _sampleMaxValueChangeColor = Color.Success;
+                break;
+            case < 0.005:
+                _sampleMaxValueChange = "~" + maxValueChange.ToString("0.00") + " %";
+                _sampleMaxValueChangeColor = Color.Success;
+                break;
+        }
+    }
+    }
+

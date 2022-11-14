@@ -1,37 +1,34 @@
 ﻿@inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
-@inject IJSRuntime js
+@inject IJSRuntime Js
 @inject AppState AppState
 @implements IDisposable
 
-<a hidden id="saveLink" download="" href="" target="_blank"/>
+<a hidden id="saveLink" download="" href="" target="_blank"></a>
 <MudButton HtmlTag="label"
 		   Variant="Variant.Filled"
-		   Color=@Color.Primary
+		   Color="@Color.Primary"
 		   StartIcon="@Icons.Filled.Download"
 		   OnClick="SaveFile"
-		   Disabled=@(fileToSave is null)
+		   Disabled="@(FileToSave is null)"
 		   Style="width:100%">
 	<MudText Typo="Typo.button" Class="align-center">@Localize["Save"]</MudText>
 </MudButton>
 
 @code {
-	[Parameter] public File? fileToSave { get; set; }
+	[Parameter] public File? FileToSave { get; set; }
 
 	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
 	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
-	protected void SaveFile()
+    private void SaveFile()
 	{
-		if (fileToSave is null)
+		if (FileToSave is null)
 			throw new Exception();
 
 		try
 		{
-			if (fileToSave.Base64Data == "" || fileToSave.Base64Data is null)
-				((IJSInProcessRuntime)js).InvokeVoid("saveFileBlob", fileToSave);
-			else
-				((IJSInProcessRuntime)js).InvokeVoid("saveFileBase64", fileToSave);
+		    ((IJSInProcessRuntime)Js).InvokeVoid(FileToSave.Base64Data is "" or null ? "saveFileBlob" : "saveFileBase64", FileToSave);
 		}
 		catch
 		{

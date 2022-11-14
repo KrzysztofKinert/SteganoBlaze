@@ -10,7 +10,7 @@
     public class ImageSteganographyOptions : SteganographyOptions
     {
         public bool WebPFormatEnabled { get; set; } = false;
-        public PixelBits BitsToEncode { get; set; } = new PixelBits(1, 1, 1);
+        public PixelBits BitsToEncode { get; set; } = new(1, 1, 1);
     }
     public class AudioSteganographyOptions : SteganographyOptions
     {

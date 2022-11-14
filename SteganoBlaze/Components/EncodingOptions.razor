@@ -11,11 +11,11 @@
 		</TitleContent>
 		<ChildContent>
 			<MudGrid style="height:100%" Class="align-content-center justify-space-around" Spacing="0">
-				<MudItem sm="3" xs="12" Class="py-1" hidden="@(!OnWebPEnabledChagned.HasDelegate)">
+				<MudItem sm="3" xs="12" Class="py-1" hidden="@(!OnWebPEnabledChanged.HasDelegate)">
 					<MudText Typo="Typo.body1" Align="Align.Center">@Localize["CarrierFormat"]</MudText>
 					<MudContainer Class="d-flex flex-row justify-space-around align-center">
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">PNG</MudText>
-						<MudSwitch Checked="@webPEnabled" CheckedChanged="@((bool w) => WebPEnabledChanged(w))" Color=@Color.Primary T="bool" Class="mr-n2" Disabled="@Disabled" />
+						<MudSwitch Checked="@_webPEnabled" CheckedChanged="@(WebPEnabledChanged)" Color="@Color.Primary" T="bool" Class="mr-n2" Disabled="@Disabled" />
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">WebP</MudText>
 					</MudContainer>
 				</MudItem>
@@ -23,7 +23,7 @@
 					<MudText Typo="Typo.body1" Align="Align.Center">@Localize["MessageCompression"]</MudText>
 					<MudContainer Class="d-flex flex-row justify-space-around align-center">
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Localize["Off"]</MudText>
-						<MudSwitch Checked="@compressionEnabled" CheckedChanged="@((bool c) => CompressionEnabledChanged(c))" Class="mr-n2" Color=@Color.Primary T="bool" Disabled="@Disabled" />
+						<MudSwitch Checked="@_compressionEnabled" CheckedChanged="@(CompressionEnabledChanged)" Class="mr-n2" Color="@Color.Primary" T="bool" Disabled="@Disabled" />
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Localize["On"]</MudText>
 					</MudContainer>
 				</MudItem>
@@ -31,7 +31,7 @@
 					<MudText Typo="Typo.body1" Align="Align.Center">@Localize["MessageEncryption"]</MudText>
 					<MudContainer Class="d-flex flex-row justify-space-around align-center">
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Localize["Off"]</MudText>
-						<MudSwitch Checked="@encryptionEnabled" CheckedChanged="@((bool e) => EncryptionEnabledChanged(e))" Class="mr-n2" Color=@Color.Primary T="bool" Disabled="@Disabled" />
+						<MudSwitch Checked="@_encryptionEnabled" CheckedChanged="@(EncryptionEnabledChanged)" Class="mr-n2" Color="@Color.Primary" T="bool" Disabled="@Disabled" />
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Localize["On"]</MudText>
 					</MudContainer>
 				</MudItem>
@@ -39,14 +39,14 @@
 					<MudText Typo="Typo.body1" Align="Align.Center">@Localize["ScatteredEncoding"]</MudText>
 					<MudContainer Class="d-flex flex-row justify-space-around align-center">
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Localize["Off"]</MudText>
-						<MudSwitch Checked="@scatteredEncodingEnabled" CheckedChanged="@((bool s) => ScatteredEncodingEnabledChanged(s))" Class="mr-n2" Color=@Color.Primary T="bool" Disabled="@Disabled" />
+						<MudSwitch Checked="@_scatteredEncodingEnabled" CheckedChanged="@(ScatteredEncodingEnabledChanged)" Class="mr-n2" Color="@Color.Primary" T="bool" Disabled="@Disabled" />
 						<MudText Typo="Typo.body2" Align="Align.Center" Style="width:60px">@Localize["On"]</MudText>
 					</MudContainer>
 				</MudItem>
-				<MudItem xs="12" hidden="@(!encryptionEnabled)">
+				<MudItem xs="12" hidden="@(!_encryptionEnabled)">
 					<MudDivider />
 					<MudText Typo="Typo.body1" Class="pt-4" Align="Align.Center">@Localize["EncryptionPassword"]</MudText>
-					<PasswordInput RepeatPassword="true" OnPasswordChanged="@((string p) => PasswordChanged(p))"/>
+					<PasswordInput RepeatPassword="true" OnPasswordChanged="@(PasswordChanged)"/>
 				</MudItem>
 			</MudGrid>
 		</ChildContent>
@@ -58,44 +58,44 @@
 
 	[Parameter] public EventCallback<SteganographyOptions> OnOptionsChanged { get; set; }
 
-	[Parameter] public EventCallback<bool> OnWebPEnabledChagned { get; set; }
+	[Parameter] public EventCallback<bool> OnWebPEnabledChanged { get; set; }
 
-	bool webPEnabled = false;
-	bool compressionEnabled = false;
-	bool encryptionEnabled = false;
-	bool scatteredEncodingEnabled = false;
+	bool _webPEnabled = false;
+	bool _compressionEnabled = false;
+	bool _encryptionEnabled = false;
+	bool _scatteredEncodingEnabled = false;
 
-	SteganographyOptions options = new SteganographyOptions();
+	SteganographyOptions _options = new();
 
 	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
 	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task WebPEnabledChanged(bool value)
 	{
-		webPEnabled = value;
-		await OnWebPEnabledChagned.InvokeAsync(webPEnabled); 
+		_webPEnabled = value;
+		await OnWebPEnabledChanged.InvokeAsync(_webPEnabled); 
 	}
 	async Task CompressionEnabledChanged(bool value)
 	{
-		compressionEnabled = value;
-		options.CompressionEnabled = compressionEnabled;
-		await OnOptionsChanged.InvokeAsync(options);
+		_compressionEnabled = value;
+		_options.CompressionEnabled = _compressionEnabled;
+		await OnOptionsChanged.InvokeAsync(_options);
 	}
 	async Task ScatteredEncodingEnabledChanged(bool value)
 	{
-		scatteredEncodingEnabled = value;
-		options.ScatteredEncodingEnabled = scatteredEncodingEnabled;
-		await OnOptionsChanged.InvokeAsync(options); 
+		_scatteredEncodingEnabled = value;
+		_options.ScatteredEncodingEnabled = _scatteredEncodingEnabled;
+		await OnOptionsChanged.InvokeAsync(_options); 
 	}
 	async Task EncryptionEnabledChanged(bool value)
 	{
-		encryptionEnabled = value;
-		options.EncryptionEnabled = encryptionEnabled;
-		await OnOptionsChanged.InvokeAsync(options);
+		_encryptionEnabled = value;
+		_options.EncryptionEnabled = _encryptionEnabled;
+		await OnOptionsChanged.InvokeAsync(_options);
 	}
 	async Task PasswordChanged(string? value)
 	{
-		options.Password = value;
-		await OnOptionsChanged.InvokeAsync(options);
+		_options.Password = value;
+		await OnOptionsChanged.InvokeAsync(_options);
 	}
 }

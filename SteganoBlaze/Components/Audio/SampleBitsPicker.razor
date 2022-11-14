@@ -3,38 +3,49 @@
 @implements IDisposable
 
 <MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: min(5vw, 18px);">@Localize["SampleBitsToEncode"]</MudText>
-<MudDivider />
+<MudDivider/>
 <MudList Clickable="false" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
-	<MudListItem Style="width:50%">
-		<MudNumericField Class="px-4" Value="@sampleBitsToEncode" ValueChanged=@((int b) => SampleBitsToEncodeChanged(b)) Label="@Localize["Bits"]" Variant="Variant.Text" Min="1" Max=@(BitsPerSample ?? 16) />
-	</MudListItem>
-	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
-	<MudListItem Style="width:50%">
-		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-			<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BitsPerSample"]</MudText>
-			<MudText Typo="Typo.body1" Align="Align.Center">@(BitsPerSample?.ToString() ?? "-")</MudText>
-			<MudDivider Class="mb-2"/>
-			<SampleValueInformation
-				SampleBits=@sampleBitsToEncode
-				BitsPerSample=@BitsPerSample>
-			</SampleValueInformation>
-		</MudContainer>
-	</MudListItem>
+    <MudListItem Style="width: 50%">
+        <MudNumericField Class="px-4" Value="@_sampleBitsToEncode" ValueChanged="@((int b) => SampleBitsToEncodeChanged(b))" Label="@Localize["Bits"]" Variant="Variant.Text" Min="1" Max="@(BitsPerSample ?? 16)"/>
+    </MudListItem>
+    <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0"/>
+    <MudListItem Style="width: 50%">
+        <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+            <MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BitsPerSample"]</MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center">@(BitsPerSample?.ToString() ?? "-")</MudText>
+            <MudDivider Class="mb-2"/>
+            <SampleValueInformation
+                SampleBits="@_sampleBitsToEncode"
+                BitsPerSample="@BitsPerSample">
+            </SampleValueInformation>
+        </MudContainer>
+    </MudListItem>
 </MudList>
 
-	@code {
-	[Parameter] public int? BitsPerSample { get; set; }
+@code {
 
-	[Parameter] public EventCallback<int> OnSampleBitsToEncodeChanged { get; set; }
+    [Parameter]
+    public int? BitsPerSample { get; set; }
 
-	int sampleBitsToEncode = 1;
+    [Parameter]
+    public EventCallback<int> OnSampleBitsToEncodeChanged { get; set; }
 
-	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
-	public void Dispose() { AppState.OnChange -= StateHasChanged; }
+    int _sampleBitsToEncode = 1;
 
-	async Task SampleBitsToEncodeChanged(int value)
-	{
-		sampleBitsToEncode = value;
-		await OnSampleBitsToEncodeChanged.InvokeAsync(sampleBitsToEncode);
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+
+    async Task SampleBitsToEncodeChanged(int value)
+    {
+        _sampleBitsToEncode = value;
+        await OnSampleBitsToEncodeChanged.InvokeAsync(_sampleBitsToEncode);
+    }
+
 }

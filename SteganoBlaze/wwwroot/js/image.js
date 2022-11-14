@@ -24,7 +24,7 @@ function getImageURL(data, type) {
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
-    let imageData = new ImageData(Uint8ClampedArray.from(data), img.width, img.height)
+    let imageData = new ImageData(Uint8ClampedArray.from(data), img.width, img.height);
 
     for (let i = 0; i < imageData.data.length; i += 4) {
         imageData.data[i + 3] = 255;
@@ -32,6 +32,6 @@ function getImageURL(data, type) {
 
     ctx.putImageData(imageData, 0, 0);
 
-    var dataURL = canvas.toDataURL(type, 1.0)
-    return dataURL;
+    var dataUrl = canvas.toDataURL(type, 1.0);
+    return dataUrl;
 }

@@ -1,169 +1,181 @@
 ﻿@page "/AudioEncodingPage"
-@using SteganoBlaze.Components.Audio;
 @inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
+@using SteganoBlaze.Components.Audio
 @implements IDisposable
 
 <PageTitle>@Localize["AudioEncoding"]</PageTitle>
 
-<a hidden id="saveLink" download="" href="" target="_blank"/>
+<a hidden id="saveLink" download="" href="" target="_blank"></a>
 <MudGrid Spacing="1">
-	<MudItem sm="12" md="6" xs="12">
-        <MudPaper Elevation="3" Class="py-0 my-0" Style="height:100%">
-			<OpenAudio Disabled=@processing OnAudioChanged=@((WAV c) => CarrierChanged(c))/>
+    <MudItem sm="12" md="6" xs="12">
+        <MudPaper Elevation="3" Class="py-0 my-0" Style="height: 100%">
+            <OpenAudio Disabled="@_processing" OnAudioChanged="@(CarrierChanged)"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem sm="12" md="6" xs="12"> 
-		<MudPaper Elevation="3" Style="height:100%">
-			<OpenMessage Disabled=@processing OnMessageChanged=@((Message m) => MessageChanged(m))/>
-		</MudPaper>
-	</MudItem>
-
-	<MudItem xs="12" sm="6">
-        <MudPaper Elevation="3" Style="height:100%">
-			<SampleBitsPicker BitsPerSample=@carrier?.BitsPerSample OnSampleBitsToEncodeChanged=@((int s) => SampleBitsToEncodeChanged(s))/>
+    <MudItem sm="12" md="6" xs="12">
+        <MudPaper Elevation="3" Style="height: 100%">
+            <OpenMessage Disabled="@_processing" OnMessageChanged="@(MessageChanged)"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem xs="12" sm="6">
-        <MudPaper Elevation="3" Style="height:100%" Class="d-flex flex-column">
-			<EncodingInformation 
-				Capacity=@((carrier?.GetTotalSampleCount() ?? 0) * options.BitsToEncode / 8.0)
-				MessageSize=@(message?.GetMessageSize() ?? 0)
-				OnMessageFitsChanged=@((bool e) => MessageFitsChanged(e))>
-			</EncodingInformation>
+    <MudItem xs="12" sm="6">
+        <MudPaper Elevation="3" Style="height: 100%">
+            <SampleBitsPicker BitsPerSample="@_carrier?.BitsPerSample" OnSampleBitsToEncodeChanged="@(SampleBitsToEncodeChanged)"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-		<MudItem xs="12">
-        <MudPaper Elevation="3" Style="height:100%" Class="d-flex align-center justify-center mud-width-full">
-			<EncodingOptions 
-					Disabled=@processing
-					OnOptionsChanged=@((SteganographyOptions o) => OptionsChanged(o))>
-			</EncodingOptions>
+    <MudItem xs="12" sm="6">
+        <MudPaper Elevation="3" Style="height: 100%" Class="d-flex flex-column">
+            <EncodingInformation
+                Capacity="@((_carrier?.GetTotalSampleCount() ?? 0) * _options.BitsToEncode / 8.0)"
+                MessageSize="@(_message?.GetMessageSize() ?? 0)"
+                OnMessageFitsChanged="@(MessageFitsChanged)">
+            </EncodingInformation>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem xs="12">
+    <MudItem xs="12">
+        <MudPaper Elevation="3" Style="height: 100%" Class="d-flex align-center justify-center mud-width-full">
+            <EncodingOptions
+                Disabled="@_processing"
+                OnOptionsChanged="@(OptionsChanged)">
+            </EncodingOptions>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12">
         <MudPaper Elevation="3" Class="d-flex align-center justify-center mud-width-full pa-0">
-			<AudioEncode
-				CanEncode=@(messageFits && validPassword)
-				Carrier=@carrier
-				Message=@message
-				Options=@options
-				OnProcessingChanged=@((bool p) => ProcessingChanged(p))
-				OnEncodedCarrierChanged=@((File c) => EncodedCarrierChanged(c))>
-			</AudioEncode>
+            <AudioEncode
+                CanEncode="@(_messageFits && _validPassword)"
+                Carrier="@_carrier"
+                Message="@_message"
+                Options="@_options"
+                OnProcessingChanged="@(ProcessingChanged)"
+                OnEncodedCarrierChanged="@(EncodedCarrierChanged)">
+            </AudioEncode>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem xs="12" hidden="@(carrier is null)">
-		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
-			<AudioPreview Label=@Localize["OriginalAudio"] Carrier=@carrier/>
+    <MudItem xs="12" hidden="@(_carrier is null)">
+        <MudPaper Elevation="3" Style="height: 100%" Class="px-0 mx-0">
+            <AudioPreview Label=@Localize["OriginalAudio"] Carrier="@_carrier"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
-	<MudItem xs="12" hidden=" @(encodedCarrier is null)">
-		<MudPaper Elevation="3" Style="height:100%" Class="px-0 mx-0">
-			<AudioPreview Label=@Localize["EncodedAudio"] Carrier=@encodedCarrier/>
+    <MudItem xs="12" hidden=" @(_encodedCarrier is null)">
+        <MudPaper Elevation="3" Style="height: 100%" Class="px-0 mx-0">
+            <AudioPreview Label=@Localize["EncodedAudio"] Carrier="@_encodedCarrier"/>
         </MudPaper>
-	</MudItem>
+    </MudItem>
 
 </MudGrid>
 
-@code 
+@code
 {
-	WAV? carrier;
-	Message? message;
-	File? encodedCarrier;
+    Wav? _carrier;
+    Message? _message;
+    File? _encodedCarrier;
 
-	byte[]? messageDecompressed;
+    byte[]? _messageDecompressed;
 
-	bool messageFits = false;
-	bool validPassword = true;
-	bool processing = false;
+    bool _messageFits;
+    bool _validPassword = true;
+    bool _processing;
 
-	AudioSteganographyOptions options = new AudioSteganographyOptions();
+    readonly AudioSteganographyOptions _options = new();
 
-	protected override void OnInitialized()
-	{
-		AppState.OnChange += StateHasChanged;
-		AppState.SetPageTheme(Color.Tertiary, "AudioEncoding");
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.SetPageTheme(Color.Tertiary, "AudioEncoding");
+    }
 
-	async Task CarrierChanged(WAV value)
-	{
-		carrier = null;
-		StateHasChanged();
-		await Task.Delay(100);
-		encodedCarrier = null;
-		carrier = value;
-	}
-	void MessageFitsChanged(bool value) { messageFits = value; }
-	void ProcessingChanged(bool value) 
-	{ 
-		processing = value;
-		if(processing is true)
-			encodedCarrier = null;
-	}
-	void EncodedCarrierChanged(File value) { encodedCarrier = value; }
+    async Task CarrierChanged(Wav value)
+    {
+        _carrier = null;
+        StateHasChanged();
+        await Task.Delay(100);
+        _encodedCarrier = null;
+        _carrier = value;
+    }
 
-	async Task MessageChanged(Message newMessage)
-	{
-		messageDecompressed = null;
-		message = newMessage;
-		if(options.CompressionEnabled is true)
-			await ChangeCompression(true);
-	}
-	async Task OptionsChanged(SteganographyOptions value)
-	{
-		if (options.CompressionEnabled != value.CompressionEnabled)
-			await ChangeCompression(value.CompressionEnabled);
+    void MessageFitsChanged(bool value)
+    {
+        _messageFits = value;
+    }
 
-		options.CompressionEnabled = value.CompressionEnabled;
-		options.EncryptionEnabled = value.EncryptionEnabled;
-		options.ScatteredEncodingEnabled = value.ScatteredEncodingEnabled;
-		options.Password = value.Password;
+    void ProcessingChanged(bool value)
+    {
+        _processing = value;
+        if (_processing is true)
+            _encodedCarrier = null;
+    }
 
-		if (options.EncryptionEnabled is false || (options.EncryptionEnabled is true && options.Password is not null))
-			validPassword = true;
-		else
-			validPassword = false;
-	}
+    void EncodedCarrierChanged(File value)
+    {
+        _encodedCarrier = value;
+    }
 
-	async Task ChangeCompression(bool compressionEnabled)
-	{
-		if (message is null) return;
+    async Task MessageChanged(Message newMessage)
+    {
+        _messageDecompressed = null;
+        _message = newMessage;
+        if (_options.CompressionEnabled is true)
+            await ChangeCompression(true);
+    }
 
-		if (compressionEnabled is true)
-		{
-			try
-			{
-				messageDecompressed = message.ByteData;
-				message.ByteData = await Compression.Compress(message.ByteData);
-				message.IsCompressed = true;
-			}
-			catch
-			{
-				Snackbar.Add(Localize["ErrorCompressingMessage"], Severity.Error);
-			}
-		}
-		else
-		{
-			message.ByteData = messageDecompressed!;
-			messageDecompressed = null;
-			message.IsCompressed = false;
-		}
-		message.UpdateHeader();
-	}
-	void SampleBitsToEncodeChanged(int value)
-	{
-		options.BitsToEncode = value;
-	}
-	public void Dispose()
-	{
-		AppState.OnChange -= StateHasChanged;
-	}
+    async Task OptionsChanged(SteganographyOptions value)
+    {
+        if (_options.CompressionEnabled != value.CompressionEnabled)
+            await ChangeCompression(value.CompressionEnabled);
+
+        _options.CompressionEnabled = value.CompressionEnabled;
+        _options.EncryptionEnabled = value.EncryptionEnabled;
+        _options.ScatteredEncodingEnabled = value.ScatteredEncodingEnabled;
+        _options.Password = value.Password;
+
+        if (_options.EncryptionEnabled is false || (_options.EncryptionEnabled is true && _options.Password is not null))
+            _validPassword = true;
+        else
+            _validPassword = false;
+    }
+
+    async Task ChangeCompression(bool compressionEnabled)
+    {
+        if (_message is null) return;
+
+        if (compressionEnabled is true)
+        {
+            try
+            {
+                _messageDecompressed = _message.ByteData;
+                _message.ByteData = await Compression.Compress(_message.ByteData);
+                _message.IsCompressed = true;
+            }
+            catch
+            {
+                Snackbar.Add(Localize["ErrorCompressingMessage"], Severity.Error);
+            }
+        }
+        else
+        {
+            _message.ByteData = _messageDecompressed!;
+            _messageDecompressed = null;
+            _message.IsCompressed = false;
+        }
+        _message.UpdateHeader();
+    }
+
+    void SampleBitsToEncodeChanged(int value)
+    {
+        _options.BitsToEncode = value;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
 }

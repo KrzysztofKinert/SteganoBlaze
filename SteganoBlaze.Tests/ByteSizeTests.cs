@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SteganoBlaze.Utils;
+﻿using SteganoBlaze.Utils;
 
 namespace SteganoBlaze.Tests
 {
@@ -19,7 +14,7 @@ namespace SteganoBlaze.Tests
             //Arrange
 
             //Act
-            string actual = ByteSize.Reduce(bytes); ;
+            string actual = ByteSize.Reduce(bytes);
 
             //Assert
             Assert.True(expected == actual || expected == actual.Replace(",", "."));
@@ -35,7 +30,7 @@ namespace SteganoBlaze.Tests
             //Arrange
 
             //Act
-            string actual = ByteSize.Reduce(bytes); ;
+            string actual = ByteSize.Reduce(bytes);
 
             //Assert
             Assert.True(expected == actual || expected == actual.Replace(",", "."));

@@ -3,53 +3,62 @@
 @inject AppState AppState
 @implements IDisposable
 
-<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
-	<MudListItem Class="py-0 my-0">
-		<OpenFileButton Disabled=@Disabled Type=@FileType.Audio OnFileOpened=@((File file) => GetCarrier(file)) />
-	</MudListItem>
-	<MudListItem Class="py-0 my-0">
-		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(carrier?.FileName ?? "")</MudText>
-	</MudListItem>
-	<MudListItem Class="py-0 my-0">
-		<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
-			<MudListItem Style="width:70%" Class="py-0 my-0">
-				<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(carrier?.SizeToString() ?? "")</MudText>
-			</MudListItem>
-			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2" />
-			<MudListItem DisableGutters="true" Class="py-0 my-0">
-				<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
-					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Duration"]:</MudText>
-					<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(carrier?.GetDuration() ?? "")</MudText>
-				</MudContainer>
-			</MudListItem>
-		</MudList>
-	</MudListItem>
+<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height: 100%">
+    <MudListItem Class="py-0 my-0">
+        <OpenFileButton Disabled="@Disabled" Type="@FileType.Audio" OnFileOpened="@(GetCarrier)"/>
+    </MudListItem>
+    <MudListItem Class="py-0 my-0">
+        <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px); word-break: break-all;">@Localize["Name"]: @(_carrier?.FileName ?? "")</MudText>
+    </MudListItem>
+    <MudListItem Class="py-0 my-0">
+        <MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+            <MudListItem Style="width: 70%" Class="py-0 my-0">
+                <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(_carrier?.SizeToString() ?? "")</MudText>
+            </MudListItem>
+            <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2"/>
+            <MudListItem DisableGutters="true" Class="py-0 my-0">
+                <MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+                    <MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Duration"]:</MudText>
+                    <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(_carrier?.GetDuration() ?? "")</MudText>
+                </MudContainer>
+            </MudListItem>
+        </MudList>
+    </MudListItem>
 </MudList>
 
 @code {
-	[Parameter]
-	public bool Disabled { get; set; } = false;
 
-	[Parameter]
-	public EventCallback<WAV> OnAudioChanged { get; set; }
+    [Parameter]
+    public bool Disabled { get; set; } = false;
 
-	WAV? carrier;
+    [Parameter]
+    public EventCallback<Wav> OnAudioChanged { get; set; }
 
-	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
-	public void Dispose() { AppState.OnChange -= StateHasChanged; }
+    Wav? _carrier;
 
-	async Task GetCarrier(File file)
-	{
-		try
-		{
-			carrier = new WAV(file);
-			await OnAudioChanged.InvokeAsync(carrier);
-		}
-		catch
-		{
-			Snackbar.Add(Localize["CarrierAudioCorrupted"], Severity.Error);
-			carrier = null;
-			await OnAudioChanged.InvokeAsync(null);
-		}
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+
+    async Task GetCarrier(File file)
+    {
+        try
+        {
+            _carrier = new Wav(file);
+            await OnAudioChanged.InvokeAsync(_carrier);
+        }
+        catch
+        {
+            Snackbar.Add(Localize["CarrierAudioCorrupted"], Severity.Error);
+            _carrier = null;
+            await OnAudioChanged.InvokeAsync(null);
+        }
+    }
+
 }

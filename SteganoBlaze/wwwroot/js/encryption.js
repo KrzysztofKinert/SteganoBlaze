@@ -13,7 +13,7 @@ const deriveKey = (passwordKey, salt, keyUsage) =>
             name: "PBKDF2",
             salt: salt,
             iterations: 250000,
-            hash: "SHA-256",
+            hash: "SHA-256"
         },
         passwordKey,
         { name: "AES-GCM", length: 256 },
@@ -28,7 +28,7 @@ async function encryptData(secretData, password, salt, iv) {
         const encryptedContent = await window.crypto.subtle.encrypt(
             {
                 name: "AES-GCM",
-                iv: iv,
+                iv: iv
             },
             aesKey,
             secretData
@@ -37,23 +37,21 @@ async function encryptData(secretData, password, salt, iv) {
 
     } catch (e) {
         throw new Error();
-        return "";
     }
 }
 async function decryptData(encryptedData, password, salt, iv) {
     try {
         const passwordKey = await getPasswordKey(password);
         const aesKey = await deriveKey(passwordKey, salt, ["decrypt"]);
-        return decryptedData = window.crypto.subtle.decrypt(
+        return window.decryptedData = window.crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
-                iv: iv,
+                iv: iv
             },
             aesKey,
             encryptedData
         );
     } catch (e) {
         throw new Error();
-        return "";
     }
 }

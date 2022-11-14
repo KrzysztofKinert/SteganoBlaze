@@ -1,14 +1,15 @@
-﻿@using System.Diagnostics
-@using System.Text
-@inject IStringLocalizer<Resource> Localize
-@inject IJSRuntime js
+﻿@inject IStringLocalizer<Resource> Localize
+@inject IJSRuntime Js
 @inject AppState AppState
+@using System.Diagnostics
+@using System.Text
+@using System.Security.Cryptography
 @implements IDisposable
 
-<canvas hidden id="canvas"/>
+<canvas hidden id="canvas"></canvas>
 <MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
 	<MudListItem Class="pb-2 pt-3">
-		<ProgressBar Task="@processingTask" ProgressValue="@processingValue"/>
+		<ProgressBar Task="@_processingTask" ProgressValue="@_processingValue"/>
 	</MudListItem>
 	<MudListItem Class="pt-0">
 		<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
@@ -18,12 +19,12 @@
 				Color="Color.Primary"
 				StartIcon="@Icons.Filled.UploadFile"
 				OnClick="Encode"
-				Disabled=@(!CanEncode)
+				Disabled="@(!CanEncode)"
 				Style="width:100%">
 				<MudText Typo="Typo.button" Class="align-center">@Localize["Encode"]</MudText>
 			</MudButton>
 			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
-			<SaveButton fileToSave="@encodedCarrier"/>
+			<SaveButton FileToSave="@_encodedCarrier"/>
 		</MudList>
 	</MudListItem>
 </MudList>
@@ -41,20 +42,20 @@
 
 	[Parameter] public EventCallback<File> OnEncodedCarrierChanged { get; set; }
 
-	File? encodedCarrier;
+	File? _encodedCarrier;
 
-	int processingValue = 0;
-	string? processingTask = "";
+	int _processingValue = 0;
+	string? _processingTask = "";
 
-	Stopwatch watch = new Stopwatch();
+	Stopwatch _watch = new();
 
 	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
 	public void Dispose() { AppState.OnChange -= StateHasChanged; }
 
 	async Task UpdateProgress(string progressBarText, int progressBarValue)
 	{
-		processingTask = progressBarText;
-		processingValue = progressBarValue;
+		_processingTask = progressBarText;
+		_processingValue = progressBarValue;
 		StateHasChanged();
 		await Task.Delay(100);
 	}
@@ -64,14 +65,14 @@
 		if (Carrier is null || Message is null || Options is null)
 			throw new Exception();
 
-		watch.Reset();
-		watch.Start();
+		_watch.Reset();
+		_watch.Start();
 
 		await OnProcessingChanged.InvokeAsync(true);
-		encodedCarrier = null;
+		_encodedCarrier = null;
 
 		await UpdateProgress(Localize["ReadingImageData"], 0);
-		Carrier.PixelData = await JSInterop.ReadStream(js, "getImageData");
+		Carrier.PixelData = await JsInterop.ReadStream(Js, "getImageData");
 
 		if (Options.Password is not null)
 		{
@@ -94,10 +95,10 @@
 			var encodedCarrierBytes = await EncodeFile(encoder);
 
 			await UpdateProgress(Localize["SavingImageData"], 80);
-			string encodedCarrierURL = ((IJSInProcessRuntime)js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.WebPFormatEnabled ?? false) ? "image/webp" : "image/png");
+			string encodedCarrierUrl = ((IJSInProcessRuntime)Js).Invoke<string>("getImageURL", encodedCarrierBytes, (Options?.WebPFormatEnabled ?? false) ? "image/webp" : "image/png");
 
-			encodedCarrier = new File { Base64Data = encodedCarrierURL.Split(";", 2)[1].Substring(7), 
-										ContentType = encodedCarrierURL.Split(";", 2)[0].Substring(5),
+			_encodedCarrier = new File { Base64Data = encodedCarrierUrl.Split(";", 2)[1].Substring(7), 
+										ContentType = encodedCarrierUrl.Split(";", 2)[0].Substring(5),
 										FileName = AddSuffix(Carrier.FileName) };
 		}
 		catch
@@ -106,11 +107,11 @@
 			return;
 		}
 
-		watch.Stop();
-		await UpdateProgress(Localize["EncodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
+		_watch.Stop();
+		await UpdateProgress(Localize["EncodingDoneIn"] + " " + _watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
 
 		await OnProcessingChanged.InvokeAsync(false);
-		await OnEncodedCarrierChanged.InvokeAsync(encodedCarrier);
+		await OnEncodedCarrierChanged.InvokeAsync(_encodedCarrier);
 	}
 	async Task<byte[]> EncodeFile(ImageEncoder encoder)
 	{
@@ -143,16 +144,16 @@
 			return;
 
 		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.Password);
-		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
-		byte[] ivHeader = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
-		byte[] ivFile = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
+		byte[] salt = RandomNumberGenerator.GetBytes(16);
+		byte[] ivHeader = RandomNumberGenerator.GetBytes(12);
+		byte[] ivFile = RandomNumberGenerator.GetBytes(12);
 
 		List<byte[]> aesInputs = new List<byte[]> { Message.ByteData, passwordBytes, salt, ivFile };
-		Message.ByteData = await JSInterop.ReadStream(js, "encryptData", aesInputs);
+		Message.ByteData = await JsInterop.ReadStream(Js, "encryptData", aesInputs);
 		Message.UpdateHeader();
 
 		aesInputs = new List<byte[]> { Message.GenerateMetadata(), passwordBytes, salt, ivHeader };
-		Message.UpdateHeader(await JSInterop.ReadStream(js, "encryptData", aesInputs), salt.Concat(ivHeader).Concat(ivFile).ToList());
+		Message.UpdateHeader(await JsInterop.ReadStream(Js, "encryptData", aesInputs), salt.Concat(ivHeader).Concat(ivFile).ToList());
 	}
 	string AddSuffix(string fileName)
 	{

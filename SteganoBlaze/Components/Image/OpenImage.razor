@@ -1,95 +1,106 @@
 ﻿@inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
 @inject ISnackbar Snackbar
-@inject IJSRuntime js
+@inject IJSRuntime Js
 @implements IDisposable
 
-@if (carrier is not null)
+@if (_carrier is not null)
 {
-	<img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@carrier.ContentType;base64,@carrier.Base64Data" />
+    <img hidden id="carrierImage" @onload="GetCarrierDimensions" @onerror="CarrierCorrupted" src="data:@_carrier.ContentType;base64,@_carrier.Base64Data"/>
 }
 
-<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
-	<MudListItem Class="py-0 my-0">
-		<OpenFileButton Disabled=@Disabled Type=@type OnFileOpened=@((File file) => GetCarrier(file))/>
-	</MudListItem>
-	<MudListItem Class="py-0 my-0">
-		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(carrier?.FileName ?? "")</MudText>
-	</MudListItem>
-	<MudListItem Class="py-0 my-0">
-		<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
-			<MudListItem Style="width:70%" Class="py-0 my-0">
-				<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(carrier?.SizeToString() ?? "")</MudText>
-			</MudListItem>
-			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2" />
-			<MudListItem DisableGutters="true" Class="py-0 my-0">
-				<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
-					<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Dimensions"]:</MudText>
-					<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@carrierDimensions</MudText>
-				</MudContainer>
-			</MudListItem>
-		</MudList>
-	</MudListItem>
+<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height: 100%">
+    <MudListItem Class="py-0 my-0">
+        <OpenFileButton Disabled="@Disabled" Type="@_type" OnFileOpened="@(GetCarrier)"/>
+    </MudListItem>
+    <MudListItem Class="py-0 my-0">
+        <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px); word-break: break-all;">@Localize["Name"]: @(_carrier?.FileName ?? "")</MudText>
+    </MudListItem>
+    <MudListItem Class="py-0 my-0">
+        <MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+            <MudListItem Style="width: 70%" Class="py-0 my-0">
+                <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(_carrier?.SizeToString() ?? "")</MudText>
+            </MudListItem>
+            <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2"/>
+            <MudListItem DisableGutters="true" Class="py-0 my-0">
+                <MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+                    <MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Dimensions"]:</MudText>
+                    <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@_carrierDimensions</MudText>
+                </MudContainer>
+            </MudListItem>
+        </MudList>
+    </MudListItem>
 </MudList>
 
-	@code {
-	[Parameter]
-	public bool Disabled { get; set; } = false;
+@code {
 
-	[Parameter]
-	public bool EncodedImage { get; set; } = false;
+    [Parameter]
+    public bool Disabled { get; set; } = false;
 
-	[Parameter]
-	public EventCallback<Image> OnImageChanged { get; set; }
+    [Parameter]
+    public bool EncodedImage { get; set; } = false;
 
-	Image? carrier;
+    [Parameter]
+    public EventCallback<Image> OnImageChanged { get; set; }
 
-	int imageWidth;
-	int imageHeight;
-	string? carrierDimensions = "";
+    Image? _carrier;
 
-	FileType type = FileType.Image;
+    int _imageWidth;
+    int _imageHeight;
+    string? _carrierDimensions = "";
 
-	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
-	public void Dispose() { AppState.OnChange -= StateHasChanged; }
+    FileType _type = FileType.Image;
 
-	protected override void OnParametersSet()
-	{
-		type = EncodedImage is true ? FileType.EncodedImage : FileType.Image;
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
 
-	void GetCarrier(File file)
-	{
-		carrier = new Image(file);
-		carrierDimensions = Localize["Loading"];
-	}
-	async Task GetCarrierDimensions()
-	{
-		if (carrier is null) return;
-		try
-		{
-			imageWidth = await js.InvokeAsync<int>("getImageWidth");
-			imageHeight = await js.InvokeAsync<int>("getImageHeight");
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
 
-			if ((imageHeight * imageWidth) > AppState.MAX_CARRIER_PIXELS)
-				throw new Exception();
+    protected override void OnParametersSet()
+    {
+        _type = EncodedImage is true ? FileType.EncodedImage : FileType.Image;
+    }
 
-			carrierDimensions = imageWidth.ToString() + " x " + imageHeight.ToString();
-			carrier.Height = imageHeight;
-			carrier.Width = imageWidth;
-		}
-		catch
-		{
-			Snackbar.Add(Localize["MaxCarrierPixels"] + " 5 MP", Severity.Error);
-			carrier = null;
-		}
-		await OnImageChanged.InvokeAsync(carrier);
-	}
-	async Task CarrierCorrupted()
-	{
-		Snackbar.Add(Localize["CarrierImageCorrupted"], Severity.Error);
-		carrier = null;
-		carrierDimensions = null;
-		await OnImageChanged.InvokeAsync(null);
-	}
+    void GetCarrier(File file)
+    {
+        _carrier = new Image(file);
+        _carrierDimensions = Localize["Loading"];
+    }
+
+    async Task GetCarrierDimensions()
+    {
+        if (_carrier is null) return;
+        try
+        {
+            _imageWidth = await Js.InvokeAsync<int>("getImageWidth");
+            _imageHeight = await Js.InvokeAsync<int>("getImageHeight");
+
+            if (_imageHeight * _imageWidth > AppState.MAX_CARRIER_PIXELS)
+                throw new Exception();
+
+            _carrierDimensions = _imageWidth + " x " + _imageHeight;
+            _carrier.Height = _imageHeight;
+            _carrier.Width = _imageWidth;
+        }
+        catch
+        {
+            Snackbar.Add(Localize["MAX_CARRIER_PIXELS"] + " 5 MP", Severity.Error);
+            _carrier = null;
+        }
+        await OnImageChanged.InvokeAsync(_carrier);
+    }
+
+    async Task CarrierCorrupted()
+    {
+        Snackbar.Add(Localize["CarrierImageCorrupted"], Severity.Error);
+        _carrier = null;
+        _carrierDimensions = null;
+        await OnImageChanged.InvokeAsync(null);
+    }
+
 }

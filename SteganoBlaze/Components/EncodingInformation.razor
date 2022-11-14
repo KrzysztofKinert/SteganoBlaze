@@ -3,98 +3,110 @@
 @implements IDisposable
 
 <MudText Typo="Typo.body1" Align="Align.Center" Style="font-size: min(5vw, 18px);">@Localize["EncodingInformation"]</MudText>
-<MudDivider />
-<MudList Clickable="false" style="height:100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
-	<MudListItem>
-		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-			<MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["CarrierCapacity"]</MudText>
-			<MudText Typo="Typo.body1" Align="Align.Center">@carrierCapacity</MudText>
-		</MudContainer>
-	</MudListItem>
-	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
-	<MudListItem>
-		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-			<MudText Typo="Typo.body2" Color="@carrierUsageColor" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["CarrierUsage"]</MudText>
-			<MudText Typo="Typo.body1" Color="@carrierUsageColor" Align="Align.Center">@carrierUsage</MudText>
-		</MudContainer>
-	</MudListItem>
+<MudDivider/>
+<MudList Clickable="false" style="height: 100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
+    <MudListItem>
+        <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+            <MudText Typo="Typo.body2" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["CarrierCapacity"]</MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center">@_carrierCapacity</MudText>
+        </MudContainer>
+    </MudListItem>
+    <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0"/>
+    <MudListItem>
+        <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+            <MudText Typo="Typo.body2" Color="@_carrierUsageColor" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["CarrierUsage"]</MudText>
+            <MudText Typo="Typo.body1" Color="@_carrierUsageColor" Align="Align.Center">@_carrierUsage</MudText>
+        </MudContainer>
+    </MudListItem>
 </MudList>
 
 @code {
-	[Parameter] public double Capacity { get; set; }
 
-	[Parameter] public long MessageSize { get; set; }
+    [Parameter]
+    public double Capacity { get; set; }
 
-	[Parameter] public EventCallback<bool> OnMessageFitsChanged { get; set; }
+    [Parameter]
+    public long MessageSize { get; set; }
 
-	string carrierCapacity = "-";
-	string carrierUsage = "-";
-	MudBlazor.Color carrierUsageColor = Color.Default;
+    [Parameter]
+    public EventCallback<bool> OnMessageFitsChanged { get; set; }
 
-	double previousCapacity;
-	long previousMessageSize;
-	bool shouldRender;
+    string _carrierCapacity = "-";
+    string _carrierUsage = "-";
+    Color _carrierUsageColor = Color.Default;
 
-	protected override void OnInitialized()
-	{ 
-		AppState.OnChange += StateHasChanged;
-		AppState.OnChange += SetShouldRender;
-	}
-	public void Dispose()
-	{ 
-		AppState.OnChange -= StateHasChanged;
-		AppState.OnChange -= SetShouldRender;
-	}
-	protected override async Task OnParametersSetAsync()
-	{
-		if (Capacity != previousCapacity || MessageSize != previousMessageSize)
-		{
-			shouldRender = true;
-			previousCapacity = Capacity;
-			previousMessageSize = MessageSize;
-			await CheckCapacity();
-		}
-		else
-			shouldRender = false;
-	}
-	protected override bool ShouldRender() => shouldRender;
-	void SetShouldRender() 
-	{ 
-		shouldRender = true;
-		StateHasChanged();
-	}
+    double _previousCapacity;
+    long _previousMessageSize;
+    bool _shouldRender;
 
-	async Task CheckCapacity()
-	{
-		if (Capacity != 0) carrierCapacity = @Localize["Checking"];
-		if (MessageSize != 0)
-		{
-			carrierUsageColor = Color.Default;
-			carrierUsage = @Localize["Checking"];
-		}
-		StateHasChanged();
-		await Task.Delay(1);
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.OnChange += SetShouldRender;
+    }
 
-		if (Capacity != 0)
-		{
-			carrierCapacity = ByteSize.Reduce(Capacity);
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+        AppState.OnChange -= SetShouldRender;
+    }
 
-			if (MessageSize != 0)
-			{
-				carrierUsage = ((MessageSize + 100) / Capacity * 100).ToString("0.0") + " %";
-				if (MessageSize / Capacity < 1)
-				{
-					carrierUsageColor = Color.Success;
-					await OnMessageFitsChanged.InvokeAsync(true);
-					shouldRender = true;
-				}
-				else
-				{
-					carrierUsageColor = Color.Error;
-					await OnMessageFitsChanged.InvokeAsync(false);
-					shouldRender = true;
-				}
-			}
-		}
-	}
-}
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Capacity != _previousCapacity || MessageSize != _previousMessageSize)
+        {
+            _shouldRender = true;
+            _previousCapacity = Capacity;
+            _previousMessageSize = MessageSize;
+            await CheckCapacity();
+        }
+        else
+            _shouldRender = false;
+    }
+
+    protected override bool ShouldRender()
+    {
+        return _shouldRender;
+    }
+
+    void SetShouldRender()
+    {
+        _shouldRender = true;
+        StateHasChanged();
+    }
+
+    async Task CheckCapacity()
+    {
+        if (Capacity != 0) _carrierCapacity = Localize["Checking"];
+        if (MessageSize != 0)
+        {
+            _carrierUsageColor = Color.Default;
+            _carrierUsage = Localize["Checking"];
+        }
+        StateHasChanged();
+        await Task.Delay(1);
+
+        if (Capacity != 0)
+        {
+            _carrierCapacity = ByteSize.Reduce(Capacity);
+
+            if (MessageSize != 0)
+            {
+                _carrierUsage = ((MessageSize + 100) / Capacity * 100).ToString("0.0") + " %";
+                if (MessageSize / Capacity < 1)
+                {
+                    _carrierUsageColor = Color.Success;
+                    await OnMessageFitsChanged.InvokeAsync(true);
+                    _shouldRender = true;
+                }
+                else
+                {
+                    _carrierUsageColor = Color.Error;
+                    await OnMessageFitsChanged.InvokeAsync(false);
+                    _shouldRender = true;
+                }
+            }
+        }
+    }
+    }
+

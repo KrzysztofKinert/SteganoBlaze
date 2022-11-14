@@ -2,69 +2,77 @@
 @inject AppState AppState
 @implements IDisposable
 
-<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height:100%">
-	<MudListItem Class="py-0 my-0">
-		<MudButton HtmlTag="label"
-				Variant="Variant.Outlined"
-				Color=@Color.Primary
-				StartIcon="@Icons.Filled.AttachFile"
-				FullWidth="true"
-				DisableRipple="true"
-				Class="mt-2 cursor-default">
-			<MudText Typo="Typo.button" Align="Align.Center">@Localize["DecodedFile"]</MudText>
+<MudList Clickable="false" DisablePadding="true" Class="py-0 my-0" Style="height: 100%">
+    <MudListItem Class="py-0 my-0">
+        <MudButton HtmlTag="label"
+                   Variant="Variant.Outlined"
+                   Color="@Color.Primary"
+                   StartIcon="@Icons.Filled.AttachFile"
+                   FullWidth="true"
+                   DisableRipple="true"
+                   Class="mt-2 cursor-default">
+            <MudText Typo="Typo.button" Align="Align.Center">@Localize["DecodedFile"]</MudText>
         </MudButton>
-	</MudListItem>
-	<MudListItem Class="py-0 my-0">
-		<MudText Typo="Typo.body2" Style="word-break: break-all; font-size: min(3vw, 16px);">@Localize["Name"]: @(Message?.FileName ?? "")</MudText>
-		</MudListItem>
-		<MudListItem Class="py-0 my-0">
-			<MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
-				<MudListItem Style="width:70%" Class="py-0 my-0">
-					<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(Message?.SizeToString() ?? "")</MudText>
-				</MudListItem>
-				<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2" />
-				<MudListItem DisableGutters="true" Class="py-0 my-0">
-					<MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
-						<MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Type"]:</MudText>
-						<MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(Message?.ContentType ?? "")</MudText>
-					</MudContainer>
-				</MudListItem>
-			</MudList>
-		</MudListItem>
-	</MudList>
+    </MudListItem>
+    <MudListItem Class="py-0 my-0">
+        <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px); word-break: break-all;">@Localize["Name"]: @(Message?.FileName ?? "")</MudText>
+    </MudListItem>
+    <MudListItem Class="py-0 my-0">
+        <MudList Clickable="false" Dense="true" Class="d-flex justify-space-between flex-row" DisablePadding="true" DisableGutters="true">
+            <MudListItem Style="width: 70%" Class="py-0 my-0">
+                <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Size"]: @(Message?.SizeToString() ?? "")</MudText>
+            </MudListItem>
+            <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 my-1 mx-2"/>
+            <MudListItem DisableGutters="true" Class="py-0 my-0">
+                <MudContainer Class="d-flex flex-wrap align-content-start pa-0 ma-0">
+                    <MudText Class="pr-2" Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@Localize["Type"]:</MudText>
+                    <MudText Typo="Typo.body2" Style="font-size: min(3vw, 16px);">@(Message?.ContentType ?? "")</MudText>
+                </MudContainer>
+            </MudListItem>
+        </MudList>
+    </MudListItem>
+</MudList>
 
-	@code {
-	[Parameter]
-	public File? Message { get; set; }
+@code {
 
-	bool shouldRender;
-	File? previousMessage;
+    [Parameter]
+    public File? Message { get; set; }
 
-	protected override void OnInitialized()
-	{
-		AppState.OnChange += StateHasChanged;
-		AppState.OnChange += SetShouldRender;
-	}
-	public void Dispose()
-	{
-		AppState.OnChange -= StateHasChanged;
-		AppState.OnChange -= SetShouldRender;
-	}
-	void SetShouldRender()
-	{
-		shouldRender = true;
-		StateHasChanged();
-	}
+    bool _shouldRender;
+    File? _previousMessage;
 
-	protected override void OnParametersSet()
-	{
-		if (Message != previousMessage)
-		{
-			previousMessage = Message;
-			shouldRender = true;
-		}
-		else
-			shouldRender = false;
-	}
-	protected override bool ShouldRender() => shouldRender;
-}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.OnChange += SetShouldRender;
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+        AppState.OnChange -= SetShouldRender;
+    }
+
+    void SetShouldRender()
+    {
+        _shouldRender = true;
+        StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Message != _previousMessage)
+        {
+            _previousMessage = Message;
+            _shouldRender = true;
+        }
+        else
+            _shouldRender = false;
+    }
+
+    protected override bool ShouldRender()
+    {
+        return _shouldRender;
+    }
+    }
+

@@ -1,155 +1,173 @@
-﻿@using System.Diagnostics
-@using System.Text
-@inject AppState AppState
+﻿@inject AppState AppState
 @inject IStringLocalizer<Resource> Localize
-@inject IJSRuntime js
+@inject IJSRuntime Js
+@using System.Diagnostics
+@using System.Text
+@using System.Security.Cryptography
 @implements IDisposable
 
-<canvas hidden id="canvas"/>
-<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width:100%" Class="d-flex flex-column pa-0">
-	<MudListItem Class="pb-2 pt-3">
-		<ProgressBar Task="@processingTask" ProgressValue="@processingValue"/>
-	</MudListItem>
-	<MudListItem Class="pt-0">
-		<MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width:100%" Class="d-flex justify-space-around flex-row">
-			<MudButton  
-				HtmlTag="label"
-				Variant="Variant.Filled"
-				Color="Color.Primary"
-				StartIcon="@Icons.Filled.UploadFile"
-				OnClick="Encode"
-				Disabled=@(!CanEncode)
-				Style="width:100%">
-				<MudText Typo="Typo.button" Class="align-center">@Localize["Encode"]</MudText>
-			</MudButton>
-			<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
-			<SaveButton fileToSave="@encodedCarrier"/>
-		</MudList>
-	</MudListItem>
+<canvas hidden id="canvas"></canvas>
+<MudList Clickable="false" Dense="true" DisablePadding="true" Style="width: 100%" Class="d-flex flex-column pa-0">
+    <MudListItem Class="pb-2 pt-3">
+        <ProgressBar Task="@_processingTask" ProgressValue="@_processingValue"/>
+    </MudListItem>
+    <MudListItem Class="pt-0">
+        <MudList Clickable="false" DisableGutters="true" DisablePadding="true" Dense="true" Style="width: 100%" Class="d-flex justify-space-around flex-row">
+            <MudButton
+                HtmlTag="label"
+                Variant="Variant.Filled"
+                Color="Color.Primary"
+                StartIcon="@Icons.Filled.UploadFile"
+                OnClick="Encode"
+                Disabled="@(!CanEncode)"
+                Style="width: 100%">
+                <MudText Typo="Typo.button" Class="align-center">@Localize["Encode"]</MudText>
+            </MudButton>
+            <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle"/>
+            <SaveButton FileToSave="@_encodedCarrier"/>
+        </MudList>
+    </MudListItem>
 </MudList>
 
 @code {
-	[Parameter] public bool CanEncode { get; set; } = false;
 
-	[Parameter] public WAV? Carrier { get; set; }
+    [Parameter]
+    public bool CanEncode { get; set; } = false;
 
-	[Parameter] public Message? Message { get; set; }
+    [Parameter]
+    public Wav? Carrier { get; set; }
 
-	[Parameter] public AudioSteganographyOptions? Options { get; set; }
+    [Parameter]
+    public Message? Message { get; set; }
 
-	[Parameter] public EventCallback<bool> OnProcessingChanged { get; set; }
+    [Parameter]
+    public AudioSteganographyOptions? Options { get; set; }
 
-	[Parameter] public EventCallback<File> OnEncodedCarrierChanged { get; set; }
+    [Parameter]
+    public EventCallback<bool> OnProcessingChanged { get; set; }
 
-	File? encodedCarrier;
+    [Parameter]
+    public EventCallback<File> OnEncodedCarrierChanged { get; set; }
 
-	int processingValue = 0;
-	string? processingTask = "";
+    File? _encodedCarrier;
 
-	Stopwatch watch = new Stopwatch();
+    int _processingValue = 0;
+    string? _processingTask = "";
 
-	protected override void OnInitialized() { AppState.OnChange += StateHasChanged; }
-	public void Dispose() { AppState.OnChange -= StateHasChanged; }
+    Stopwatch _watch = new();
 
-	async Task UpdateProgress(string progressBarText, int progressBarValue)
-	{
-		processingTask = progressBarText;
-		processingValue = progressBarValue;
-		StateHasChanged();
-		await Task.Delay(100);
-	}
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
 
-	async Task Encode()
-	{
-		if (Carrier is null || Message is null || Options is null)
-			throw new Exception();
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
 
-		watch.Reset();
-		watch.Start();
+    async Task UpdateProgress(string progressBarText, int progressBarValue)
+    {
+        _processingTask = progressBarText;
+        _processingValue = progressBarValue;
+        StateHasChanged();
+        await Task.Delay(100);
+    }
 
-		await OnProcessingChanged.InvokeAsync(true);
-		encodedCarrier = null;
+    async Task Encode()
+    {
+        if (Carrier is null || Message is null || Options is null)
+            throw new Exception();
 
-		if (Options.Password is not null)
-		{
-			try
-			{
-				await UpdateProgress(Localize["EncryptingMessage"], 20);
-				await EncryptMessage();
-			}
-			catch
-			{
-				await UpdateProgress(Localize["ErrorEncryptingMessage"], 0);
-				return;
-			}
-		}
+        _watch.Reset();
+        _watch.Start();
 
-		try
-		{
-			SampleParameters sampleParams = new SampleParameters(Options.ScatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.BitsToEncode);
-			AudioEncoder encoder = new AudioEncoder(Carrier, sampleParams);
+        await OnProcessingChanged.InvokeAsync(true);
+        _encodedCarrier = null;
 
-			encodedCarrier = new File { Base64Data = Convert.ToBase64String(await EncodeFile(encoder)), ContentType = Carrier.ContentType, FileName = AddSuffix(Carrier.FileName) };
-		}
-		catch
-		{
-			await UpdateProgress(Localize["ErrorEncodingMessage"], 0);
-			return;
-		}
+        if (Options.Password is not null)
+        {
+            try
+            {
+                await UpdateProgress(Localize["EncryptingMessage"], 20);
+                await EncryptMessage();
+            }
+            catch
+            {
+                await UpdateProgress(Localize["ErrorEncryptingMessage"], 0);
+                return;
+            }
+        }
 
-		watch.Stop();
-		await UpdateProgress(Localize["EncodingDoneIn"] + " " + watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
+        try
+        {
+            var sampleParams = new SampleParameters(Options.ScatteredEncodingEnabled ? SampleOrder.Random : SampleOrder.Sequential, Options.BitsToEncode);
+            var encoder = new AudioEncoder(Carrier, sampleParams);
 
-		await OnProcessingChanged.InvokeAsync(false);
-		await OnEncodedCarrierChanged.InvokeAsync(encodedCarrier);
-	}
-	async Task<byte[]> EncodeFile(AudioEncoder encoder)
-	{
-		if (Message is null)
-			throw new Exception();
+            _encodedCarrier = new File { Base64Data = Convert.ToBase64String(await EncodeFile(encoder)), ContentType = Carrier.ContentType, FileName = AddSuffix(Carrier.FileName) };
+        }
+        catch
+        {
+            await UpdateProgress(Localize["ErrorEncodingMessage"], 0);
+            return;
+        }
 
-		await UpdateProgress(Localize["EncodingMessage"], 25);
+        _watch.Stop();
+        await UpdateProgress(Localize["EncodingDoneIn"] + " " + _watch.Elapsed.TotalSeconds.ToString("0.00") + " s!", 100);
 
-		encoder.Encode(Message.Header);
+        await OnProcessingChanged.InvokeAsync(false);
+        await OnEncodedCarrierChanged.InvokeAsync(_encodedCarrier);
+    }
 
-		int updates = Message.ByteData.Length / 250000 + 1;
-		int updatesDone = 0;
-		int bytesLeft = Message.ByteData.Length;
+    async Task<byte[]> EncodeFile(AudioEncoder encoder)
+    {
+        if (Message is null)
+            throw new Exception();
 
-		while(bytesLeft > 250000)
-		{
-			encoder.Encode(Message.ByteData[(250000 * updatesDone)..(250000 * (updatesDone + 1))]);
-			updatesDone++;
-			bytesLeft -= 250000;
-			await UpdateProgress(Localize["EncodingMessage"], 25 + updatesDone * 75 / updates);
-		}
+        await UpdateProgress(Localize["EncodingMessage"], 25);
 
-		encoder.Encode(Message.ByteData[(250000 * updatesDone)..]);
+        encoder.Encode(Message.Header);
 
-		return encoder.GetEncodedCarrier();
-	}
+        var updates = Message.ByteData.Length / 250000 + 1;
+        var updatesDone = 0;
+        var bytesLeft = Message.ByteData.Length;
 
-	protected async Task EncryptMessage()
-	{
-		if (Message is null || Options?.Password is null)
-			return;
+        while (bytesLeft > 250000)
+        {
+            encoder.Encode(Message.ByteData[(250000 * updatesDone)..(250000 * (updatesDone + 1))]);
+            updatesDone++;
+            bytesLeft -= 250000;
+            await UpdateProgress(Localize["EncodingMessage"], 25 + updatesDone * 75 / updates);
+        }
 
-		byte[] passwordBytes = Encoding.UTF8.GetBytes(Options.Password);
-		byte[] salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(16);
-		byte[] ivHeader = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
-		byte[] ivFile = System.Security.Cryptography.RandomNumberGenerator.GetBytes(12);
+        encoder.Encode(Message.ByteData[(250000 * updatesDone)..]);
 
-		List<byte[]> aesInputs = new List<byte[]> { Message.ByteData, passwordBytes, salt, ivFile };
-		Message.ByteData = await JSInterop.ReadStream(js, "encryptData", aesInputs);
-		Message.UpdateHeader();
+        return encoder.GetEncodedCarrier();
+    }
 
-		aesInputs = new List<byte[]> { Message.GenerateMetadata(), passwordBytes, salt, ivHeader };
-		Message.UpdateHeader(await JSInterop.ReadStream(js, "encryptData", aesInputs), salt.Concat(ivHeader).Concat(ivFile).ToList());
-	}
-	private string AddSuffix(string fileName)
-	{
-		string name = Path.GetFileNameWithoutExtension(fileName);
-		string ext = Path.GetExtension(fileName);
-		return String.Concat(name, Localize["_encoded"], ext);
-	}
+    private async Task EncryptMessage()
+    {
+        if (Message is null || Options?.Password is null)
+            return;
+
+        var passwordBytes = Encoding.UTF8.GetBytes(Options.Password);
+        var salt = RandomNumberGenerator.GetBytes(16);
+        var ivHeader = RandomNumberGenerator.GetBytes(12);
+        var ivFile = RandomNumberGenerator.GetBytes(12);
+
+        var aesInputs = new List<byte[]> { Message.ByteData, passwordBytes, salt, ivFile };
+        Message.ByteData = await JsInterop.ReadStream(Js, "encryptData", aesInputs);
+        Message.UpdateHeader();
+
+        aesInputs = new List<byte[]> { Message.GenerateMetadata(), passwordBytes, salt, ivHeader };
+        Message.UpdateHeader(await JsInterop.ReadStream(Js, "encryptData", aesInputs), salt.Concat(ivHeader).Concat(ivFile).ToList());
+    }
+
+    private string AddSuffix(string fileName)
+    {
+        var name = Path.GetFileNameWithoutExtension(fileName);
+        var ext = Path.GetExtension(fileName);
+        return string.Concat(name, Localize["_encoded"], ext);
+    }
+
 }

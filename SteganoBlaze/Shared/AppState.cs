@@ -12,9 +12,9 @@ namespace SteganoBlaze.Shared
 
         public MudTheme Theme = new();
 
-        public static readonly int MAX_CARRIER_SIZE = 10 * 1024 * 1024;
-        public static readonly int MAX_MESSAGE_SIZE = 5 * 1024 * 1024;
-        public static readonly int MAX_CARRIER_PIXELS = 25000000;
+        public const int MAX_CARRIER_SIZE = 10 * 1024 * 1024;
+        public const int MAX_MESSAGE_SIZE = 5 * 1024 * 1024;
+        public const int MAX_CARRIER_PIXELS = 25000000;
 
         public void StateChanged() => 
             NotifyStateChanged();

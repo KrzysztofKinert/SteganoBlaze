@@ -4,12 +4,12 @@ namespace SteganoBlaze.Steganography
 {
 	public readonly struct SampleParameters
     {
-        public readonly SampleOrder sampleOrder;
-        public readonly int sampleBitsToUse;
+        public readonly SampleOrder SampleOrder;
+        public readonly int SampleBitsToUse;
         public SampleParameters(SampleOrder order, int bits)
         {
-            sampleOrder = order;
-            sampleBitsToUse = bits;
+            SampleOrder = order;
+            SampleBitsToUse = bits;
         }
         public static List<SampleParameters> GenerateParameters(int maxSampleBits)
         {

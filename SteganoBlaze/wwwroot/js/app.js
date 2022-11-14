@@ -7,14 +7,14 @@
 
 function saveFileBlob(file) {
     const fileBlob = new File([file.byteData], file.fileName, { type: File.contentType });
-    const Url = URL.createObjectURL(fileBlob);
+    const url = URL.createObjectURL(fileBlob);
 
     var saveLink = document.getElementById('saveLink');
-    saveLink.href = Url;
+    saveLink.href = url;
     saveLink.download = file.fileName;
     saveLink.click();
 
-    URL.revokeObjectURL(Url);
+    URL.revokeObjectURL(url);
 }
 
 function getLanguage() {

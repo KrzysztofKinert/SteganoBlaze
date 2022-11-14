@@ -1,4 +1,5 @@
 ﻿using MudBlazor;
+
 namespace SteganoBlaze.Utils
 {
     public static class PageTheme
@@ -7,35 +8,35 @@ namespace SteganoBlaze.Utils
         {
             return color switch
             {
-                Color.Tertiary => new MudTheme()
+                Color.Tertiary => new MudTheme
                 {
-                    Palette = new Palette()
+                    Palette = new Palette
                     {
                         Primary = "#1EC8A5",
                         Tertiary = "#594AE2",
                     },
                     PaletteDark = ConvertToDarkTheme(new Palette(), "#3ACEAF", "#776be7"),
                 },
-                Color.Info => new MudTheme()
+                Color.Info => new MudTheme
                 {
-                    Palette = new Palette()
+                    Palette = new Palette
                     {
                         Primary = Colors.Blue.Default,
                     },
                     PaletteDark = ConvertToDarkTheme(new Palette(), Colors.Blue.Lighten1, "#1EC8A5"),
                 },
-                Color.Primary => new MudTheme()
+                Color.Primary => new MudTheme
                 {
-                    Palette = new Palette()
+                    Palette = new Palette
                     {
                         Primary = "#594AE2",
                         Tertiary = "#1EC8A5",
                     },
                     PaletteDark = ConvertToDarkTheme(new Palette(), "#776be7", "#3ACEAF"),
                 },
-                _ => new MudTheme()
+                _ => new MudTheme
                 {
-                    Palette = new Palette()
+                    Palette = new Palette
                     {
                         Primary = "#594AE2",
                         Tertiary = "#1EC8A5",

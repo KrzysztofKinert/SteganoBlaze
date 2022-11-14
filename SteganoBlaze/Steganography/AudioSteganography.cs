@@ -5,65 +5,65 @@ namespace SteganoBlaze.Steganography
 {
     public abstract class AudioSteganography
     {
-        protected WAV? carrier;
+        protected Wav? Carrier;
 
-        protected SampleParameters parameters;
-        protected int sampleIndex;
-        protected int sampleBitsLeft;
+        protected SampleParameters Parameters;
+        protected int SampleIndex;
+        protected int SampleBitsLeft;
 
-        protected int randomSeed;
-        protected Random? generator;
-        protected HashSet<int>? usedSamples;
+        protected int RandomSeed;
+        protected Random? Generator;
+        protected HashSet<int>? UsedSamples;
 
         protected void FirstSample()
         {
-            if (carrier is null) 
+            if (Carrier is null) 
                 throw new Exception();
 
-            sampleBitsLeft = parameters.sampleBitsToUse;
-            switch (parameters.sampleOrder)
+            SampleBitsLeft = Parameters.SampleBitsToUse;
+            switch (Parameters.SampleOrder)
             {
                 case SampleOrder.Sequential:
-                    sampleIndex = 0;
+                    SampleIndex = 0;
                     break;
                 case SampleOrder.Random:
-                    generator = new Random(randomSeed);
-                    usedSamples = new HashSet<int>();
-                    sampleIndex = generator.Next(carrier.GetTotalSampleCount());
-                    usedSamples.Add(sampleIndex);
+                    Generator = new Random(RandomSeed);
+                    UsedSamples = new HashSet<int>();
+                    SampleIndex = Generator.Next(Carrier.GetTotalSampleCount());
+                    UsedSamples.Add(SampleIndex);
                     break;
             }
         }
         protected void NextSample()
         {
-            if (carrier is null) 
+            if (Carrier is null) 
                 throw new Exception();
 
-            sampleBitsLeft = parameters.sampleBitsToUse;
-            switch (parameters.sampleOrder)
+            SampleBitsLeft = Parameters.SampleBitsToUse;
+            switch (Parameters.SampleOrder)
             {
                 case SampleOrder.Sequential:
-                    sampleIndex++;
+                    SampleIndex++;
                     break;
                 case SampleOrder.Random:
-                    if (usedSamples is null || generator is null)
+                    if (UsedSamples is null || Generator is null)
                         throw new Exception();
-                    while (usedSamples.Contains(sampleIndex))
-                        sampleIndex = generator.Next(carrier.GetTotalSampleCount());
-                    usedSamples.Add(sampleIndex);
+                    while (UsedSamples.Contains(SampleIndex))
+                        SampleIndex = Generator.Next(Carrier.GetTotalSampleCount());
+                    UsedSamples.Add(SampleIndex);
                     break;
             }
         }
         protected int BitIndex() 
-            => sampleBitsLeft - 1;
+            => SampleBitsLeft - 1;
     }
     public class AudioEncoder : AudioSteganography
     {
-        public AudioEncoder(WAV audio, SampleParameters sampleParams)
+        public AudioEncoder(Wav audio, SampleParameters sampleParams)
         {
-            carrier = audio.Clone();
-            randomSeed = carrier.GetTotalSampleCount();
-            parameters = sampleParams;
+            Carrier = audio.Clone();
+            RandomSeed = Carrier.GetTotalSampleCount();
+            Parameters = sampleParams;
             FirstSample();
         }
         public void Encode(byte[] bytesToEncode)
@@ -72,25 +72,25 @@ namespace SteganoBlaze.Steganography
                 EncodeByte(byteToEncode);
         }
         public byte[] GetEncodedCarrier() =>
-            carrier is null ? throw new Exception() : carrier.GetData();
+            Carrier is null ? throw new Exception() : Carrier.GetData();
 
         private void EncodeByte(byte byteValue)
         {
-            if (carrier is null)
+            if (Carrier is null)
                 throw new Exception();
 
             int encodedBits = 0;
             while (encodedBits < 8)
             {
-                if (sampleBitsLeft > 0)
+                if (SampleBitsLeft > 0)
                 {
-                    uint sample = carrier.GetSample(sampleIndex);
+                    uint sample = Carrier.GetSample(SampleIndex);
                     sample = byteValue % 2 == 1 ? SetBit(sample, BitIndex()) 
                                                 : ClearBit(sample, BitIndex());
-                    carrier.SetSample(sampleIndex, sample);
+                    Carrier.SetSample(SampleIndex, sample);
 
                     byteValue /= 2;
-                    sampleBitsLeft--;
+                    SampleBitsLeft--;
                     encodedBits++;
                 }
                 else
@@ -104,11 +104,11 @@ namespace SteganoBlaze.Steganography
     }
     public class AudioDecoder : AudioSteganography
     {
-        public AudioDecoder(WAV carrierToDecode, SampleParameters sampleParams)
+        public AudioDecoder(Wav carrierToDecode, SampleParameters sampleParams)
         {
-            carrier = carrierToDecode;
-            randomSeed = carrier.GetTotalSampleCount();
-            parameters = sampleParams;
+            Carrier = carrierToDecode;
+            RandomSeed = Carrier.GetTotalSampleCount();
+            Parameters = sampleParams;
             FirstSample();
         }
         public byte[] Decode(int bytesToDecode)
@@ -121,19 +121,19 @@ namespace SteganoBlaze.Steganography
         }
         private byte DecodeByte()
         {
-            if (carrier is null) 
+            if (Carrier is null) 
                 throw new Exception();
 
             int decodedByte = 0;
             int decodedBits = 0;
             while (decodedBits < 8)
             {
-                uint sample = carrier.GetSample(sampleIndex);
-                if (sampleBitsLeft > 0)
+                uint sample = Carrier.GetSample(SampleIndex);
+                if (SampleBitsLeft > 0)
                 {
                     decodedByte += BitSign(sample, BitIndex()) << decodedBits;
 
-                    sampleBitsLeft--;
+                    SampleBitsLeft--;
                     decodedBits++;
                 }
                 else

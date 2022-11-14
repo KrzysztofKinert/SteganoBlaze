@@ -3,92 +3,103 @@
 @inject ISnackbar Snackbar
 @implements IDisposable
 
-<MudDivider />
+<MudDivider/>
 <MudText Typo="Typo.body1" Align="Align.Center" Class="py-1" Style="font-size: min(4vw, 16px);">@Localize["ChannelValueChange"]</MudText>
-<MudDivider />
-<MudList Clickable="false" style="height:100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
-	<MudListItem>
-		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-			<MudText Typo="Typo.body2" Color="@channelMaxValueChangeColor[(int)Channel.R]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["RChannel"]</MudText>
-			<MudText Typo="Typo.body1" Color="@channelMaxValueChangeColor[(int)Channel.R]" Align="Align.Center">@channelMaxValueChange[(int)Channel.R]</MudText>
-		</MudContainer>
-	</MudListItem>
-	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
-	<MudListItem>
-		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-			<MudText Typo="Typo.body2" Color="@channelMaxValueChangeColor[(int)Channel.G]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["GChannel"]</MudText>
-			<MudText Typo="Typo.body1" Color="@channelMaxValueChangeColor[(int)Channel.G]" Align="Align.Center">@channelMaxValueChange[(int)Channel.G]</MudText>
-		</MudContainer>
-	</MudListItem>
-	<MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0" />
-	<MudListItem>
-		<MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
-			<MudText Typo="Typo.body2" Color="@channelMaxValueChangeColor[(int)Channel.B]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BChannel"]</MudText>
-			<MudText Typo="Typo.body1" Color="@channelMaxValueChangeColor[(int)Channel.B]" Align="Align.Center">@channelMaxValueChange[(int)Channel.B]</MudText>
-		</MudContainer>
-	</MudListItem>
+<MudDivider/>
+<MudList Clickable="false" style="height: 100%" Dense="true" DisableGutters="true" DisablePadding="true" Class="d-flex flex-row align-content-center">
+    <MudListItem>
+        <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+            <MudText Typo="Typo.body2" Color="@_channelMaxValueChangeColor[(int)Channel.R]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["RChannel"]</MudText>
+            <MudText Typo="Typo.body1" Color="@_channelMaxValueChangeColor[(int)Channel.R]" Align="Align.Center">@_channelMaxValueChange[(int)Channel.R]</MudText>
+        </MudContainer>
+    </MudListItem>
+    <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0"/>
+    <MudListItem>
+        <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+            <MudText Typo="Typo.body2" Color="@_channelMaxValueChangeColor[(int)Channel.G]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["GChannel"]</MudText>
+            <MudText Typo="Typo.body1" Color="@_channelMaxValueChangeColor[(int)Channel.G]" Align="Align.Center">@_channelMaxValueChange[(int)Channel.G]</MudText>
+        </MudContainer>
+    </MudListItem>
+    <MudDivider Vertical="true" FlexItem="true" DividerType="DividerType.Middle" Class="pa-0 ma-0"/>
+    <MudListItem>
+        <MudContainer Class="d-flex flex-column align-content-center pa-0 ma-0">
+            <MudText Typo="Typo.body2" Color="@_channelMaxValueChangeColor[(int)Channel.B]" Align="Align.Center" Style="font-size: min(3.5vw, 14px);">@Localize["BChannel"]</MudText>
+            <MudText Typo="Typo.body1" Color="@_channelMaxValueChangeColor[(int)Channel.B]" Align="Align.Center">@_channelMaxValueChange[(int)Channel.B]</MudText>
+        </MudContainer>
+    </MudListItem>
 </MudList>
 
 @code {
-	[Parameter] public PixelBits? PixelBits { get; set; }
 
-	string[] channelMaxValueChange = new string[] { "", "", "" };
-	MudBlazor.Color[] channelMaxValueChangeColor = new MudBlazor.Color[] { Color.Default, Color.Default, Color.Default };
+    [Parameter]
+    public PixelBits? PixelBits { get; set; }
 
-	PixelBits? previousPixelBits;
-	bool shouldRender;
+    string[] _channelMaxValueChange = { "", "", "" };
+    Color[] _channelMaxValueChangeColor = { Color.Default, Color.Default, Color.Default };
 
-	protected override void OnInitialized()
-	{
-		AppState.OnChange += StateHasChanged;
-		AppState.OnChange += SetShouldRender;
-	}
-	public void Dispose()
-	{
-		AppState.OnChange -= StateHasChanged;
-		AppState.OnChange -= SetShouldRender;
-	}
-	protected override void OnParametersSet()
-	{
-		if (PixelBits != previousPixelBits)
-		{
-			shouldRender = true;
-			previousPixelBits = PixelBits;
-			CheckValueChange();
-		}
-		else
-			shouldRender = false;
-	}
-	protected override bool ShouldRender() => shouldRender;
-	void SetShouldRender()
-	{
-		shouldRender = true; 
-		StateHasChanged();
-	}
-	public void CheckValueChange()
-	{
-		double[] maxValueChange = new double[3];
-		maxValueChange[(int)Channel.R] = PossibleValueChange.FromFixedPoint(PixelBits?.R ?? 1, 8);
-		maxValueChange[(int)Channel.G] = PossibleValueChange.FromFixedPoint(PixelBits?.G ?? 1, 8);
-		maxValueChange[(int)Channel.B] = PossibleValueChange.FromFixedPoint(PixelBits?.B ?? 1, 8);
+    PixelBits? _previousPixelBits;
+    bool _shouldRender;
 
-		for (int i = 0; i < maxValueChange.Length; i++)
-		{
-			channelMaxValueChange[i] = maxValueChange[i].ToString("0.00") + " %";
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AppState.OnChange += SetShouldRender;
+    }
 
-			switch (maxValueChange[i])
-			{
-				case > 10:
-					channelMaxValueChangeColor[i] = Color.Warning;
-					Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
-					break;
-				case < 10 and > 2:
-					channelMaxValueChangeColor[i] = Color.Default;
-					break;
-				case < 2:
-					channelMaxValueChangeColor[i] = Color.Success;
-					break;
-			}
-		}
-	}
-}
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+        AppState.OnChange -= SetShouldRender;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (PixelBits != _previousPixelBits)
+        {
+            _shouldRender = true;
+            _previousPixelBits = PixelBits;
+            CheckValueChange();
+        }
+        else
+            _shouldRender = false;
+    }
+
+    protected override bool ShouldRender()
+    {
+        return _shouldRender;
+    }
+
+    void SetShouldRender()
+    {
+        _shouldRender = true;
+        StateHasChanged();
+    }
+
+    private void CheckValueChange()
+    {
+        var maxValueChange = new double[3];
+        maxValueChange[(int)Channel.R] = PossibleValueChange.FromFixedPoint(PixelBits?.R ?? 1, 8);
+        maxValueChange[(int)Channel.G] = PossibleValueChange.FromFixedPoint(PixelBits?.G ?? 1, 8);
+        maxValueChange[(int)Channel.B] = PossibleValueChange.FromFixedPoint(PixelBits?.B ?? 1, 8);
+
+        for (var i = 0; i < maxValueChange.Length; i++)
+        {
+            _channelMaxValueChange[i] = maxValueChange[i].ToString("0.00") + " %";
+
+            switch (maxValueChange[i])
+            {
+                case > 10:
+                    _channelMaxValueChangeColor[i] = Color.Warning;
+                    Snackbar.Add(Localize["EncodingBitsWarning"], Severity.Warning);
+                    break;
+                case < 10 and > 2:
+                    _channelMaxValueChangeColor[i] = Color.Default;
+                    break;
+                case < 2:
+                    _channelMaxValueChangeColor[i] = Color.Success;
+                    break;
+            }
+        }
+    }
+    }
+
