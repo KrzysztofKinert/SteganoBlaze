@@ -34,6 +34,8 @@ namespace SteganoBlaze.Steganography
                     PixelIndex = Generator.Next(PixelData.Length / 4) * 4;
                     UsedPixels.Add(PixelIndex);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
         protected void NextPixel()
@@ -100,10 +102,6 @@ namespace SteganoBlaze.Steganography
             {
                 if (ChannelBitsLeft[(int)Channel] > 0)
                 {
-                    var A = PixelData[ChannelIndex()];
-                    var B = BitIndex();
-
-
                     PixelData[ChannelIndex()] = byteValue % 2 == 1 ? SetBit(ref PixelData[ChannelIndex()], BitIndex())
                                                                    : ClearBit(ref PixelData[ChannelIndex()], BitIndex());
 
@@ -120,6 +118,7 @@ namespace SteganoBlaze.Steganography
                 }
             }
         }
+
         private static byte SetBit(ref byte value, int bitIndex) =>
             value |= (byte)(1 << bitIndex);
         private static byte ClearBit(ref byte value, int bitIndex) =>

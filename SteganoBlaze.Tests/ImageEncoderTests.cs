@@ -1,95 +1,55 @@
-﻿using System.Collections;
-using SteganoBlaze.Enums;
+﻿using SteganoBlaze.Enums;
 using SteganoBlaze.Steganography;
 using SteganoBlaze.Models;
 
 namespace SteganoBlaze.Tests
 {
-    public class ImageEncoderTestsGenerator : TheoryData<PixelBits>
+    public class ImageEncoderTestsGenerator : TheoryData<PixelParameters>
     {
         public ImageEncoderTestsGenerator()
         {
-            for (int r = 0; r < 9; r++)
+            for (var r = 0; r < 9; r++)
+            for (var g = 0; g < 9; g++)
+            for (var b = 0; b < 9; b++)
             {
-                for (int g = 0; g < 9; g++)
-                {
-                    for (int b = 0; b < 9; b++)
-                    {
-                        Add(new PixelBits(r, g, b));
-                    }
-                }
+                Add(new PixelParameters(PixelOrder.Sequential, new PixelBits(r, g, b)));
+                Add(new PixelParameters(PixelOrder.Random, new PixelBits(r, g, b)));
             }
         }
     }
     public class ImageEncoderTests
 	{
-        private const int _pixelCount = 16;
-
-        [Fact]
-        public void Encode_ShouldModifyBitsInBytes()
-        {
-            //Arrange
-            var image = new Image(new Models.File()) { PixelData = new byte[_pixelCount * 4] };
-            var pixelParameters = new PixelParameters(PixelOrder.Sequential, new PixelBits(8, 4, 0));
-            var _encoder = new ImageEncoder(image, pixelParameters);
-
-            for (var i = 0; i < _pixelCount * 4; i++)
-                image.PixelData[i] = 255;
-
-            var _bytesToEncode = new byte[24];
-
-
-            var expected = new byte[_pixelCount * 4];
-            for (var i = 0; i < _pixelCount * 4; i++)
-            {
-                expected[i] = (i % 4) switch
-                {
-                    0 => 0b00000000,
-                    1 => 0b11110000,
-                    2 => 0b11111111,
-                    3 => 0b11111111,
-                    _ => expected[i]
-                };
-            }
-
-            //Act
-            _encoder.Encode(_bytesToEncode);
-            var actual = _encoder.GetEncodedCarrier();
-
-            //Assert
-            Assert.Equal(expected, actual);
-        }
+        private readonly int _pixelCount = 16;
 
         [Theory]
         [ClassData(typeof(ImageEncoderTestsGenerator))]
-        public void Encode_ShouldModifyBitsInBytesA(PixelBits testData)
+        public void Encode_ShouldEncodeBytesOnSelectedBits(PixelParameters testPixelParameters)
         {
             //Arrange
-            var image = new Image(new Models.File()) { PixelData = new byte[_pixelCount * 4] };
-            var pixelParameters = new PixelParameters(PixelOrder.Sequential, testData);
-            var _encoder = new ImageEncoder(image, pixelParameters);
+            var image = new Image(new Models.File()) { PixelData = new byte[_pixelCount * 4], Width = (int)Math.Sqrt(_pixelCount), Height = (int)Math.Sqrt(_pixelCount) };
+            var encoder = new ImageEncoder(image, testPixelParameters);
 
             for (var i = 0; i < _pixelCount * 4; i++)
                 image.PixelData[i] = 255;
 
-            var _bytesToEncode = new byte[_pixelCount * testData.GetBitSum() / 8];
+            var bytesToEncode = new byte[_pixelCount * testPixelParameters.PixelBitsToUse.GetBitSum() / 8];
 
             var expected = new byte[_pixelCount * 4];
             for (var i = 0; i < _pixelCount * 4; i++)
             {
                 expected[i] = (i % 4) switch
                 {
-                    0 => (byte)(255 - (Math.Pow(2, testData.R) - 1)),
-                    1 => (byte)(255 - (Math.Pow(2, testData.G) - 1)),
-                    2 => (byte)(255 - (Math.Pow(2, testData.B) - 1)),
+                    0 => (byte)(255 - (Math.Pow(2, testPixelParameters.PixelBitsToUse.R) - 1)),
+                    1 => (byte)(255 - (Math.Pow(2, testPixelParameters.PixelBitsToUse.G) - 1)),
+                    2 => (byte)(255 - (Math.Pow(2, testPixelParameters.PixelBitsToUse.B) - 1)),
                     3 => 255,
                     _ => expected[i]
                 };
             }
 
             //Act
-            _encoder.Encode(_bytesToEncode);
-            var actual = _encoder.GetEncodedCarrier();
+            encoder.Encode(bytesToEncode);
+            var actual = encoder.GetEncodedCarrier();
 
             //Assert
             Assert.Equal(expected, actual);

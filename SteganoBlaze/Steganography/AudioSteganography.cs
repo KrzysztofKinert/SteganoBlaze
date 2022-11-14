@@ -21,6 +21,7 @@ namespace SteganoBlaze.Steganography
                 throw new Exception();
 
             SampleBitsLeft = Parameters.SampleBitsToUse;
+
             switch (Parameters.SampleOrder)
             {
                 case SampleOrder.Sequential:
@@ -32,6 +33,8 @@ namespace SteganoBlaze.Steganography
                     SampleIndex = Generator.Next(Carrier.GetTotalSampleCount());
                     UsedSamples.Add(SampleIndex);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
         protected void NextSample()
@@ -40,6 +43,7 @@ namespace SteganoBlaze.Steganography
                 throw new Exception();
 
             SampleBitsLeft = Parameters.SampleBitsToUse;
+
             switch (Parameters.SampleOrder)
             {
                 case SampleOrder.Sequential:
@@ -52,6 +56,8 @@ namespace SteganoBlaze.Steganography
                         SampleIndex = Generator.Next(Carrier.GetTotalSampleCount());
                     UsedSamples.Add(SampleIndex);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
         protected int BitIndex() 

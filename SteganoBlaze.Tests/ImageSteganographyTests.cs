@@ -47,20 +47,13 @@ namespace SteganoBlaze.Tests
             if (PixelData is null)
                 throw new Exception();
             Parameters = new PixelParameters(order, new PixelBits(1, 1, 1));
-            int expected = 0;
 
-            switch (order)
+            var expected = order switch
             {
-                case PixelOrder.Sequential:
-                    expected = 0;
-                    break;
-                case PixelOrder.Random:
-                    var generator = new Random(RandomSeed);
-                    expected = generator.Next(PixelData.Length / 4) * 4;
-                    break;
-                default:
-                    break;
-            }
+                PixelOrder.Sequential => 0,
+                PixelOrder.Random => 12,
+                _ => throw new ArgumentOutOfRangeException(nameof(order), order, null)
+            };
 
             //Act
             FirstPixel();
@@ -80,18 +73,12 @@ namespace SteganoBlaze.Tests
                 throw new Exception();
             Parameters = new PixelParameters(order, new PixelBits(1, 1, 1));
 
-            var expected = 0;
-            switch (order)
+            var expected = order switch
             {
-                case PixelOrder.Sequential:
-                    expected = 4;
-                    break;
-                case PixelOrder.Random:
-                    expected = 8;
-                    break;
-                default:
-                    break;
-            }
+                PixelOrder.Sequential => 4,
+                PixelOrder.Random => 8,
+                _ => 0
+            };
 
             //Act
             FirstPixel();
