@@ -9,8 +9,16 @@ namespace SteganoBlaze.Tests
     {
         public ImageEncoderTestsGenerator()
         {
-            Add(new PixelBits(1, 1, 1));
-
+            for (int r = 0; r < 9; r++)
+            {
+                for (int g = 0; g < 9; g++)
+                {
+                    for (int b = 0; b < 9; b++)
+                    {
+                        Add(new PixelBits(r, g, b));
+                    }
+                }
+            }
         }
     }
     public class ImageEncoderTests
@@ -64,16 +72,16 @@ namespace SteganoBlaze.Tests
             for (var i = 0; i < _pixelCount * 4; i++)
                 image.PixelData[i] = 255;
 
-            var _bytesToEncode = new byte[20];
+            var _bytesToEncode = new byte[_pixelCount * testData.GetBitSum() / 8];
 
             var expected = new byte[_pixelCount * 4];
             for (var i = 0; i < _pixelCount * 4; i++)
             {
                 expected[i] = (i % 4) switch
                 {
-                    0 => (byte)(255 - Math.Pow(2, testData.R)),
-                    1 => (byte)(255 - Math.Pow(2, testData.G)),
-                    2 => (byte)(255 - Math.Pow(2, testData.B)),
+                    0 => (byte)(255 - (Math.Pow(2, testData.R) - 1)),
+                    1 => (byte)(255 - (Math.Pow(2, testData.G) - 1)),
+                    2 => (byte)(255 - (Math.Pow(2, testData.B) - 1)),
                     3 => 255,
                     _ => expected[i]
                 };
