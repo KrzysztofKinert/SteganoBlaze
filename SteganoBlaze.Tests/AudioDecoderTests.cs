@@ -1,12 +1,5 @@
 ﻿using SteganoBlaze.Enums;
-using SteganoBlaze.Models;
-using SteganoBlaze.Steganography;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using File = System.IO.File;
 
 namespace SteganoBlaze.Tests
 {
@@ -21,16 +14,16 @@ namespace SteganoBlaze.Tests
             }
         }
     }
+
     public class AudioDecoderTests : AudioSteganography
     {
-
         [Theory]
         [ClassData(typeof(AudioDecoderTestsGenerator))]
         public void Decode_ShouldDecodeSelectedNumberOfBytes(SampleParameters testData)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes("./Resources/8_bit_sample_2.wav");
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes("./Resources/8_bit_sample_2.wav");
+            var file = new Models.File { ByteData = fileBytes };
             Carrier = new Wav(file);
             var decoder = new AudioDecoder(Carrier, testData);
 

@@ -1,6 +1,5 @@
 ﻿using SteganoBlaze.Enums;
-using SteganoBlaze.Models;
-using SteganoBlaze.Steganography;
+using File = System.IO.File;
 
 namespace SteganoBlaze.Tests
 {
@@ -8,8 +7,8 @@ namespace SteganoBlaze.Tests
     {
         public AudioSteganographyTests()
         {
-            var fileBytes = System.IO.File.ReadAllBytes("./Resources/SampleWAV.wav");
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes("./Resources/SampleWAV.wav");
+            var file = new Models.File { ByteData = fileBytes };
             Carrier = new Wav(file);
             RandomSeed = Carrier.GetTotalSampleCount();
         }
@@ -77,12 +76,12 @@ namespace SteganoBlaze.Tests
             Parameters = new SampleParameters(SampleOrder.Random, 1);
             var expected = new HashSet<int>();
 
-            for (int i = 0; i < Carrier.GetTotalSampleCount(); i++)
+            for (var i = 0; i < Carrier.GetTotalSampleCount(); i++)
                 expected.Add(i);
 
             //Act
             FirstSample();
-            for (int i = 0; i < Carrier.GetTotalSampleCount() - 1; i++)
+            for (var i = 0; i < Carrier.GetTotalSampleCount() - 1; i++)
                 NextSample();
             var actual = UsedSamples;
 

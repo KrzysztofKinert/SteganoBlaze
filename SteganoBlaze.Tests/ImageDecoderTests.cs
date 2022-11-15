@@ -1,6 +1,5 @@
 ﻿using SteganoBlaze.Enums;
-using SteganoBlaze.Models;
-using SteganoBlaze.Steganography;
+using File = SteganoBlaze.Models.File;
 
 namespace SteganoBlaze.Tests
 {
@@ -17,8 +16,9 @@ namespace SteganoBlaze.Tests
             }
         }
     }
+
     public class ImageDecoderTests
-	{
+    {
         private readonly int _pixelCount = 16;
 
         [Theory]
@@ -26,7 +26,11 @@ namespace SteganoBlaze.Tests
         public void Decode_ShouldDecodeSelectedNumberOfBytes(PixelParameters testData)
         {
             //Arrange
-            var image = new Image(new Models.File()) { PixelData = new byte[_pixelCount * 4], Width = (int)Math.Sqrt(_pixelCount), Height = (int)Math.Sqrt(_pixelCount) };
+            var image = new Image(new File())
+            {
+                PixelData = new byte[_pixelCount * 4], Width = (int)Math.Sqrt(_pixelCount),
+                Height = (int)Math.Sqrt(_pixelCount)
+            };
             var decoder = new ImageDecoder(image, testData);
 
             for (var i = 0; i < _pixelCount * 4; i++)

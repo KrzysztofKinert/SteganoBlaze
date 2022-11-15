@@ -1,6 +1,4 @@
 ﻿using SteganoBlaze.Enums;
-using SteganoBlaze.Models;
-using SteganoBlaze.Steganography;
 
 namespace SteganoBlaze.Tests
 {
@@ -21,7 +19,7 @@ namespace SteganoBlaze.Tests
         {
             //Arrange
             Parameters = new PixelParameters(PixelOrder.Sequential, new PixelBits(r, g, b));
-            int[] expectedChannelBitsLeft = new int[3];
+            var expectedChannelBitsLeft = new int[3];
 
             var expectedChannel = Channel.R;
             expectedChannelBitsLeft[(int)Channel.R] = r;
@@ -35,7 +33,7 @@ namespace SteganoBlaze.Tests
 
             //Assert
             Assert.Equal(expectedChannel, actualChannel);
-            Assert.Equal(expectedChannelBitsLeft, actualChannelBitsLeft);    
+            Assert.Equal(expectedChannelBitsLeft, actualChannelBitsLeft);
         }
 
         [Theory]
@@ -98,12 +96,12 @@ namespace SteganoBlaze.Tests
             Parameters = new PixelParameters(PixelOrder.Random, new PixelBits(1, 1, 1));
             var expected = new HashSet<int>();
 
-            for (int i = 0; i < PixelData.Length / 4; i++)
+            for (var i = 0; i < PixelData.Length / 4; i++)
                 expected.Add(i * 4);
 
             //Act
             FirstPixel();
-            for (int i = 0; i < (PixelData.Length - 1) / 4; i++)
+            for (var i = 0; i < (PixelData.Length - 1) / 4; i++)
                 NextPixel();
             var actual = UsedPixels;
 

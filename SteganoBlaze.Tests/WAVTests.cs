@@ -1,4 +1,4 @@
-﻿using SteganoBlaze.Models;
+﻿using File = System.IO.File;
 
 namespace SteganoBlaze.Tests
 {
@@ -18,8 +18,8 @@ namespace SteganoBlaze.Tests
         public void FindChunkIndex_ShouldFindChunkIndex(string fileName, string chunkName, int expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act
@@ -38,8 +38,8 @@ namespace SteganoBlaze.Tests
         public void ParseWAV_ShouldParseWAVChannels(string fileName, int expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act
@@ -58,8 +58,8 @@ namespace SteganoBlaze.Tests
         public void ParseWAV_ShouldParseWAVSampleRate(string fileName, int expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act
@@ -78,8 +78,8 @@ namespace SteganoBlaze.Tests
         public void ParseWAV_ShouldParseWAVBitsPerSample(string fileName, int expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act
@@ -98,8 +98,8 @@ namespace SteganoBlaze.Tests
         public void ParseWAV_ShouldParseWAVSampleCount(string fileName, int expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act
@@ -118,8 +118,8 @@ namespace SteganoBlaze.Tests
         public void GetTotalSampleCount_ShouldReturnTotalSampleCount(string fileName, int expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act
@@ -138,8 +138,8 @@ namespace SteganoBlaze.Tests
         public void GetDuration_ShouldReturnDuration(string fileName, string expected)
         {
             //Arrange
-            var fileBytes = System.IO.File.ReadAllBytes(fileName);
-            var file = new Models.File() { ByteData = fileBytes };
+            var fileBytes = File.ReadAllBytes(fileName);
+            var file = new Models.File { ByteData = fileBytes };
             var wav = new Wav(file);
 
             //Act

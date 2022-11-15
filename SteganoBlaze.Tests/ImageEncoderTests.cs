@@ -1,6 +1,5 @@
 ﻿using SteganoBlaze.Enums;
-using SteganoBlaze.Steganography;
-using SteganoBlaze.Models;
+using File = SteganoBlaze.Models.File;
 
 namespace SteganoBlaze.Tests
 {
@@ -17,8 +16,9 @@ namespace SteganoBlaze.Tests
             }
         }
     }
+
     public class ImageEncoderTests
-	{
+    {
         private readonly int _pixelCount = 16;
 
         [Theory]
@@ -26,7 +26,11 @@ namespace SteganoBlaze.Tests
         public void Encode_ShouldEncodeBytesOnSelectedBits(PixelParameters testPixelParameters)
         {
             //Arrange
-            var image = new Image(new Models.File()) { PixelData = new byte[_pixelCount * 4], Width = (int)Math.Sqrt(_pixelCount), Height = (int)Math.Sqrt(_pixelCount) };
+            var image = new Image(new File())
+            {
+                PixelData = new byte[_pixelCount * 4], Width = (int)Math.Sqrt(_pixelCount),
+                Height = (int)Math.Sqrt(_pixelCount)
+            };
             var encoder = new ImageEncoder(image, testPixelParameters);
 
             for (var i = 0; i < _pixelCount * 4; i++)
@@ -36,7 +40,6 @@ namespace SteganoBlaze.Tests
 
             var expected = new byte[_pixelCount * 4];
             for (var i = 0; i < _pixelCount * 4; i++)
-            {
                 expected[i] = (i % 4) switch
                 {
                     0 => (byte)(255 - (Math.Pow(2, testPixelParameters.PixelBitsToUse.R) - 1)),
@@ -45,7 +48,6 @@ namespace SteganoBlaze.Tests
                     3 => 255,
                     _ => expected[i]
                 };
-            }
 
             //Act
             encoder.Encode(bytesToEncode);

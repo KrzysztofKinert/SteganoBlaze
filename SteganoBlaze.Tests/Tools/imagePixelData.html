@@ -1,64 +1,64 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    </script>
+    <meta content="text/html; charset=utf-8">
     <script>
         window.onload = function () {
-            document.getElementById('button').addEventListener('click', function () {
-                var files = document.getElementById('file').files;
+            var fileName = '';
+    
+            document.getElementById('fileInput').addEventListener('input', function () {
+                var files = document.getElementById('fileInput').files;
                 if (files.length > 0) {
-                    getBase64(files[0]);
+                    let reader = new FileReader();
+                    reader.readAsDataURL(files[0]);
+                    reader.onload = function () {
+                        let img = document.getElementById('image');
+                        img.src = reader.result;
+                        document.getElementById('saveButton').disabled = false;
+                        fileName = files[0].name;
+                    }
+                    reader.onerror = function (error) {
+                        console.log('Error: ', error);
+                    };
                 }
-            });
+            })
+
+            document.getElementById('saveButton').addEventListener('click', function () {
+                let img = document.getElementById("image");
+                let canvas = document.getElementById('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                let data = ctx.getImageData(0, 0, img.width, img.height).data;
+
+                let uriContent = URL.createObjectURL(new Blob([data], { type: 'application/octet-stream' }));
+                let elem = window.document.createElement('a');
+                elem.href = uriContent;
+                elem.download = fileName.substr(0, fileName.lastIndexOf('.')) + '_PixelData.dat';
+                document.body.appendChild(elem);
+                elem.click();
+                document.body.removeChild(elem);
+                URL.revokeObjectURL(uriContent);
+            })
         };
-        function getBase64(file) {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function () {
-                let img = document.getElementById("carrierImage");
-                img.src = reader.result;
-                img.onload = function () {
-                    var img = document.getElementById('carrierImage');
-                    var canvas = document.getElementById('myCanvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    const data = ctx.getImageData(0, 0, img.width, img.height).data;
-
-                    let uriContent = URL.createObjectURL(new Blob([data], { type: 'application/octet-stream' }));
-
-                    const elem = window.document.createElement('a');
-                    elem.href = uriContent;
-                    elem.download = 'imagePixelData.dat';
-                    document.body.appendChild(elem);
-                    elem.click();
-                    document.body.removeChild(elem);
-
-                    URL.revokeObjectURL(uriContent);
-                }
-            };
-            reader.onerror = function (error) {
-                console.log('Error: ', error);
-            };
-        }
     </script>
 </head>
 
 <body>
-    <br />
-    <br />
+    <br/>
+    <br/>
     Select image file:
-    <input id="file" type="file" multiple="false" accept="image/png, image/jpeg"/>
-    <br />
-    <br />
-    <button id="button">Save image pixel data</button>
-    <br />
-    <br />
-    <img id="carrierImage" src=""/>
-
-    <canvas hidden id="myCanvas"></canvas>
+    <input id="fileInput" type="file" accept="image/*"/>
+    <br/>
+    <br/>
+    <button id="saveButton" disabled>Save image pixel data</button>
+    <br/>
+    <br/>
+    <img id="image" src="" alt=""/>
+    <canvas hidden id="canvas"></canvas>
 </body>
 
 </html>

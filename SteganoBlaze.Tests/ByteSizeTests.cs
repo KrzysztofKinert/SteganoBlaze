@@ -14,7 +14,7 @@ namespace SteganoBlaze.Tests
             //Arrange
 
             //Act
-            string actual = ByteSize.Reduce(bytes);
+            var actual = ByteSize.Reduce(bytes);
 
             //Assert
             Assert.True(expected == actual || expected == actual.Replace(",", "."));
@@ -30,7 +30,7 @@ namespace SteganoBlaze.Tests
             //Arrange
 
             //Act
-            string actual = ByteSize.Reduce(bytes);
+            var actual = ByteSize.Reduce(bytes);
 
             //Assert
             Assert.True(expected == actual || expected == actual.Replace(",", "."));
