@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    </script>
+    <script>
+        window.onload = function () {
+            document.getElementById('button').addEventListener('click', function () {
+                var files = document.getElementById('file').files;
+                if (files.length > 0) {
+                    getBase64(files[0]);
+                }
+            });
+        };
+        function getBase64(file) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                let img = document.getElementById("carrierImage");
+                img.src = reader.result;
+                img.onload = function () {
+                    var img = document.getElementById('carrierImage');
+                    var canvas = document.getElementById('myCanvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const data = ctx.getImageData(0, 0, img.width, img.height).data;
+
+                    let uriContent = URL.createObjectURL(new Blob([data], { type: 'application/octet-stream' }));
+
+                    const elem = window.document.createElement('a');
+                    elem.href = uriContent;
+                    elem.download = 'imagePixelData.dat';
+                    document.body.appendChild(elem);
+                    elem.click();
+                    document.body.removeChild(elem);
+
+                    URL.revokeObjectURL(uriContent);
+                }
+            };
+            reader.onerror = function (error) {
+                console.log('Error: ', error);
+            };
+        }
+    </script>
+</head>
+
+<body>
+    <br />
+    <br />
+    Select image file:
+    <input id="file" type="file" multiple="false" accept="image/png, image/jpeg"/>
+    <br />
+    <br />
+    <button id="button">Save image pixel data</button>
+    <br />
+    <br />
+    <img id="carrierImage" src=""/>
+
+    <canvas hidden id="myCanvas"></canvas>
+</body>
+
+</html>
